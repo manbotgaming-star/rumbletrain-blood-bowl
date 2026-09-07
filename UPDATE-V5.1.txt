@@ -1,0 +1,30 @@
+Rumble Train Blood Bowl Team Builder V5.1
+
+FONT FIX
+--------
+V5.0 imported Graduate, but the Team Builder root still explicitly used
+system-ui / Segoe UI. That is why the website looked unchanged.
+
+V5.1 fixes the root font declaration and forces the Team Builder controls,
+tables, buttons and headings to inherit Graduate.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.0 to ?v=5.1.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.1"></script>
+
+IMPORTANT
+---------
+The large GoDaddy page title "Blood Bowl Team Builder" above the custom-code
+block is outside the Team Builder iframe. team-builder.js cannot style it.
+
+To make that heading match exactly, either:
+- change the GoDaddy theme font to a matching style, or
+- remove that GoDaddy heading and put the title inside the Team Builder.
