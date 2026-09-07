@@ -1,0 +1,40 @@
+Rumble Train Blood Bowl Team Builder V5.5
+
+PRINT FIT / WIDTH FIX
+---------------------
+The roster print page now uses:
+- actual pt-based print font sizes
+- 94% centered table width
+- fixed table layout
+- explicit column widths
+- narrower Cost / SPP / Injury columns
+- controlled Skills / Traits wrapping
+- smaller cell padding
+- smaller Team Extras boxes
+
+This prevents the Cost column from being pushed beyond the printable area.
+
+FONT SIZE
+---------
+Main roster table: 6.7pt
+General print body: 7pt
+Reference page: 6.6–7pt
+
+BOLDING
+-------
+Position and Skills / Traits remain bold.
+All other player data remains normal weight.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.4 to ?v=5.5.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.5"></script>
+
+save-team.html does not need to change.

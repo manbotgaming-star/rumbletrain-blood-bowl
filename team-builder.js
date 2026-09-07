@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.4
+/* Rumble Train Blood Bowl Team Builder - External V5.5
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.4",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.5",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -208,35 +208,49 @@ function printTeam(){
  w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title>
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
- @page{size:A4 landscape;margin:7mm}
+ @page{size:A4 landscape;margin:8mm}
  *{box-sizing:border-box}
- body{font:9px 'Graduate',Impact,'Arial Black',sans-serif;margin:0;color:#153e52}
+ body{font:7pt 'Graduate',Impact,'Arial Black',sans-serif;margin:0;color:#153e52}
  h1,h2,.display{font-family:'Graduate',Impact,'Arial Black',sans-serif;letter-spacing:.02em}
- h1{margin:0 0 4px;font-size:23px}
- h2{margin:0 0 6px;font-size:20px}
+ h1{margin:0 0 3px;font-size:17pt}
+ h2{margin:0 0 5px;font-size:15pt}
  p{margin:3px 0}
- table{width:97%;margin-left:auto;margin-right:auto;border-collapse:collapse;margin-top:8px;font-family:inherit}
- th,td{border:1px solid #999;padding:3px 4px;text-align:left;vertical-align:top;font-weight:400}
+ table{width:94%;margin-left:auto;margin-right:auto;border-collapse:collapse;margin-top:6px;font-family:inherit}
+ th,td{border:1px solid #999;padding:2px 3px;text-align:left;vertical-align:top;font-weight:400}
  th{background:#153e52;color:white;font-weight:700}
- .spp{width:34px}.inj{width:88px;height:20px}
- .summary{display:flex;gap:6px;margin:6px auto 3px;width:97%}
- .summaryBox{border:1px solid #9fb0b8;border-radius:5px;padding:4px 7px;min-width:125px;background:#f6f8f9}
- .summaryBox b{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.05em;color:#60747e}
- .summaryBox strong{display:block;font-size:12px;margin-top:1px}
- .extrasTitle{font-size:14px;margin:8px 1.5% 4px}
- .extrasRow{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:3px auto 0;width:97%}
- .extraCompact{border:1px solid #153e52;border-radius:5px;padding:4px 5px;background:#f8fafb;min-height:38px;text-align:center}
- .extraCompact .sectionHead{font-size:7.5px;letter-spacing:.02em;text-transform:uppercase;color:#526b77;line-height:1.1}
- .extraCompact .value{font-size:15px;font-weight:700;line-height:1.1;margin-top:3px}
+ .spp{height:18px}.inj{height:18px}
+ .summary{display:flex;gap:5px;margin:5px auto 3px;width:94%}
+ .summaryBox{border:1px solid #9fb0b8;border-radius:5px;padding:3px 6px;min-width:110px;background:#f6f8f9}
+ .summaryBox b{display:block;font-size:5.8pt;text-transform:uppercase;letter-spacing:.04em;color:#60747e}
+ .summaryBox strong{display:block;font-size:8.5pt;margin-top:1px}
+ .extrasTitle{font-size:10.5pt;margin:7px 3% 3px}
+ .extrasRow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:2px auto 0;width:94%}
+ .extraCompact{border:1px solid #153e52;border-radius:4px;padding:3px 4px;background:#f8fafb;min-height:31px;text-align:center}
+ .extraCompact .sectionHead{font-size:5.4pt;letter-spacing:.01em;text-transform:uppercase;color:#526b77;line-height:1.05}
+ .extraCompact .value{font-size:9.5pt;font-weight:700;line-height:1.05;margin-top:2px}
  .refpage{page-break-before:always;break-before:page}
- .ref{font-size:9.5px}
- .ref .intro{font-size:9px;margin-bottom:6px}
- .ref table{font-size:9px;margin-top:6px;line-height:1.22}
- .ref th,.ref td{padding:4px 5px}
- .ref th{font-size:9px}
+ .ref{font-size:7pt}
+ .ref .intro{font-size:6.5pt;margin-bottom:5px}
+ .ref table{font-size:6.6pt;margin-top:5px;line-height:1.18}
+ .ref th,.ref td{padding:3px 4px}
+ .ref th{font-size:6.5pt}
  .ref th:nth-child(1){width:18%}.ref th:nth-child(2){width:25%}
- .skillname{font-size:9px;white-space:nowrap;color:#153e52;font-weight:700}.boldcol,.usedby{font-weight:700}
- .foot{margin-top:7px;font-size:8px;color:#555;line-height:1.3}
+ .skillname{font-size:6.6pt;white-space:nowrap;color:#153e52;font-weight:700}.boldcol,.usedby{font-weight:700}.rosterTable{table-layout:fixed;font-size:6.7pt}
+ .rosterTable th,.rosterTable td{overflow-wrap:anywhere;word-break:normal}
+ .rosterTable .c-num{width:3%}
+ .rosterTable .c-name{width:16%}
+ .rosterTable .c-pos{width:15%}
+ .rosterTable .c-stat{width:3.6%}
+ .rosterTable .c-skills{width:24%}
+ .rosterTable .c-spp{width:4%}
+ .rosterTable .c-injury{width:8%}
+ .rosterTable .c-cost{width:8%}
+ .rosterTable th:nth-child(4),.rosterTable th:nth-child(5),.rosterTable th:nth-child(6),.rosterTable th:nth-child(7),.rosterTable th:nth-child(8),
+ .rosterTable td:nth-child(4),.rosterTable td:nth-child(5),.rosterTable td:nth-child(6),.rosterTable td:nth-child(7),.rosterTable td:nth-child(8),
+ .rosterTable th:nth-child(10),.rosterTable td:nth-child(10),.rosterTable th:nth-child(12),.rosterTable td:nth-child(12){text-align:center}
+ .rosterTable td:nth-child(12),.rosterTable th:nth-child(12){white-space:nowrap}
+
+ .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
  @media print{button{display:none}}
  </style>
  <section>
@@ -247,7 +261,13 @@ function printTeam(){
    <div class="summaryBox"><b>Team Cost</b><strong>${money(totalCost())}</strong></div>
    <div class="summaryBox"><b>Treasury</b><strong>${money(budget()-totalCost())}</strong></div>
  </div>
- <table><tr><th>#</th><th>Name</th><th>Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th><th>Skills / Traits</th><th>SPP</th><th>Injury</th><th>Cost</th></tr>${rows}</table>
+ <table class="rosterTable">
+ <colgroup>
+   <col class="c-num"><col class="c-name"><col class="c-pos">
+   <col class="c-stat"><col class="c-stat"><col class="c-stat"><col class="c-stat"><col class="c-stat">
+   <col class="c-skills"><col class="c-spp"><col class="c-injury"><col class="c-cost">
+ </colgroup>
+ <tr><th>#</th><th>Name</th><th>Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th><th>Skills / Traits</th><th>SPP</th><th>Injury</th><th>Cost</th></tr>${rows}</table>
  <div class="extrasTitle display">Team Extras</div>
  <div class="extrasRow">
    <div class="extraCompact"><div class="sectionHead">Team Re-rolls</div><div class="value">${state.rerolls}</div></div>
