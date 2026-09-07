@@ -1,0 +1,30 @@
+Rumble Train Blood Bowl Team Builder V4.5
+
+FIX FOR SAVE TEAM FILE
+----------------------
+The previous helper page received the roster correctly, but some Chrome
+sessions did not actually save the Blob download.
+
+V4.5 changes the helper to use the browser's native Save As dialog via
+showSaveFilePicker on supported Chrome/Edge browsers.
+
+If that API is unavailable, the page also provides a Fallback Download link.
+
+FILES TO UPLOAD TO THE ROOT OF YOUR GITHUB REPOSITORY
+------------------------------------------------------
+1. team-builder.js   - replace the existing file
+2. save-team.html    - replace the existing file
+
+Then:
+1. Commit both changes to main.
+2. Wait for GitHub Pages to redeploy.
+3. Refresh RumbleTrain with Ctrl+F5.
+4. Build/open a team.
+5. Click Save Team File.
+6. On the GitHub save page click Save Team File.
+7. Chrome should display its normal Save As window.
+8. Choose a folder and save the .rtbb.json file.
+
+No GoDaddy changes are required.
+
+LOAD TEAM FILE remains unchanged.

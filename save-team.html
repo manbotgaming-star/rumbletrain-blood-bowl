@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Save Blood Bowl Team</title>
 <style>
-:root{--ink:#153e52;--line:#d8e1e5;--soft:#f5f8f9;--accent:#1b607d}
+:root{--ink:#153e52;--line:#d8e1e5;--soft:#f5f8f9;--accent:#1b607d;--muted:#60747e}
 *{box-sizing:border-box}
 body{margin:0;background:var(--soft);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
-main{max-width:620px;margin:8vh auto;padding:26px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+main{max-width:650px;margin:8vh auto;padding:28px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
 h1{margin:0 0 8px;font-size:28px}
 p{line-height:1.5}
-button{border:0;border-radius:8px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
-button:hover{filter:brightness(.94)}
-.small{font-size:12px;color:#60747e;margin-top:18px}
+button,a.download{display:inline-block;border:0;border-radius:8px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none}
+button:hover,a.download:hover{filter:brightness(.94)}
+.small{font-size:12px;color:var(--muted);margin-top:18px}
 #error{color:#8a2424;background:#fdecec;border:1px solid #efc4c4;padding:12px;border-radius:8px;display:none}
+#fallback{display:none;margin-left:8px}
 </style>
 </head>
 <body>
@@ -22,30 +23,78 @@ button:hover{filter:brightness(.94)}
 <h1>Save Blood Bowl Team</h1>
 <p id="message">Preparing your roster file…</p>
 <div id="error"></div>
-<button id="download" type="button" style="display:none">Download Team File</button>
-<p class="small">After downloading, you can close this tab and return to RumbleTrain. Keep the file anywhere you like and use <b>Load Team File</b> later.</p>
+<button id="save" type="button" style="display:none">Save Team File</button>
+<a id="fallback" class="download" href="#">Fallback Download</a>
+<p class="small">
+The main button uses your browser's normal <b>Save As</b> window when supported.
+After saving, close this tab and return to RumbleTrain.
+</p>
 </main>
+
 <script>
 (function(){
-  const msg=document.getElementById("message"),err=document.getElementById("error"),btn=document.getElementById("download");
-  function safe(v){return String(v||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
+  const msg=document.getElementById("message"),
+        err=document.getElementById("error"),
+        btn=document.getElementById("save"),
+        fallback=document.getElementById("fallback");
+
+  function safe(v){
+    return String(v||"blood-bowl-team").trim()
+      .replace(/[^\w\- ]+/g,"")
+      .replace(/\s+/g,"-")
+      .replace(/-+/g,"-")
+      .slice(0,70) || "blood-bowl-team";
+  }
+
   try{
-    if(!location.hash)throw new Error("No team data was supplied.");
+    if(!location.hash) throw new Error("No team data was supplied.");
+
     const d=JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    if(!d||!d.state||!d.state.team)throw new Error("The team data is invalid.");
-    const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
-    const u=URL.createObjectURL(blob);
-    btn.href=u;
-    btn.style.display="inline-block";
+    if(!d || !d.state || !d.state.team)
+      throw new Error("The team data is invalid.");
+
+    const filename=safe(d.teamName||d.state.team)+".rtbb.json";
+    const content=JSON.stringify(d,null,2);
+
     msg.innerHTML="<b>"+(d.teamName||d.state.team)+"</b> is ready to save.";
-    btn.onclick=function(){
-      const a=document.createElement("a");
-      a.href=u;
-      a.download=safe(d.teamName||d.state.team)+".rtbb.json";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      msg.textContent="Download started. You can close this tab when finished.";
+    btn.style.display="inline-block";
+
+    // A data URL is retained as a fallback for browsers without
+    // File System Access API support.
+    const dataUrl="data:application/json;charset=utf-8,"+encodeURIComponent(content);
+    fallback.href=dataUrl;
+    fallback.download=filename;
+
+    btn.onclick=async function(){
+      try{
+        if("showSaveFilePicker" in window){
+          const handle=await window.showSaveFilePicker({
+            suggestedName: filename,
+            types:[{
+              description:"Rumble Train Blood Bowl Team",
+              accept:{"application/json":[".json"]}
+            }]
+          });
+          const writable=await handle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          msg.textContent="Team file saved successfully. You can close this tab.";
+          return;
+        }
+
+        // Fallback: use a regular downloadable data URL.
+        fallback.style.display="inline-block";
+        fallback.click();
+        msg.textContent="If the download did not begin, click Fallback Download.";
+      }catch(e){
+        if(e && e.name==="AbortError"){
+          msg.textContent="Save cancelled. Click Save Team File when you are ready.";
+          return;
+        }
+        fallback.style.display="inline-block";
+        err.textContent="The Save As dialog could not be opened. Use Fallback Download instead.";
+        err.style.display="block";
+      }
     };
   }catch(e){
     msg.textContent="The roster file could not be prepared.";

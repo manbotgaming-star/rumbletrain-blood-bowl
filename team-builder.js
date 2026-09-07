@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V4.4
+/* Rumble Train Blood Bowl Team Builder - External V4.5
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -170,7 +170,7 @@ const $=id=>document.getElementById(id),el={team:$("bbTeam"),teamName:$("bbTeamN
 function money(v){const s=v<0?"−":"";return s+new Intl.NumberFormat("en-GB").format(Math.abs(v))+" gp"}function team(){return TEAMS[state.team]}function pos(id){return team().players.find(p=>p.id===id)}function q(id){return state.roster.filter(r=>r.positionId===id).length}function countPlayers(){return state.roster.length}function playersCost(){return state.roster.reduce((s,r)=>s+(pos(r.positionId)?.cost||0),0)}function totalCost(){return playersCost()+state.rerolls*team().rerollCost+(state.apothecary?APO_COST:0)+state.coaches*COACH_COST+state.cheerleaders*CHEER_COST+state.fans*FAN_COST}function budget(){const n=Number(el.budget.value);return Number.isFinite(n)&&n>=0?n:0}function groupCount(g){return state.roster.filter(r=>pos(r.positionId)?.group===g).length}function canAdd(p){if(q(p.id)>=p.max||countPlayers()>=team().maxPlayers)return false;if(p.group&&team().specialGroup&&p.group===team().specialGroup.id&&groupCount(p.group)>=team().specialGroup.max)return false;return true}function insignificantCount(){return state.roster.filter(r=>(pos(r.positionId)?.skills||"").includes("Insignificant")).length}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.4",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.5",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
