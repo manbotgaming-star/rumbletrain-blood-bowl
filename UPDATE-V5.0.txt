@@ -1,0 +1,49 @@
+Rumble Train Blood Bowl Team Builder V5.0
+
+FONT UPDATE
+-----------
+The on-screen Team Builder now uses the same open-source "Graduate" display
+font used by the printed roster.
+
+This makes:
+- Team Builder headings
+- labels
+- buttons
+- tables
+- player names / controls
+- print headings
+- print Skills & Traits reference
+
+feel visually consistent.
+
+IMPORTANT LIMITATION
+--------------------
+The large GoDaddy page heading "Blood Bowl Team Builder" is outside the
+custom-code iframe. The Team Builder JavaScript cannot style that outer text.
+
+For an exact match, either:
+A) change the GoDaddy theme font to a similar available display font, or
+B) remove the GoDaddy page heading and place the page title inside the Team
+   Builder custom code, where Graduate can be used exactly.
+
+UPDATE GITHUB
+-------------
+1. Unzip this package.
+2. Replace team-builder.js in the GitHub repository.
+3. Commit to main.
+4. Wait for GitHub Pages to redeploy.
+
+GODADDY CACHE VERSION
+---------------------
+Change:
+team-builder.js?v=4.9
+
+to:
+team-builder.js?v=5.0
+
+Full loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.0"></script>
+
+save-team.html does not need to change.
