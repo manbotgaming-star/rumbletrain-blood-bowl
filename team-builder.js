@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.6
+/* Rumble Train Blood Bowl Team Builder - External V5.7
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.6",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.7",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -204,7 +204,8 @@ function printTeam(){
  const t=team(),w=open("","_blank"),
  rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td class="boldcol">${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td class="boldcol">${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join(""),
  refs=rosterSkillRefs(),
- refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td class="usedby">${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`;
+ refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td class="usedby">${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`,
+ statsRows=Array.from({length:20},(_,i)=>{const r=state.roster[i],p=r?pos(r.positionId):null;return `<tr><td>${i+1}</td><td class="statName">${r?(esc(r.name)||""):""}</td><td class="statPos">${p?esc(p.position):""}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`}).join("");
  w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title>
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
@@ -252,6 +253,19 @@ function printTeam(){
 .rosterTable td:nth-child(2){font-size:6.6pt;font-weight:400;letter-spacing:0}
 
  .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
+ .statspage{page-break-before:always;break-before:page}
+ .statsHead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:94%;margin:0 auto 5px}
+ .statsMeta{font-size:6.2pt;line-height:1.4;text-align:right}
+ .statsTable{table-layout:fixed;width:94%;margin:6px auto 0;font-size:7pt}
+ .statsTable th,.statsTable td{height:20px;padding:3px 4px}
+ .statsTable .sc-num{width:4%}
+ .statsTable .sc-name{width:23%}
+ .statsTable .sc-pos{width:20%}
+ .statsTable .sc-stat{width:7.55%}
+ .statsTable th:nth-child(n+4),.statsTable td:nth-child(n+4){text-align:center}
+ .statsTable .statName{font-size:6.6pt;font-weight:400}
+ .statsTable .statPos{font-weight:700}
+ .statsLegend{width:94%;margin:7px auto 0;font-size:5.8pt;color:#555;line-height:1.4}
  @media print{button{display:none}}
  </style>
  <section>
@@ -283,6 +297,42 @@ function printTeam(){
  <p class="intro"><b>${esc(el.teamName.value||t.name)}</b> — only Skills and Traits used by players on this roster are listed.</p>
  <table><tr><th>Skill / Trait</th><th>Used By</th><th>Quick Explanation</th></tr>${refRows}</table>
  <p class="foot">Quick-reference summaries for Blood Bowl Third Season play. An asterisk (*) in the roster indicates a mandatory ability. For unusual interactions and complete wording, consult the current official rules.</p>
+ </section>
+
+ <section class="statspage">
+   <div class="statsHead">
+     <div>
+       <h2>Player Game Stats Tracker</h2>
+       <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
+     </div>
+     <div class="statsMeta">
+       <b>Game:</b> ____________________<br>
+       <b>Opponent:</b> ____________________ &nbsp; <b>Date:</b> ____________
+     </div>
+   </div>
+
+   <table class="statsTable">
+     <colgroup>
+       <col class="sc-num"><col class="sc-name"><col class="sc-pos">
+       <col class="sc-stat"><col class="sc-stat"><col class="sc-stat"><col class="sc-stat">
+       <col class="sc-stat"><col class="sc-stat"><col class="sc-stat">
+     </colgroup>
+     <tr>
+       <th>#</th><th>Player Name</th><th>Position</th>
+       <th>COMP</th><th>TTM</th><th>LAND</th><th>INT</th><th>CAS</th><th>TD</th><th>MVP</th>
+     </tr>
+     ${statsRows}
+   </table>
+
+   <div class="statsLegend">
+     <b>COMP</b> = Completions &nbsp; • &nbsp;
+     <b>TTM</b> = Throw Team-mate &nbsp; • &nbsp;
+     <b>LAND</b> = Successful Landing &nbsp; • &nbsp;
+     <b>INT</b> = Interceptions &nbsp; • &nbsp;
+     <b>CAS</b> = Casualties &nbsp; • &nbsp;
+     <b>TD</b> = Touchdowns &nbsp; • &nbsp;
+     <b>MVP</b> = Most Valuable Player
+   </div>
  </section>`);
  w.document.close();
  const doPrint=()=>setTimeout(()=>w.print(),120);

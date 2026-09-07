@@ -1,0 +1,52 @@
+Rumble Train Blood Bowl Team Builder V5.7
+
+NEW PRINT PAGE 3 — PLAYER GAME STATS TRACKER
+--------------------------------------------
+Print Roster now produces three print pages:
+
+Page 1 — Team Roster
+Page 2 — Skills & Traits Reference
+Page 3 — Player Game Stats Tracker
+
+PAGE 3 CONTENT
+--------------
+- Current roster player names are pre-filled.
+- Current player positions are pre-filled.
+- Rows continue to #20 for future/replacement league players.
+- Blank game-stat columns:
+    COMP
+    TTM
+    LAND
+    INT
+    CAS
+    TD
+    MVP
+- Blank fields at top for:
+    Game
+    Opponent
+    Date
+
+Legend:
+COMP = Completions
+TTM  = Throw Team-mate
+LAND = Successful Landing
+INT  = Interceptions
+CAS  = Casualties
+TD   = Touchdowns
+MVP  = Most Valuable Player
+
+The page uses the same Graduate print font and compact A4 landscape style.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.6 to ?v=5.7.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.7"></script>
+
+save-team.html does not need to change.
