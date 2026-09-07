@@ -1,0 +1,25 @@
+Rumble Train Blood Bowl Team Builder V5.6
+
+PRINT CHANGE
+------------
+Only the printed Player Name column has been adjusted.
+
+- Player names now print at 6.6pt.
+- This matches the text size used in the Skills & Traits Reference table.
+- Player names remain normal weight.
+- Position and Skills / Traits remain bold.
+- No other print sizing or layout has changed.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.5 to ?v=5.6.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.6"></script>
+
+save-team.html does not need to change.

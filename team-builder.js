@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.5
+/* Rumble Train Blood Bowl Team Builder - External V5.6
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.5",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.6",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -249,6 +249,7 @@ function printTeam(){
  .rosterTable td:nth-child(4),.rosterTable td:nth-child(5),.rosterTable td:nth-child(6),.rosterTable td:nth-child(7),.rosterTable td:nth-child(8),
  .rosterTable th:nth-child(10),.rosterTable td:nth-child(10),.rosterTable th:nth-child(12),.rosterTable td:nth-child(12){text-align:center}
  .rosterTable td:nth-child(12),.rosterTable th:nth-child(12){white-space:nowrap}
+.rosterTable td:nth-child(2){font-size:6.6pt;font-weight:400;letter-spacing:0}
 
  .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
  @media print{button{display:none}}
