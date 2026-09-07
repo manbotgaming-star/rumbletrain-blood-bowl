@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.7
+/* Rumble Train Blood Bowl Team Builder - External V5.8
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.7",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.8",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -229,7 +229,7 @@ function printTeam(){
  .extraCompact{border:1px solid #153e52;border-radius:4px;padding:3px 4px;background:#f8fafb;min-height:31px;text-align:center}
  .extraCompact .sectionHead{font-size:5.4pt;letter-spacing:.01em;text-transform:uppercase;color:#526b77;line-height:1.05}
  .extraCompact .value{font-size:9.5pt;font-weight:700;line-height:1.05;margin-top:2px}
- .refpage{page-break-before:always;break-before:page}
+ .printPage{width:100%}.printPage:not(:last-child){page-break-after:always;break-after:page}.refpage{page-break-before:auto;break-before:auto}
  .ref{font-size:7pt}
  .ref .intro{font-size:6.5pt;margin-bottom:5px}
  .ref table{font-size:6.6pt;margin-top:5px;line-height:1.18}
@@ -253,9 +253,9 @@ function printTeam(){
 .rosterTable td:nth-child(2){font-size:6.6pt;font-weight:400;letter-spacing:0}
 
  .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
- .statspage{page-break-before:always;break-before:page}
+ .statspage{page-break-before:auto;break-before:auto}
  .statsHead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:94%;margin:0 auto 5px}
- .statsMeta{font-size:6.2pt;line-height:1.4;text-align:right}
+ .statsMeta{font-size:6.2pt;line-height:1.4;text-align:right}.pageLabel{font-size:5.5pt;color:#60747e;letter-spacing:.08em;margin-bottom:2px}
  .statsTable{table-layout:fixed;width:94%;margin:6px auto 0;font-size:7pt}
  .statsTable th,.statsTable td{height:20px;padding:3px 4px}
  .statsTable .sc-num{width:4%}
@@ -266,9 +266,9 @@ function printTeam(){
  .statsTable .statName{font-size:6.6pt;font-weight:400}
  .statsTable .statPos{font-weight:700}
  .statsLegend{width:94%;margin:7px auto 0;font-size:5.8pt;color:#555;line-height:1.4}
- @media print{button{display:none}}
+ @media screen{.printPage{margin-bottom:28px;border-bottom:1px dashed #b7c4ca;padding-bottom:18px}.printPage:last-child{border-bottom:0}}@media print{button{display:none}.printPage{page-break-after:always;break-after:page}.printPage:last-child{page-break-after:auto;break-after:auto}}
  </style>
- <section>
+ <section class="printPage rosterpage">
  <h1>${esc(el.teamName.value||t.name)}</h1>
  <p><b>Team:</b> ${t.name} &nbsp; <b>Coach:</b> ${esc(el.coachName.value)||"—"}</p>
  <div class="summary">
@@ -292,16 +292,17 @@ function printTeam(){
    <div class="extraCompact"><div class="sectionHead">Dedicated Fans</div><div class="value">${state.fans}</div></div>
  </div>
  </section>
- <section class="refpage ref">
+ <section class="printPage refpage ref">
  <h2>Skills &amp; Traits Reference</h2>
  <p class="intro"><b>${esc(el.teamName.value||t.name)}</b> — only Skills and Traits used by players on this roster are listed.</p>
  <table><tr><th>Skill / Trait</th><th>Used By</th><th>Quick Explanation</th></tr>${refRows}</table>
  <p class="foot">Quick-reference summaries for Blood Bowl Third Season play. An asterisk (*) in the roster indicates a mandatory ability. For unusual interactions and complete wording, consult the current official rules.</p>
  </section>
 
- <section class="statspage">
+ <section class="printPage statspage">
    <div class="statsHead">
      <div>
+       <div class="pageLabel">PRINT PAGE 3</div>
        <h2>Player Game Stats Tracker</h2>
        <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
      </div>

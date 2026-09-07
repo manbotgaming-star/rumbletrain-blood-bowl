@@ -1,0 +1,49 @@
+Rumble Train Blood Bowl Team Builder V5.8
+
+PRINT PAGE 3 FIX
+----------------
+The print document is now built as THREE explicit print-page containers:
+
+Page 1 - Team Roster
+Page 2 - Skills & Traits Reference
+Page 3 - Player Game Stats Tracker
+
+This replaces the previous approach that relied mainly on page-break-before.
+
+WHY
+---
+The V5.7 screenshot showed that Chrome rendered the roster and skills pages,
+but did not visibly render the Game Stats Tracker section.
+
+V5.8 uses explicit page containers with print page breaks after page 1 and
+page 2. The generated about:blank document also shows all three sections
+before printing.
+
+Page 3 now visibly includes the small label:
+PRINT PAGE 3
+
+TEST
+----
+After updating, click Print Roster.
+
+Before the Print dialog opens, the generated document should visibly contain:
+- roster
+- skills reference
+- Player Game Stats Tracker
+
+In the Print dialog it should report 3 sheets of paper (assuming normal A4
+landscape / 1 page per sheet settings).
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.7 to ?v=5.8.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.8"></script>
+
+save-team.html does not need to change.
