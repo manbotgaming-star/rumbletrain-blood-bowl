@@ -1,0 +1,49 @@
+Rumble Train Blood Bowl Team Builder V4.6 — CACHE-BUSTED SAVE FIX
+
+WHY
+---
+The screenshot showed the browser was still executing V4.4:
+- the roster URL contained version 4.4
+- the old helper said "Download Team File"
+
+V4.6 forces both files to load fresh.
+
+UPLOAD TO GITHUB
+----------------
+Replace BOTH files in the repository root:
+1. team-builder.js
+2. save-team.html
+
+Commit both changes to main and wait for GitHub Pages to deploy.
+
+IMPORTANT GODADDY CHANGE
+------------------------
+Change the existing loader from:
+
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js"></script>
+
+to:
+
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=4.6"></script>
+
+Keep:
+<div id="rtbb-root"></div>
+
+This query string forces GoDaddy/browser caches to fetch V4.6.
+
+TEST
+----
+1. Open / refresh RumbleTrain Team Creator.
+2. Build or load a team.
+3. Click Save Team File.
+4. The new tab should visibly say:
+      Save helper V4.6
+5. Its URL should contain:
+      save-team.html?v=4.6#
+6. Click Save Team File.
+7. Chrome/Edge should open the native Save As dialog.
+
+If the helper page does NOT say "Save helper V4.6", stop there:
+the new GitHub file has not deployed yet.
+
+No other GoDaddy code changes are required.
