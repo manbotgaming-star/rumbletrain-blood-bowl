@@ -1,0 +1,45 @@
+Rumble Train Blood Bowl Team Builder V4.7
+
+NEW PRINT FEATURE
+-----------------
+Print Roster now produces:
+Page 1 - Team Roster
+  - existing player roster
+  - blank SPP column
+  - blank Injury column
+  - team extras / treasury
+
+Page 2 - Skills & Traits Reference
+  - automatically includes ONLY the Skills and Traits present on the
+    currently selected roster
+  - each ability appears once
+  - shows which selected player positions use it
+  - includes a concise Third Season rules explanation
+
+If a roster has an unusually large number of unique abilities, the reference
+may continue onto an additional printed sheet.
+
+UPDATE GITHUB
+-------------
+1. Unzip this package.
+2. Replace team-builder.js in the GitHub repository.
+3. Commit to main.
+4. Wait for GitHub Pages to redeploy.
+
+IMPORTANT - GODADDY CACHE VERSION
+---------------------------------
+Change the GoDaddy loader from:
+
+team-builder.js?v=4.6
+
+to:
+
+team-builder.js?v=4.7
+
+Example:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=4.7"></script>
+
+The existing save-team.html helper does NOT need to be replaced.
+Save Team File / Load Team File remain unchanged.
