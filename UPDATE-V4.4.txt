@@ -1,0 +1,28 @@
+Rumble Train Blood Bowl Team Builder V4.4
+
+FIX
+- Save Team File no longer tries to download directly inside GoDaddy's custom-code iframe.
+- It opens a small GitHub Pages save helper in a normal browser tab.
+- The helper provides a Download Team File button.
+- This avoids browser/iframe download restrictions.
+
+FILES TO UPLOAD TO GITHUB ROOT
+1. team-builder.js       (replace the existing file)
+2. save-team.html        (new file)
+
+GitHub repository:
+rumbletrain-blood-bowl
+
+After uploading both files:
+- Commit to main.
+- Wait for GitHub Pages to redeploy.
+- Confirm this URL opens:
+  https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html
+- Refresh RumbleTrain with Ctrl+F5.
+- Click Save Team File.
+- A new tab should open with a Download Team File button.
+
+LOAD TEAM FILE
+- Load Team File remains unchanged and still reads .rtbb.json files from the visitor's device.
+
+No GoDaddy loader changes are required.
