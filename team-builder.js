@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.8
+/* Rumble Train Blood Bowl Team Builder - External V5.9
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.8",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.9",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -254,8 +254,12 @@ function printTeam(){
 
  .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
  .statspage{page-break-before:auto;break-before:auto}
- .statsHead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;width:94%;margin:0 auto 5px}
- .statsMeta{font-size:6.2pt;line-height:1.4;text-align:right}.pageLabel{font-size:5.5pt;color:#60747e;letter-spacing:.08em;margin-bottom:2px}
+ .statsTitle{margin:0 0 4px}
+ .statsFields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:48%;margin:0 3% 5px auto}
+ .statsField{border:1px solid #9fb0b8;border-radius:4px;padding:3px 5px;min-height:29px;background:#f8fafb}
+ .statsField b{display:block;font-size:5.5pt;text-transform:uppercase;letter-spacing:.04em;color:#60747e;margin-bottom:3px}
+ .statsField span{display:block;border-bottom:1px solid #7f9199;height:9px}
+ .pageLabel{font-size:5.5pt;color:#60747e;letter-spacing:.08em;margin-bottom:2px}
  .statsTable{table-layout:fixed;width:94%;margin:6px auto 0;font-size:7pt}
  .statsTable th,.statsTable td{height:20px;padding:3px 4px}
  .statsTable .sc-num{width:4%}
@@ -300,16 +304,16 @@ function printTeam(){
  </section>
 
  <section class="printPage statspage">
-   <div class="statsHead">
-     <div>
-       <div class="pageLabel">PRINT PAGE 3</div>
-       <h2>Player Game Stats Tracker</h2>
-       <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
-     </div>
-     <div class="statsMeta">
-       <b>Game:</b> ____________________<br>
-       <b>Opponent:</b> ____________________ &nbsp; <b>Date:</b> ____________
-     </div>
+   <div class="statsTitle">
+     <div class="pageLabel">PRINT PAGE 3</div>
+     <h2>Player Game Stats Tracker</h2>
+     <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
+   </div>
+
+   <div class="statsFields">
+     <div class="statsField"><b>Game</b><span></span></div>
+     <div class="statsField"><b>Opponent</b><span></span></div>
+     <div class="statsField"><b>Date</b><span></span></div>
    </div>
 
    <table class="statsTable">

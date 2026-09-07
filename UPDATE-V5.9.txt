@@ -1,0 +1,26 @@
+Rumble Train Blood Bowl Team Builder V5.9
+
+PRINT PAGE 3 LAYOUT UPDATE
+--------------------------
+- "Player Game Stats Tracker" now starts flush left like the other print
+  section headings.
+- Game / Opponent / Date have been moved into one compact 3 x 1 row.
+- The three fields are aligned to the RIGHT side of the page.
+- Their right edge lines up with the right edge of the 94%-wide stats table.
+- Each field has its own small printable box and writing line.
+
+Everything else from V5.8 is unchanged.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.8 to ?v=5.9.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.9"></script>
+
+save-team.html does not need to change.
