@@ -1,0 +1,21 @@
+Rumble Train Blood Bowl Team Builder V4.2
+
+NEW
+- Team Name generator: click the dice button beside Team Name.
+- The generated team name style changes with the selected Blood Bowl team.
+- Save Team now downloads a portable .rtbb.json file.
+- Load Team opens a file picker and restores a previously saved team file.
+- Visitors can keep any number of team files.
+- Files can be moved between computers/browsers/devices.
+- Browser localStorage is no longer used for Save/Load.
+- Existing player name generator, roster rules, Print Roster, SPP and Injury print columns remain.
+
+UPDATE GITHUB
+1. Unzip this package.
+2. In GitHub, open the rumbletrain-blood-bowl repository.
+3. Replace the existing team-builder.js with this new team-builder.js.
+4. Commit to main.
+5. Wait for GitHub Pages to deploy.
+6. Refresh the Team Builder with Ctrl+F5.
+
+No GoDaddy code changes are required.

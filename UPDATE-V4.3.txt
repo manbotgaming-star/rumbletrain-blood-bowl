@@ -1,0 +1,23 @@
+Rumble Train Blood Bowl Team Builder V4.3
+
+CHANGE
+- Bretonnian Grail Knights keep the noble 'de <place>' style names.
+- Knight Catchers now use regular Bretonnian names.
+- Knight Throwers now use regular Bretonnian names.
+- Squires remain unchanged.
+
+Everything else from V4.2 is unchanged:
+- Team Name generator
+- Portable Save Team File / Load Team File
+- Player random names with anti-duplicate logic
+- Print Roster with SPP and Injury columns
+- All roster rules and team data
+
+UPDATE
+1. Unzip this package.
+2. Replace team-builder.js in the GitHub repository.
+3. Commit to main.
+4. Wait for GitHub Pages to redeploy.
+5. Refresh the Team Builder page with Ctrl+F5.
+
+No GoDaddy changes are required.

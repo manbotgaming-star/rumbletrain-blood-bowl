@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V4.2
+/* Rumble Train Blood Bowl Team Builder - External V4.3
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -78,7 +78,7 @@ amazon:[
 
 function nameCat(p){
   const s=p.position,t=state.team;
-  if(t==="Bretonnian"&&/Grail Knight|Knight Catcher|Knight Thrower/i.test(s))return"bretonNoble";
+  if(t==="Bretonnian"&&/Grail Knight/i.test(s))return"bretonNoble";
   if(/Goblin|Snotling/i.test(s))return"goblin";
   if(/Skaven|Gutter|Stormvermin|Rat Ogre/i.test(s))return"skaven";
   if(/Orc|Troll/i.test(s))return"orc";

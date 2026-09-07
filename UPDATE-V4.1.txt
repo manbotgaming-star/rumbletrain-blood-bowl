@@ -1,0 +1,17 @@
+Rumble Train Team Builder V4.1
+
+Changes:
+- Much larger team-themed name pools.
+- Added separate Goblin and Vampire naming styles.
+- Bretonnian knight positions use more noble-style names.
+- Random-name generator avoids duplicate names already used on the current roster.
+- Existing Save, Load, Print, team data, and roster functions are unchanged.
+
+GitHub update:
+1. Open your rumbletrain-blood-bowl repository.
+2. Replace the existing team-builder.js with the team-builder.js in this ZIP.
+3. Commit the change to main.
+4. Wait for GitHub Pages to redeploy.
+5. Refresh the Team Builder page. Use Ctrl+F5 if your browser still shows the old version.
+
+The GoDaddy loader does not need to change.
