@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.3
+/* Rumble Train Blood Bowl Team Builder - External V5.4
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.3",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.4",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -202,41 +202,41 @@ function loadTeamFile(file){
 }
 function printTeam(){
  const t=team(),w=open("","_blank"),
- rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td>${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td>${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join(""),
+ rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td class="boldcol">${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td class="boldcol">${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join(""),
  refs=rosterSkillRefs(),
- refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td>${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`;
+ refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td class="usedby">${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`;
  w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title>
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
- @page{size:A4 landscape;margin:8mm}
+ @page{size:A4 landscape;margin:7mm}
  *{box-sizing:border-box}
- body{font:10.5px 'Graduate',Impact,'Arial Black',sans-serif;margin:0;color:#153e52}
+ body{font:9px 'Graduate',Impact,'Arial Black',sans-serif;margin:0;color:#153e52}
  h1,h2,.display{font-family:'Graduate',Impact,'Arial Black',sans-serif;letter-spacing:.02em}
- h1{margin:0 0 5px;font-size:27px}
- h2{margin:0 0 7px;font-size:24px}
- p{margin:4px 0}
- table{width:100%;border-collapse:collapse;margin-top:10px;font-family:inherit}
- th,td{border:1px solid #999;padding:5px;text-align:left;vertical-align:top}
+ h1{margin:0 0 4px;font-size:23px}
+ h2{margin:0 0 6px;font-size:20px}
+ p{margin:3px 0}
+ table{width:97%;margin-left:auto;margin-right:auto;border-collapse:collapse;margin-top:8px;font-family:inherit}
+ th,td{border:1px solid #999;padding:3px 4px;text-align:left;vertical-align:top;font-weight:400}
  th{background:#153e52;color:white;font-weight:700}
- .spp{width:38px}.inj{width:105px;height:25px}
- .summary{display:flex;gap:8px;margin:8px 0 4px}
- .summaryBox{border:1px solid #9fb0b8;border-radius:6px;padding:6px 9px;min-width:145px;background:#f6f8f9}
- .summaryBox b{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:#60747e}
- .summaryBox strong{display:block;font-size:14px;margin-top:2px}
- .extrasTitle{font-size:16px;margin:11px 0 5px}
- .extrasRow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
- .extraCompact{border:1.5px solid #153e52;border-radius:7px;padding:6px 8px;background:#f8fafb;min-height:47px;text-align:center}
- .extraCompact .sectionHead{font-size:8.5px;letter-spacing:.03em;text-transform:uppercase;color:#526b77;line-height:1.15}
- .extraCompact .value{font-size:18px;font-weight:800;line-height:1.15;margin-top:4px}
+ .spp{width:34px}.inj{width:88px;height:20px}
+ .summary{display:flex;gap:6px;margin:6px auto 3px;width:97%}
+ .summaryBox{border:1px solid #9fb0b8;border-radius:5px;padding:4px 7px;min-width:125px;background:#f6f8f9}
+ .summaryBox b{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.05em;color:#60747e}
+ .summaryBox strong{display:block;font-size:12px;margin-top:1px}
+ .extrasTitle{font-size:14px;margin:8px 1.5% 4px}
+ .extrasRow{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:3px auto 0;width:97%}
+ .extraCompact{border:1px solid #153e52;border-radius:5px;padding:4px 5px;background:#f8fafb;min-height:38px;text-align:center}
+ .extraCompact .sectionHead{font-size:7.5px;letter-spacing:.02em;text-transform:uppercase;color:#526b77;line-height:1.1}
+ .extraCompact .value{font-size:15px;font-weight:700;line-height:1.1;margin-top:3px}
  .refpage{page-break-before:always;break-before:page}
- .ref{font-size:11.5px}
- .ref .intro{font-size:11px;margin-bottom:8px}
- .ref table{font-size:11px;margin-top:8px;line-height:1.28}
- .ref th,.ref td{padding:7px 8px}
- .ref th{font-size:10.5px}
+ .ref{font-size:9.5px}
+ .ref .intro{font-size:9px;margin-bottom:6px}
+ .ref table{font-size:9px;margin-top:6px;line-height:1.22}
+ .ref th,.ref td{padding:4px 5px}
+ .ref th{font-size:9px}
  .ref th:nth-child(1){width:18%}.ref th:nth-child(2){width:25%}
- .skillname{font-size:11px;white-space:nowrap;color:#153e52}
- .foot{margin-top:9px;font-size:9.5px;color:#555;line-height:1.35}
+ .skillname{font-size:9px;white-space:nowrap;color:#153e52;font-weight:700}.boldcol,.usedby{font-weight:700}
+ .foot{margin-top:7px;font-size:8px;color:#555;line-height:1.3}
  @media print{button{display:none}}
  </style>
  <section>
