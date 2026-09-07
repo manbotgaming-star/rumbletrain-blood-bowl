@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V4.8
+/* Rumble Train Blood Bowl Team Builder - External V4.9
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.8",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.9",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -224,12 +224,17 @@ function printTeam(){
  .summaryBox{border:1px solid #9fb0b8;border-radius:6px;padding:6px 9px;min-width:145px;background:#f6f8f9}
  .summaryBox b{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:#60747e}
  .summaryBox strong{display:block;font-size:14px;margin-top:2px}
- .extrasTitle{font-size:16px;margin:13px 0 6px}
- .extrasGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:4px}
- .extraBox{border:1.5px solid #153e52;border-radius:7px;padding:8px 9px;min-height:58px;background:#f8fafb}
- .extraBox b{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#526b77}
- .extraBox strong{display:block;font-size:18px;line-height:1.1;margin:4px 0 2px}
- .extraBox span{font-size:8.5px;color:#60747e}
+ .extrasTitle{font-size:17px;margin:13px 0 7px}
+ .rerollSection{border:1.8px solid #153e52;border-radius:8px;padding:9px 11px;background:#f8fafb;margin-bottom:8px}
+ .rerollSection .sectionHead,.staffSection .sectionHead{font-family:'Graduate',Impact,'Arial Black',sans-serif;font-size:12px;letter-spacing:.03em;margin-bottom:5px}
+ .rerollLine{display:flex;align-items:center;justify-content:space-between;gap:12px}
+ .rerollValue{font-size:22px;font-weight:800}
+ .rerollMeta{font-size:9.5px;color:#60747e;text-align:right}
+ .staffGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .staffSection{border:1.5px solid #153e52;border-radius:8px;padding:9px 11px;background:#fff;min-height:68px}
+ .staffRow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+ .staffValue{font-size:22px;font-weight:800}
+ .staffMeta{font-size:9.5px;color:#60747e;text-align:right}
  .refpage{page-break-before:always;break-before:page}
  .ref{font-size:11.5px}
  .ref .intro{font-size:11px;margin-bottom:8px}
@@ -251,12 +256,47 @@ function printTeam(){
  </div>
  <table><tr><th>#</th><th>Name</th><th>Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th><th>Skills / Traits</th><th>SPP</th><th>Injury</th><th>Cost</th></tr>${rows}</table>
  <div class="extrasTitle display">Team Extras</div>
- <div class="extrasGrid">
-   <div class="extraBox"><b>Team Re-rolls</b><strong>${state.rerolls}</strong><span>${money(t.rerollCost)} each${state.rerolls?` • ${money(rrTotal)} total`:""}</span></div>
-   <div class="extraBox"><b>Apothecary</b><strong>${state.apothecary?"YES":"NO"}</strong><span>${t.apothecary?money(APO_COST):"Not available"}</span></div>
-   <div class="extraBox"><b>Assistant Coaches</b><strong>${state.coaches}</strong><span>${money(COACH_COST)} each</span></div>
-   <div class="extraBox"><b>Cheerleaders</b><strong>${state.cheerleaders}</strong><span>${money(CHEER_COST)} each</span></div>
-   <div class="extraBox"><b>Dedicated Fans</b><strong>${state.fans}</strong><span>${money(FAN_COST)} each</span></div>
+
+ <div class="rerollSection">
+   <div class="sectionHead">Team Re-rolls</div>
+   <div class="rerollLine">
+     <div class="rerollValue">${state.rerolls}</div>
+     <div class="rerollMeta">${money(t.rerollCost)} each${state.rerolls?`<br>${money(rrTotal)} total`:""}</div>
+   </div>
+ </div>
+
+ <div class="staffGrid">
+   <div class="staffSection">
+     <div class="sectionHead">Apothecary</div>
+     <div class="staffRow">
+       <div class="staffValue">${state.apothecary?"YES":"NO"}</div>
+       <div class="staffMeta">${t.apothecary?money(APO_COST):"Not available"}</div>
+     </div>
+   </div>
+
+   <div class="staffSection">
+     <div class="sectionHead">Assistant Coaches</div>
+     <div class="staffRow">
+       <div class="staffValue">${state.coaches}</div>
+       <div class="staffMeta">${money(COACH_COST)} each</div>
+     </div>
+   </div>
+
+   <div class="staffSection">
+     <div class="sectionHead">Cheerleaders</div>
+     <div class="staffRow">
+       <div class="staffValue">${state.cheerleaders}</div>
+       <div class="staffMeta">${money(CHEER_COST)} each</div>
+     </div>
+   </div>
+
+   <div class="staffSection">
+     <div class="sectionHead">Dedicated Fans</div>
+     <div class="staffRow">
+       <div class="staffValue">${state.fans}</div>
+       <div class="staffMeta">${money(FAN_COST)} each</div>
+     </div>
+   </div>
  </div>
  </section>
  <section class="refpage ref">

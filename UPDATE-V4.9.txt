@@ -1,0 +1,44 @@
+Rumble Train Blood Bowl Team Builder V4.9
+
+PRINT PAGE 1 — TEAM EXTRAS REWORK
+---------------------------------
+Team Re-rolls is now its own full-width section.
+
+Each of the following now has its own separate printable section:
+- Apothecary
+- Assistant Coaches
+- Cheerleaders
+- Dedicated Fans
+
+The four sideline sections are arranged in a 2 x 2 grid so they remain
+prominent while still fitting comfortably on the same A4 landscape page.
+
+Everything else from V4.8 is unchanged:
+- larger roster summary boxes
+- sports-style Graduate display font
+- Page 2 Skills & Traits Reference
+- portable Save/Load Team files
+- player/team name generators
+- SPP and Injury print columns
+
+UPDATE GITHUB
+-------------
+1. Unzip this package.
+2. Replace team-builder.js in the GitHub repository.
+3. Commit to main.
+4. Wait for GitHub Pages to redeploy.
+
+GODADDY CACHE VERSION
+---------------------
+Change:
+team-builder.js?v=4.8
+
+to:
+team-builder.js?v=4.9
+
+Full loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=4.9"></script>
+
+save-team.html does not need to change.
