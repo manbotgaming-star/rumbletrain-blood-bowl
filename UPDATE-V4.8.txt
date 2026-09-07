@@ -1,0 +1,49 @@
+Rumble Train Blood Bowl Team Builder V4.8
+
+PRINT LAYOUT IMPROVEMENTS
+-------------------------
+Page 1 — Team Roster
+- Added larger summary boxes for Players, Team Cost and Treasury.
+- Replaced the tiny sideline text with a prominent Team Extras section.
+- Team Extras now has five large boxes:
+    Team Re-rolls
+    Apothecary
+    Assistant Coaches
+    Cheerleaders
+    Dedicated Fans
+- Re-roll box also shows cost per re-roll and total re-roll spend.
+
+Page 2 — Skills & Traits Reference
+- Larger overall text.
+- Larger row padding and explanations for easier table-side reading.
+- Skill/Trait names are more prominent.
+
+DISPLAY FONT
+------------
+Print headings now use the open-source Google font "Graduate", with
+Impact/Arial Black fallbacks. It gives a collegiate/sports-block feel
+similar in spirit to Blood Bowl branding without copying the exact logo font.
+
+The print routine waits for the display font to load before opening Print.
+
+UPDATE GITHUB
+-------------
+1. Unzip this package.
+2. Replace team-builder.js in the GitHub repository.
+3. Commit to main.
+4. Wait for GitHub Pages to redeploy.
+
+GODADDY CACHE VERSION
+---------------------
+Change:
+team-builder.js?v=4.7
+
+to:
+team-builder.js?v=4.8
+
+Full loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=4.8"></script>
+
+save-team.html does not need to change.

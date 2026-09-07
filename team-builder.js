@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V4.7
+/* Rumble Train Blood Bowl Team Builder - External V4.8
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.7",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"4.8",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -204,39 +204,71 @@ function printTeam(){
  const t=team(),w=open("","_blank"),
  rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td>${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td>${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join(""),
  refs=rosterSkillRefs(),
- refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td>${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`;
+ refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td>${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`,
+ rrTotal=state.rerolls*t.rerollCost;
  w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title>
  <style>
- @page{size:A4 landscape;margin:10mm}
+ @import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
+ @page{size:A4 landscape;margin:8mm}
  *{box-sizing:border-box}
  body{font:10.5px Arial,Helvetica,sans-serif;margin:0;color:#153e52}
- h1{margin:0 0 5px;font-size:24px}h2{margin:0 0 6px;font-size:21px}
+ h1,h2,.display{font-family:'Graduate',Impact,'Arial Black',sans-serif;letter-spacing:.02em}
+ h1{margin:0 0 5px;font-size:27px}
+ h2{margin:0 0 7px;font-size:24px}
  p{margin:4px 0}
- table{width:100%;border-collapse:collapse;margin-top:12px}
+ table{width:100%;border-collapse:collapse;margin-top:10px}
  th,td{border:1px solid #999;padding:5px;text-align:left;vertical-align:top}
- th{background:#153e52;color:white}
+ th{background:#153e52;color:white;font-weight:700}
  .spp{width:38px}.inj{width:105px;height:25px}
+ .summary{display:flex;gap:8px;margin:8px 0 4px}
+ .summaryBox{border:1px solid #9fb0b8;border-radius:6px;padding:6px 9px;min-width:145px;background:#f6f8f9}
+ .summaryBox b{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;color:#60747e}
+ .summaryBox strong{display:block;font-size:14px;margin-top:2px}
+ .extrasTitle{font-size:16px;margin:13px 0 6px}
+ .extrasGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:4px}
+ .extraBox{border:1.5px solid #153e52;border-radius:7px;padding:8px 9px;min-height:58px;background:#f8fafb}
+ .extraBox b{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#526b77}
+ .extraBox strong{display:block;font-size:18px;line-height:1.1;margin:4px 0 2px}
+ .extraBox span{font-size:8.5px;color:#60747e}
  .refpage{page-break-before:always;break-before:page}
- .ref table{font-size:10px;margin-top:8px}
+ .ref{font-size:11.5px}
+ .ref .intro{font-size:11px;margin-bottom:8px}
+ .ref table{font-size:11px;margin-top:8px;line-height:1.28}
+ .ref th,.ref td{padding:7px 8px}
+ .ref th{font-size:10.5px}
  .ref th:nth-child(1){width:18%}.ref th:nth-child(2){width:25%}
- .skillname{font-weight:700;white-space:nowrap}
- .foot{margin-top:8px;font-size:9px;color:#555}
+ .skillname{font-family:'Graduate',Impact,'Arial Black',sans-serif;font-size:11px;white-space:nowrap;color:#153e52}
+ .foot{margin-top:9px;font-size:9.5px;color:#555;line-height:1.35}
  @media print{button{display:none}}
  </style>
  <section>
  <h1>${esc(el.teamName.value||t.name)}</h1>
  <p><b>Team:</b> ${t.name} &nbsp; <b>Coach:</b> ${esc(el.coachName.value)||"—"}</p>
- <p><b>Players:</b> ${countPlayers()} &nbsp; <b>Team Cost:</b> ${money(totalCost())} &nbsp; <b>Treasury:</b> ${money(budget()-totalCost())}</p>
+ <div class="summary">
+   <div class="summaryBox"><b>Players</b><strong>${countPlayers()}</strong></div>
+   <div class="summaryBox"><b>Team Cost</b><strong>${money(totalCost())}</strong></div>
+   <div class="summaryBox"><b>Treasury</b><strong>${money(budget()-totalCost())}</strong></div>
+ </div>
  <table><tr><th>#</th><th>Name</th><th>Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th><th>Skills / Traits</th><th>SPP</th><th>Injury</th><th>Cost</th></tr>${rows}</table>
- <p><b>Re-rolls:</b> ${state.rerolls} &nbsp; <b>Apothecary:</b> ${state.apothecary?"Yes":"No"} &nbsp; <b>Assistant Coaches:</b> ${state.coaches} &nbsp; <b>Cheerleaders:</b> ${state.cheerleaders} &nbsp; <b>Dedicated Fans:</b> ${state.fans}</p>
+ <div class="extrasTitle display">Team Extras</div>
+ <div class="extrasGrid">
+   <div class="extraBox"><b>Team Re-rolls</b><strong>${state.rerolls}</strong><span>${money(t.rerollCost)} each${state.rerolls?` • ${money(rrTotal)} total`:""}</span></div>
+   <div class="extraBox"><b>Apothecary</b><strong>${state.apothecary?"YES":"NO"}</strong><span>${t.apothecary?money(APO_COST):"Not available"}</span></div>
+   <div class="extraBox"><b>Assistant Coaches</b><strong>${state.coaches}</strong><span>${money(COACH_COST)} each</span></div>
+   <div class="extraBox"><b>Cheerleaders</b><strong>${state.cheerleaders}</strong><span>${money(CHEER_COST)} each</span></div>
+   <div class="extraBox"><b>Dedicated Fans</b><strong>${state.fans}</strong><span>${money(FAN_COST)} each</span></div>
+ </div>
  </section>
  <section class="refpage ref">
  <h2>Skills &amp; Traits Reference</h2>
- <p><b>${esc(el.teamName.value||t.name)}</b> — only Skills and Traits used by players on this roster are listed.</p>
+ <p class="intro"><b>${esc(el.teamName.value||t.name)}</b> — only Skills and Traits used by players on this roster are listed.</p>
  <table><tr><th>Skill / Trait</th><th>Used By</th><th>Quick Explanation</th></tr>${refRows}</table>
  <p class="foot">Quick-reference summaries for Blood Bowl Third Season play. An asterisk (*) in the roster indicates a mandatory ability. For unusual interactions and complete wording, consult the current official rules.</p>
  </section>`);
- w.document.close();setTimeout(()=>w.print(),250)
+ w.document.close();
+ const doPrint=()=>setTimeout(()=>w.print(),120);
+ if(w.document.fonts&&w.document.fonts.ready)w.document.fonts.ready.then(doPrint).catch(()=>setTimeout(()=>w.print(),700));
+ else setTimeout(()=>w.print(),700)
 }function populateTeams(){el.team.innerHTML=Object.keys(TEAMS).map(n=>`<option value="${n}">${TEAMS[n].name||n}</option>`).join("");el.team.value=state.team}
 function buildRows(){el.rows.innerHTML=team().players.map(p=>`<tr><td><div class="qty"><button type="button" data-a="minus" data-id="${p.id}">−</button><span class="num" id="qty-${p.id}">${q(p.id)}</span><button type="button" data-a="plus" data-id="${p.id}">+</button></div></td><td class="pos">${p.position}</td><td class="center">0–${p.max}</td><td>${money(p.cost)}</td><td class="center">${p.ma}</td><td class="center">${p.st}</td><td class="center">${p.ag}</td><td class="center">${p.pa}</td><td class="center">${p.av}</td><td class="skills">${p.skills||"—"}</td></tr>`).join("");el.rows.querySelectorAll("button[data-a]").forEach(b=>b.onclick=()=>changePlayer(b.dataset.id,b.dataset.a==="plus"?1:-1))}
 function changePlayer(id,d){const p=pos(id);if(!p)return;if(d>0){if(!canAdd(p))return;state.roster.push({uid:uid++,positionId:id,name:""})}else{for(let i=state.roster.length-1;i>=0;i--){if(state.roster[i].positionId===id){state.roster.splice(i,1);break}}}renderAll()}
