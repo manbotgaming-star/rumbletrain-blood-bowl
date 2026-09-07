@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.10
+/* Rumble Train Blood Bowl Team Builder - External V5.11
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.10",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.11",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -254,8 +254,9 @@ function printTeam(){
 
  .foot{margin-top:6px;font-size:5.8pt;color:#555;line-height:1.25}
  .statspage{page-break-before:auto;break-before:auto}
- .statsTitle{margin:0 0 4px}
- .statsFields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px auto 5px;width:94%}
+ .statsTopRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:94%;margin:0 auto 5px}
+ .statsTitle{flex:1;min-width:260px;margin:0}
+ .statsFields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:54%;margin:0}
  .statsField{border:1px solid #153e52;border-radius:4px;padding:4px 5px;background:#f8fafb;min-height:31px;text-align:center}
  .statsField .sectionHead{font-size:5.4pt;letter-spacing:.01em;text-transform:uppercase;color:#526b77;line-height:1.05}
  .statsField .writeLine{display:block;height:11px;border-bottom:1px solid #7f9199;margin:4px 7px 0}
@@ -303,15 +304,17 @@ function printTeam(){
  </section>
 
  <section class="printPage statspage">
-   <div class="statsTitle">
-     <h2>Player Game Stats Tracker</h2>
-     <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
-   </div>
+   <div class="statsTopRow">
+     <div class="statsTitle">
+       <h2>Player Game Stats Tracker</h2>
+       <p><b>${esc(el.teamName.value||t.name)}</b> — ${t.name}</p>
+     </div>
 
-   <div class="statsFields">
-     <div class="statsField"><div class="sectionHead">Game</div><span class="writeLine"></span></div>
-     <div class="statsField"><div class="sectionHead">Opponent</div><span class="writeLine"></span></div>
-     <div class="statsField"><div class="sectionHead">Date</div><span class="writeLine"></span></div>
+     <div class="statsFields">
+       <div class="statsField"><div class="sectionHead">Game</div><span class="writeLine"></span></div>
+       <div class="statsField"><div class="sectionHead">Opponent</div><span class="writeLine"></span></div>
+       <div class="statsField"><div class="sectionHead">Date</div><span class="writeLine"></span></div>
+     </div>
    </div>
 
    <table class="statsTable">

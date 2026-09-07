@@ -1,0 +1,25 @@
+Rumble Train Blood Bowl Team Builder V5.11
+
+PRINT PAGE 3 HEADER UPDATE
+--------------------------
+- "Player Game Stats Tracker" remains on the left.
+- Team name / race subtitle remains directly underneath it.
+- Game / Opponent / Date now sit on the SAME horizontal plane to the right.
+- The three boxes remain equal width and use the same bordered style.
+- The whole header row is 94% wide and aligned with the stats table.
+
+Everything else from V5.10 is unchanged.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to redeploy.
+4. Change the GoDaddy loader from ?v=5.10 to ?v=5.11.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.11"></script>
+
+save-team.html does not need to change.
