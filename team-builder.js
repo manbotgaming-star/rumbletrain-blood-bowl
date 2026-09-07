@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V4
+/* Rumble Train Blood Bowl Team Builder - External V4.1
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -10,29 +10,116 @@ const TEAMS={"Amazon":{"name":"Amazon","rerollCost":60000,"apothecary":true,"pla
 const APO_COST=50000,REROLL_MAX=8,COACH_COST=10000,COACH_MAX=6,CHEER_COST=10000,CHEER_MAX=6,FAN_COST=5000,FAN_MAX=3;
 let uid=1,state={team:"Bretonnian",roster:[],rerolls:0,apothecary:false,coaches:0,cheerleaders:0,fans:0};
 const N={
-human:[["Alric","Dieter","Franz","Otto","Viktor","Wilhelm","Greta","Marta"],["Bauer","Kruger","Schmidt","Reikmann","Adler","Weiss","Falk","Stein"]],
-breton:[["Marc","Luc","Etienne","Gaston","Remy","Alain","Hugo","Tristan"],["Beaufort","Couronne","D'Aubigny","Montclair","Valois","Renard","Leclerc","Duval"]],
-norse:[["Bjorn","Erik","Hakon","Ivar","Leif","Sigrid","Astrid","Freya"],["Ironson","Frostborn","Redaxe","Wolfkin","Stormhand","Icevein","Bearsson","Skullsplitter"]],
-dwarf:[["Dori","Brokk","Thrain","Gotrek","Kili","Rurik","Hilda","Brynja"],["Ironbeard","Stonefist","Goldhelm","Grudgeborn","Deepdelver","Anvilhand","Coppervein","Oathkeeper"]],
-elf:[["Aerion","Caelir","Elowen","Faelar","Lethan","Sylvar","Vaelis","Yvraine"],["Moonleaf","Starwind","Silverbranch","Dawnrunner","Nightbloom","Swiftarrow","Brightsong","Shadowmere"]],
-orc:[["Grub","Morg","Ruk","Snag","Uzg","Basha","Grot","Zog"],["Badtoof","Bonekrak","Gitstompa","Skullbash","Mudgutz","Ironjaw","Nosebitta","Kickface"]],
-chaos:[["Vark","Khar","Zhul","Mord","Skar","Drav","Kor","Threx"],["Doomhand","Goreborn","Blackhorn","Rotmaw","Bloodmark","Ironhide","Warpfang","Fellblade"]],
-skaven:[["Skrit","Vreek","Rikkit","Snazz","Queek","Tretch","Skreek","Visk"],["Gnawtail","Quickclaw","Warpwhisker","Scabfur","Blackpaw","Sneakstab","Rotfang","Chitterspike"]],
-undead:[["Vlad","Morcant","Severin","Lucan","Ghast","Radu","Mirela","Ysabel"],["Graves","Nightmoor","Blackcrypt","Boneward","Duskhollow","Graveborn","Coldblood","Ashen"]],
-lizard:[["Itzi","Klaq","Xili","Teko","Slaq","Krix","Zunki","Tlat"],["Sunscale","Stonecrest","Bloodclaw","Reedstalker","Templeborn","Coldeye","Marshfang","Goldscale"]],
-small:[["Pip","Milo","Tilly","Nibs","Poppy","Bram","Tuck","Willa"],["Goodbarrel","Underhill","Crumblepot","Applecheek","Shortstep","Copperkettle","Bramblefoot","Honeybun"]],
-ogre:[["Gronk","Bogg","Mung","Thud","Krum","Gnasher","Lug","Bigga"],["Bonechewer","Gutbuster","Clubfoot","Meatfist","Skullcrack","Stompgut","Bigbelly","Ironbelch"]],
-amazon:[["Xara","Naya","Kora","Tala","Zia","Amara","Ixa","Suri"],["Sunclaw","Jaguarstep","Vinewhip","Stormfeather","Brightspear","Riverfang","Mooncat","Goldspear"]]
+human:[
+["Alric","Dieter","Franz","Otto","Viktor","Wilhelm","Greta","Marta","Adelbert","Bruno","Conrad","Emil","Frieda","Gisela","Heinrich","Johann","Klara","Lukas","Matthias","Nina","Rudolf","Sabine","Ulrich","Werner","Anika","Elsa","Felix","Gregor","Helga","Karl","Lena","Markus"],
+["Bauer","Kruger","Schmidt","Reikmann","Adler","Weiss","Falk","Stein","Becker","Braun","Eberhardt","Fischer","Grimm","Hartmann","Jaeger","Keller","Klein","Kohl","Lenz","Meier","Reuter","Schultz","Vogel","Wagner","Zimmer","Brandt","Kramer","Lang","Richter","Sommer","Wolf","Zeller"]
+],
+breton:[
+["Marc","Luc","Etienne","Gaston","Remy","Alain","Hugo","Tristan","Andre","Armand","Bastien","Cedric","Claude","Damien","Edouard","Fabien","Gerard","Henri","Jacques","Julien","Laurent","Mathieu","Nicolas","Olivier","Pascal","Quentin","Renaud","Sebastien","Thierry","Valentin","Yves","Aveline"],
+["Beaufort","Couronne","D'Aubigny","Montclair","Valois","Renard","Leclerc","Duval","Belleme","Chastain","D'Artois","Devereux","Fontaine","Giraud","Lacroix","Marceau","Moreau","Navarre","Perrin","Rochefort","Savard","Tremblay","Villeneuve","Vionnet","Beauchamp","Charbonneau","Desrosiers","Fournier","Lefevre","Mercier","Rousseau","Valliere"]
+],
+bretonNoble:[
+["Amaury","Arnaud","Bertrand","Charles","Gautier","Geoffroi","Guillaume","Jean","Louis","Philippe","Raoul","Roland","Theobald","Thibault","Yvain","Galahad","Lancel","Percival","Renaud","Odo","Herve","Gilles","Benoit","Enguerrand","Aimeric","Florian","Lionel","Marcel","Pasquier","Remi","Tancred","Valeran"],
+["de Brionne","de Couronne","de Gisoreux","de Montfort","de Parravon","de Quenelles","de Bastonne","de Bordeleaux","de Carcassonne","de L'Anguille","de Lyonesse","de Mousillon","de Valence","de Rochefort","de Montclair","de Beaumont","de Chalon","de Clairmont","de Vienne","de Roussillon","de Valois","de Beaufort","de Navarre","de Bellac","de Auvray","de Chastel","de Fontaine","de Marais","de Villiers","de Riviere","de Sancerre","de Touraine"]
+],
+norse:[
+["Bjorn","Erik","Hakon","Ivar","Leif","Sigrid","Astrid","Freya","Arne","Bodil","Einar","Frode","Gudrun","Halfdan","Ingrid","Jorund","Kari","Kjell","Liv","Magnus","Njal","Ragna","Sven","Torsten","Ulf","Viggo","Yrsa","Asgeir","Brynhild","Dag","Eirik","Solveig"],
+["Ironson","Frostborn","Redaxe","Wolfkin","Stormhand","Icevein","Bearsson","Skullsplitter","Axebiter","Bloodoath","Coldhammer","Doomsail","Frostbeard","Grimsson","Hearthguard","Iceblood","Longship","Oathkeeper","Ravensson","Sea-Wolf","Shieldbane","Snowborn","Stormcrow","Thunderskull","Trollbane","Winterhand","Wyrmslayer","Rimeheart","Fjordborn","Steelfang","Warborn","Whiteaxe"]
+],
+dwarf:[
+["Dori","Brokk","Thrain","Gotrek","Kili","Rurik","Hilda","Brynja","Bardin","Bori","Dagna","Durin","Edda","Fargrim","Grom","Harrek","Kelda","Korin","Mardin","Norri","Odrin","Ragna","Skalf","Thora","Ulfar","Varek","Yngri","Brom","Dorin","Grundi","Kraggi","Vala"],
+["Ironbeard","Stonefist","Goldhelm","Grudgeborn","Deepdelver","Anvilhand","Coppervein","Oathkeeper","Alebelly","Blackhammer","Bronzebeard","Coalbraid","Darkforge","Firemantle","Gemcutter","Granitejaw","Hammerhand","Ironbrow","Longbeard","Mithrilborn","Oakenshield","Rockbreaker","Silvervein","Steeltoe","Stonehelm","Strongarm","Thunderforge","Tunnelborn","Warhammer","Goldbraid","Runehand","Forgeheart"]
+],
+elf:[
+["Aerion","Caelir","Elowen","Faelar","Lethan","Sylvar","Vaelis","Yvraine","Aelar","Althaea","Caladrel","Daelis","Elaria","Erevan","Ilyana","Kaelis","Laeriel","Maelis","Naevys","Orelion","Rhiannon","Saelis","Talindra","Theren","Valanthe","Xyrion","Ysara","Ariandel","Celemir","Elandra","Lorien","Seraphiel"],
+["Moonleaf","Starwind","Silverbranch","Dawnrunner","Nightbloom","Swiftarrow","Brightsong","Shadowmere","Autumnvale","Dewglade","Evenstar","Frostpetal","Glimmerwood","Goldenbough","Greenmantle","Lightstep","Mistwalker","Oakwhisper","Rainshadow","Rivergleam","Silvergrove","Skyweaver","Snowthorn","Starbloom","Sunshadow","Thistledown","Wildsong","Windrider","Moonbrook","Dawnspear","Nightwind","Brightleaf"]
+],
+orc:[
+["Grub","Morg","Ruk","Snag","Uzg","Basha","Grot","Zog","Brakka","Drog","Gaz","Gorbad","Grish","Krug","Makka","Narg","Rakka","Skab","Throg","Ugmak","Varz","Wazg","Zruk","Bog","Drakka","Ghaz","Krag","Mugluk","Ragz","Skor","Urk","Zagga"],
+["Badtoof","Bonekrak","Gitstompa","Skullbash","Mudgutz","Ironjaw","Nosebitta","Kickface","Armrippa","Backbreaka","Bloodlug","Bootstompa","Choppa","Facekrumpa","Fangsnappa","Gitzappa","Goregut","Headbutta","Jawkrakka","Kneebasha","Legbreaka","Necksnappa","Ribsmasha","Skullkrumpa","Spinecrusha","Teefkikka","Throatgrabba","Toofspitta","Warbash","Wreckface","Gutzmasha","Bonechewa"]
+],
+goblin:[
+["Nib","Skab","Giz","Snikk","Bogg","Runt","Zib","Mog","Fizz","Kip","Nob","Pikk","Razz","Skrik","Titch","Wibble","Yap","Zapp","Bik","Crik","Dib","Flik","Griz","Jib","Krak","Lug","Mib","Pug","Snik","Vim","Wazz","Zig"],
+["Stinkfoot","Nosepick","Mudpocket","Sneakstab","Rottoof","Shinbite","Backstabba","Fungusbreath","Gitznip","Bogsniff","Earchew","Footlick","Gloomgrin","Kneebite","Muckface","Ratbag","Scabnose","Snotrag","Spitbucket","Toadlick","Wormgut","Grotzap","Mudpaw","Scrapfinger","Skulkfoot","Stabtoe","Teefnick","Bumblenose","Crookfang","Nibbles","Slimehand","Picknose"]
+],
+chaos:[
+["Vark","Khar","Zhul","Mord","Skar","Drav","Kor","Threx","Azrak","Baal","Drek","Ghar","Kraz","Malek","Nax","Rauth","Sethrak","Torg","Vaal","Xarn","Zor","Draz","Korl","Murg","Rhaz","Sarth","Vex","Zhar","Karn","Gorth","Thul","Xerak"],
+["Doomhand","Goreborn","Blackhorn","Rotmaw","Bloodmark","Ironhide","Warpfang","Fellblade","Ashbringer","Bloodtide","Bonecrown","Darkscar","Dreadfist","Fleshrender","Grimhoof","Hellbrand","Ironmaw","Nightbane","Plaguehand","Rageborn","Redclaw","Skullbrand","Soulrender","Stormbane","Voidfang","Warpscar","Woeheart","Doomscar","Goreblade","Blackblood","Rotfang","Fellhorn"]
+],
+skaven:[
+["Skrit","Vreek","Rikkit","Snazz","Queek","Tretch","Skreek","Visk","Chikk","Fisk","Gnaw","Kreek","Nikkit","Pask","Ratch","Skit","Squeek","Tik","Vritt","Zikk","Kritch","Nash","Pritt","Rikk","Skab","Skritt","Trik","Verm","Vreekit","Whisk","Zrit","Krik"],
+["Gnawtail","Quickclaw","Warpwhisker","Scabfur","Blackpaw","Sneakstab","Rotfang","Chitterspike","Biteback","Foulwhisker","Greyfur","Knifeclaw","Mangehide","Mucktail","Needletooth","Plaguepaw","Quickfang","Rotcoat","Scurryfoot","Skittertail","Slit-ear","Snaggletooth","Sootfur","Spiteclaw","Stinktail","Twitchwhisker","Warpclaw","Wormtail","Yellowfang","Slinkpaw","Scratchear","Blightfur"]
+],
+undead:[
+["Vlad","Morcant","Severin","Lucan","Ghast","Radu","Mirela","Ysabel","Alaric","Bela","Cassian","Dorian","Elspeth","Gregor","Helena","Iancu","Kaspar","Lazar","Marius","Nadja","Oskar","Petru","Sabina","Tomas","Valeria","Wolfram","Zoran","Dragan","Emil","Katarina","Mircea","Sorina"],
+["Graves","Nightmoor","Blackcrypt","Boneward","Duskhollow","Graveborn","Coldblood","Ashen","Blackveil","Bonecroft","Darkgrave","Deadmoor","Duskbane","Grimward","Hollowgrave","Mournveil","Nightfall","Rotwood","Shadowcrypt","Skullward","Stonegrave","Wraithmoor","Blackthorn","Coldgrave","Deathwhisper","Greycrypt","Mooncrypt","Ravenmoor","Shroud","Tombward","Gravewind","Nightshade"]
+],
+vampire:[
+["Adrian","Aurelia","Cassius","Carmilla","Darius","Elena","Lucien","Octavia","Valerian","Vespera","Ambrose","Celeste","Dominic","Isolde","Lysander","Marcella","Nikola","Ophelia","Raphael","Seraphina","Silas","Theodora","Victor","Vivienne","Alessio","Drusilla","Leontes","Morgana","Roderic","Selene","Tristan","Verena"],
+["Dracul","von Carstein","Nightveil","Bloodrose","Ravencrest","de Nocturne","Blackthorne","Duskborne","Gravecourt","Mournspire","Sanguine","Vespertil","Darkmere","Crimson","Moonfall","Nightshade","Redgrave","Shadowfen","Vane","Wolfsbane","Dreadmoor","Morcant","Noctis","Ravenwood","Silverbane","Thornveil","Valemont","Blackrose","Coldharbour","Duskwood","Grimcourt","Nightborne"]
+],
+lizard:[
+["Itzi","Klaq","Xili","Teko","Slaq","Krix","Zunki","Tlat","Aqto","Chak","Ixi","Kroq","Maz","Nakai","Oxy","Qitz","Rok","Sotek","Tehu","Tiktaq","Uto","Xla","Yuq","Zaq","Klaqxi","Tziki","Huatl","Koxi","Quetz","Sauri","Tichi","Xotli"],
+["Sunscale","Stonecrest","Bloodclaw","Reedstalker","Templeborn","Coldeye","Marshfang","Goldscale","Brightcrest","Deepwater","Emberhide","Jadeback","Mossclaw","Obsidian","Raincrest","Riverjaw","Scarhide","Skycrest","Stoneback","Swampclaw","Thundercrest","Treefang","Vineback","Warmstone","Wetclaw","Whitecrest","Jadeclaw","Mudscale","Nightcrest","Reedscale","Sunclaw","Templehide"]
+],
+small:[
+["Pip","Milo","Tilly","Nibs","Poppy","Bram","Tuck","Willa","Alfie","Benny","Clover","Daisy","Eddie","Fennel","Gilly","Hattie","Jasper","Lottie","Merry","Nell","Ollie","Posy","Rosie","Sammy","Toby","Winnie","Basil","Mabel","Percy","Pippa","Rufus","Willow"],
+["Goodbarrel","Underhill","Crumblepot","Applecheek","Shortstep","Copperkettle","Bramblefoot","Honeybun","Biscuit","Bumblebee","Buttercup","Ciderbottom","Dewberry","Dimplefoot","Fairweather","Fiddlefern","Greenbottle","Jamjar","Meadowbrook","Muffin","Nettlewick","Oatcake","Pebbletoe","Puddingfoot","Quickkettle","Rosehip","Thistlepot","Tumblebrook","Warmbread","Whistlewick","Berrybush","Teacup"]
+],
+ogre:[
+["Gronk","Bogg","Mung","Thud","Krum","Gnasher","Lug","Bigga","Bash","Bloat","Chug","Dreg","Fug","Gorb","Hunk","Krag","Mogg","Nug","Rug","Slab","Thunk","Ug","Wump","Zug","Brug","Crag","Drub","Gug","Kurg","Murg","Slug","Tug"],
+["Bonechewer","Gutbuster","Clubfoot","Meatfist","Skullcrack","Stompgut","Bigbelly","Ironbelch","Boulderback","Crushbone","Fatneck","Fistface","Gutbucket","Hamfist","Heavyhand","Jawbreaker","Kegbelly","Meathead","Rockgut","Skullbutt","Slabside","Stonegut","Thickneck","Treebreaker","Wallop","Widebelly","Bonegrinder","Clubhead","Meatwall","Stumpfist","Thudbelly","Ironstomach"]
+],
+amazon:[
+["Xara","Naya","Kora","Tala","Zia","Amara","Ixa","Suri","Ayla","Cira","Dara","Elya","Iara","Kaya","Luma","Maya","Nira","Ona","Raya","Sana","Teya","Vala","Yara","Zara","Anaya","Cala","Ixchel","Nahara","Oyana","Talia","Xima","Zuri"],
+["Sunclaw","Jaguarstep","Vinewhip","Stormfeather","Brightspear","Riverfang","Mooncat","Goldspear","Brightclaw","Cloudrunner","Dawnfang","Eaglecry","Firevine","Jaguarspear","Moonfeather","Nightcat","Rainrunner","Redflower","Riverclaw","Skyhunter","Snakebite","Starvine","Stonecat","Stormspear","Sunrunner","Thunderbird","Wildclaw","Windfeather","Brightvine","Moonrunner","Rainfang","Sunfeather"]
+]
 };
-function nameCat(p){const s=p.position,t=state.team;if(/Skaven|Gutter|Stormvermin|Rat Ogre/i.test(s))return"skaven";if(/Goblin|Snotling|Orc|Troll/i.test(s))return"orc";if(/Dwarf/i.test(s))return"dwarf";if(/Elf/i.test(s))return"elf";if(/Halfling|Gnome/i.test(s))return"small";if(/Ogre/i.test(s))return"ogre";if(t==="Bretonnian")return"breton";if(/Norse/.test(t))return"norse";if(/Amazon/.test(t))return"amazon";if(/Lizardmen|Slann/.test(t))return"lizard";if(/Vampire|Undead|Necromantic|Tomb Kings/.test(t))return"undead";if(/Chaos|Khorne|Nurgle/.test(t))return"chaos";if(/Dark Elf|Elven|High Elf|Wood Elf/.test(t))return"elf";if(/Dwarf/.test(t))return"dwarf";if(/Goblin|Orc|Snotling/.test(t))return"orc";if(/Skaven|Underworld/.test(t))return"skaven";if(/Gnome|Halfling/.test(t))return"small";if(/Ogre/.test(t))return"ogre";return"human"}
-function randomName(p){const a=N[nameCat(p)]||N.human;return a[0][Math.random()*a[0].length|0]+" "+a[1][Math.random()*a[1].length|0]}
+
+function nameCat(p){
+  const s=p.position,t=state.team;
+  if(t==="Bretonnian"&&/Grail Knight|Knight Catcher|Knight Thrower/i.test(s))return"bretonNoble";
+  if(/Goblin|Snotling/i.test(s))return"goblin";
+  if(/Skaven|Gutter|Stormvermin|Rat Ogre/i.test(s))return"skaven";
+  if(/Orc|Troll/i.test(s))return"orc";
+  if(/Dwarf/i.test(s))return"dwarf";
+  if(/Elf/i.test(s))return"elf";
+  if(/Halfling|Gnome/i.test(s))return"small";
+  if(/Ogre/i.test(s))return"ogre";
+  if(t==="Bretonnian")return"breton";
+  if(/Norse/.test(t))return"norse";
+  if(/Amazon/.test(t))return"amazon";
+  if(/Lizardmen|Slann/.test(t))return"lizard";
+  if(/Vampire/.test(t))return"vampire";
+  if(/Undead|Necromantic|Tomb Kings/.test(t))return"undead";
+  if(/Chaos|Khorne|Nurgle/.test(t))return"chaos";
+  if(/Dark Elf|Elven|High Elf|Wood Elf/.test(t))return"elf";
+  if(/Dwarf/.test(t))return"dwarf";
+  if(/Goblin|Snotling/.test(t))return"goblin";
+  if(/Orc/.test(t))return"orc";
+  if(/Skaven|Underworld/.test(t))return"skaven";
+  if(/Gnome|Halfling/.test(t))return"small";
+  if(/Ogre/.test(t))return"ogre";
+  return"human";
+}
+
+function randomName(p,currentUid){
+  const a=N[nameCat(p)]||N.human;
+  const used=new Set(state.roster.filter(r=>r.uid!==currentUid&&r.name).map(r=>r.name.trim().toLowerCase()));
+  let n="";
+  for(let i=0;i<100;i++){
+    n=a[0][Math.random()*a[0].length|0]+" "+a[1][Math.random()*a[1].length|0];
+    if(!used.has(n.toLowerCase()))return n;
+  }
+  return n;
+}
 
 const $=id=>document.getElementById(id),el={team:$("bbTeam"),teamName:$("bbTeamName"),coachName:$("bbCoachName"),budget:$("bbBudget"),pill:$("bbTeamPill"),meta:$("bbMeta"),rule:$("bbRule"),rows:$("bbPlayerRows"),rosterRows:$("bbRosterRows"),count:$("bbPlayerCount"),cost:$("bbTeamCost"),remaining:$("bbRemaining"),rrText:$("bbRerollText"),rrMinus:$("bbRerollMinus"),rrPlus:$("bbRerollPlus"),rerolls:$("bbRerolls"),apo:$("bbApo"),apoText:$("bbApoText"),coachMinus:$("bbCoachMinus"),coachPlus:$("bbCoachPlus"),coaches:$("bbCoaches"),cheerMinus:$("bbCheerMinus"),cheerPlus:$("bbCheerPlus"),cheer:$("bbCheer"),fansMinus:$("bbFansMinus"),fansPlus:$("bbFansPlus"),fans:$("bbFans"),status:$("bbStatus"),reset:$("bbReset"),save:$("bbSave"),load:$("bbLoad"),print:$("bbPrint")};
 function money(v){const s=v<0?"−":"";return s+new Intl.NumberFormat("en-GB").format(Math.abs(v))+" gp"}function team(){return TEAMS[state.team]}function pos(id){return team().players.find(p=>p.id===id)}function q(id){return state.roster.filter(r=>r.positionId===id).length}function countPlayers(){return state.roster.length}function playersCost(){return state.roster.reduce((s,r)=>s+(pos(r.positionId)?.cost||0),0)}function totalCost(){return playersCost()+state.rerolls*team().rerollCost+(state.apothecary?APO_COST:0)+state.coaches*COACH_COST+state.cheerleaders*CHEER_COST+state.fans*FAN_COST}function budget(){const n=Number(el.budget.value);return Number.isFinite(n)&&n>=0?n:0}function groupCount(g){return state.roster.filter(r=>pos(r.positionId)?.group===g).length}function canAdd(p){if(q(p.id)>=p.max||countPlayers()>=team().maxPlayers)return false;if(p.group&&team().specialGroup&&p.group===team().specialGroup.id&&groupCount(p.group)>=team().specialGroup.max)return false;return true}function insignificantCount(){return state.roster.filter(r=>(pos(r.positionId)?.skills||"").includes("Insignificant")).length}
 function saveTeam(){localStorage.setItem("rtbb",JSON.stringify({s:state,n:el.teamName.value,c:el.coachName.value,b:el.budget.value}));alert("Team saved on this device.")}function loadTeam(){let d;try{d=JSON.parse(localStorage.getItem("rtbb"))}catch(e){}if(!d||!d.s||!TEAMS[d.s.team])return alert("No saved team found on this device.");state=d.s;uid=1+Math.max(0,...state.roster.map(r=>r.uid||0));el.team.value=state.team;el.teamName.value=d.n||"";el.coachName.value=d.c||"";el.budget.value=d.b||1000000;buildRows();renderTeamInfo();buildRoster();update()}function printTeam(){const t=team(),w=open("","_blank"),rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td>${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td>${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join("");w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title><style>@page{size:A4 landscape;margin:10mm}body{font:11px Arial;margin:10px;color:#153e52}h1{margin:0 0 5px}p{margin:4px 0}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #999;padding:5px;text-align:left}th{background:#153e52;color:white}.spp{width:38px}.inj{width:105px;height:25px}@media print{button{display:none}}</style><h1>${esc(el.teamName.value||t.name)}</h1><p><b>Team:</b> ${t.name} &nbsp; <b>Coach:</b> ${esc(el.coachName.value)||"—"}</p><p><b>Players:</b> ${countPlayers()} &nbsp; <b>Team Cost:</b> ${money(totalCost())} &nbsp; <b>Treasury:</b> ${money(budget()-totalCost())}</p><table><tr><th>#</th><th>Name</th><th>Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th><th>Skills / Traits</th><th>SPP</th><th>Injury</th><th>Cost</th></tr>${rows}</table><p><b>Re-rolls:</b> ${state.rerolls} &nbsp; <b>Apothecary:</b> ${state.apothecary?"Yes":"No"} &nbsp; <b>Assistant Coaches:</b> ${state.coaches} &nbsp; <b>Cheerleaders:</b> ${state.cheerleaders} &nbsp; <b>Dedicated Fans:</b> ${state.fans}</p>`);w.document.close();setTimeout(()=>w.print(),200)}function populateTeams(){el.team.innerHTML=Object.keys(TEAMS).map(n=>`<option value="${n}">${TEAMS[n].name||n}</option>`).join("");el.team.value=state.team}
 function buildRows(){el.rows.innerHTML=team().players.map(p=>`<tr><td><div class="qty"><button type="button" data-a="minus" data-id="${p.id}">−</button><span class="num" id="qty-${p.id}">${q(p.id)}</span><button type="button" data-a="plus" data-id="${p.id}">+</button></div></td><td class="pos">${p.position}</td><td class="center">0–${p.max}</td><td>${money(p.cost)}</td><td class="center">${p.ma}</td><td class="center">${p.st}</td><td class="center">${p.ag}</td><td class="center">${p.pa}</td><td class="center">${p.av}</td><td class="skills">${p.skills||"—"}</td></tr>`).join("");el.rows.querySelectorAll("button[data-a]").forEach(b=>b.onclick=()=>changePlayer(b.dataset.id,b.dataset.a==="plus"?1:-1))}
 function changePlayer(id,d){const p=pos(id);if(!p)return;if(d>0){if(!canAdd(p))return;state.roster.push({uid:uid++,positionId:id,name:""})}else{for(let i=state.roster.length-1;i>=0;i--){if(state.roster[i].positionId===id){state.roster.splice(i,1);break}}}renderAll()}
-function buildRoster(){if(!state.roster.length){el.rosterRows.innerHTML='<tr><td colspan="11" class="empty">Choose players above and they will appear here individually.</td></tr>';return}el.rosterRows.innerHTML=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td class="center"><strong>${i+1}</strong></td><td><div class="namecell"><input class="nameinput" data-uid="${r.uid}" value="${esc(r.name)}" placeholder="Player name"><button class="mini" data-rand="${r.uid}" type="button" title="Random team-themed name">🎲</button></div></td><td class="pos">${p.position}</td><td class="center">${p.ma}</td><td class="center">${p.st}</td><td class="center">${p.ag}</td><td class="center">${p.pa}</td><td class="center">${p.av}</td><td class="skills">${p.skills||"—"}</td><td>${money(p.cost)}</td><td><button class="mini remove" data-remove="${r.uid}" type="button" title="Remove player">×</button></td></tr>`}).join("");el.rosterRows.querySelectorAll("input[data-uid]").forEach(inp=>inp.oninput=()=>{const r=state.roster.find(x=>x.uid===Number(inp.dataset.uid));if(r)r.name=inp.value});el.rosterRows.querySelectorAll("button[data-rand]").forEach(b=>b.onclick=()=>{const r=state.roster.find(x=>x.uid===Number(b.dataset.rand));if(r){r.name=randomName(pos(r.positionId));buildRoster()}});el.rosterRows.querySelectorAll("button[data-remove]").forEach(b=>b.onclick=()=>{state.roster=state.roster.filter(r=>r.uid!==Number(b.dataset.remove));renderAll()})}
+function buildRoster(){if(!state.roster.length){el.rosterRows.innerHTML='<tr><td colspan="11" class="empty">Choose players above and they will appear here individually.</td></tr>';return}el.rosterRows.innerHTML=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td class="center"><strong>${i+1}</strong></td><td><div class="namecell"><input class="nameinput" data-uid="${r.uid}" value="${esc(r.name)}" placeholder="Player name"><button class="mini" data-rand="${r.uid}" type="button" title="Random team-themed name">🎲</button></div></td><td class="pos">${p.position}</td><td class="center">${p.ma}</td><td class="center">${p.st}</td><td class="center">${p.ag}</td><td class="center">${p.pa}</td><td class="center">${p.av}</td><td class="skills">${p.skills||"—"}</td><td>${money(p.cost)}</td><td><button class="mini remove" data-remove="${r.uid}" type="button" title="Remove player">×</button></td></tr>`}).join("");el.rosterRows.querySelectorAll("input[data-uid]").forEach(inp=>inp.oninput=()=>{const r=state.roster.find(x=>x.uid===Number(inp.dataset.uid));if(r)r.name=inp.value});el.rosterRows.querySelectorAll("button[data-rand]").forEach(b=>b.onclick=()=>{const r=state.roster.find(x=>x.uid===Number(b.dataset.rand));if(r){r.name=randomName(pos(r.positionId),r.uid);buildRoster()}});el.rosterRows.querySelectorAll("button[data-remove]").forEach(b=>b.onclick=()=>{state.roster=state.roster.filter(r=>r.uid!==Number(b.dataset.remove));renderAll()})}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function renderTeamInfo(){const t=team();el.pill.textContent=t.name;el.rrText.textContent=`0–${REROLL_MAX} • ${money(t.rerollCost)} each`;el.meta.innerHTML=`<span><strong>Re-rolls:</strong> ${money(t.rerollCost)} each</span><span><strong>Apothecary:</strong> ${t.apothecary?"Yes":"No"}</span><span><strong>Roster:</strong> 11–${t.maxPlayers} players</span>`;if(t.note){el.rule.style.display="block";el.rule.textContent=t.note}else{el.rule.style.display="none";el.rule.textContent=""}el.apo.disabled=!t.apothecary;if(!t.apothecary)state.apothecary=false;el.apoText.textContent=t.apothecary?`${money(APO_COST)} • Available`:"Not available to this team"}
 function updateButtons(){team().players.forEach(p=>{const minus=el.rows.querySelector(`button[data-a="minus"][data-id="${p.id}"]`),plus=el.rows.querySelector(`button[data-a="plus"][data-id="${p.id}"]`),n=$("qty-"+p.id);if(n)n.textContent=q(p.id);if(minus)minus.disabled=q(p.id)<=0;if(plus)plus.disabled=!canAdd(p)});el.rrMinus.disabled=state.rerolls<=0;el.rrPlus.disabled=state.rerolls>=REROLL_MAX;el.coachMinus.disabled=state.coaches<=0;el.coachPlus.disabled=state.coaches>=COACH_MAX;el.cheerMinus.disabled=state.cheerleaders<=0;el.cheerPlus.disabled=state.cheerleaders>=CHEER_MAX;el.fansMinus.disabled=state.fans<=0;el.fansPlus.disabled=state.fans>=FAN_MAX}
