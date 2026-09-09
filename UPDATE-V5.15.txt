@@ -1,0 +1,30 @@
+Rumble Train Blood Bowl Team Builder V5.15
+
+CORRECTED PRINT ALIGNMENT FIX
+-----------------------------
+V5.14 attempted to align the Player Game Stats Tracker heading, but a later
+CSS rule reset .statsFields margin to 0 and overrode the fix.
+
+V5.15 corrects the actual conflicting CSS rule.
+
+Result:
+- Player Game Stats Tracker starts flush left with the Team Name and
+  Skills & Traits Reference headings.
+- Game / Opponent / Date stay on the same horizontal line.
+- The Game / Opponent / Date group has a 3% right margin so it lines up
+  with the right edge of the stats table.
+- No other print or Team Builder behavior is changed.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to deploy.
+4. Change GoDaddy loader from ?v=5.14 to ?v=5.15.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.15"></script>
+
+save-team.html does not need changing.
