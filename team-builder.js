@@ -1,4 +1,4 @@
-/* Rumble Train Blood Bowl Team Builder - External V5.11
+/* Rumble Train Blood Bowl Team Builder - External V5.12
    Hosted externally and loaded into GoDaddy with a tiny script tag.
 */
 (function(){
@@ -173,7 +173,7 @@ function splitSkillList(v){let a=[],x="",d=0;for(const c of String(v||"")){if(c=
 function rosterSkillRefs(){const m=new Map;state.roster.forEach(r=>{const p=pos(r.positionId);splitSkillList(p.skills).forEach(raw=>{const key=raw.replace(/\*$/,"").trim();if(!key)return;let e=m.get(key);if(!e){e={display:raw,key:key,positions:new Set};m.set(key,e)}e.positions.add(p.position)})});return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key))}
 function safeFileName(v){return String(v||state.team||"blood-bowl-team").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,70)||"blood-bowl-team"}
 function saveTeam(){
-  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.11",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
+  const d={app:"Rumble Train Blood Bowl Team Builder",version:"5.12",savedAt:new Date().toISOString(),teamName:el.teamName.value,coachName:el.coachName.value,budget:el.budget.value,state:state};
   const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.6#"+encodeURIComponent(JSON.stringify(d));
   const w=window.open(u,"_blank");
   if(!w)alert("Your browser blocked the save window. Please allow pop-ups for rumbletrain.com and try again.")
@@ -205,7 +205,7 @@ function printTeam(){
  rows=state.roster.map((r,i)=>{const p=pos(r.positionId);return `<tr><td>${i+1}</td><td>${esc(r.name)||"—"}</td><td class="boldcol">${p.position}</td><td>${p.ma}</td><td>${p.st}</td><td>${p.ag}</td><td>${p.pa}</td><td>${p.av}</td><td class="boldcol">${p.skills||"—"}</td><td class="spp">&nbsp;</td><td class="inj">&nbsp;</td><td>${money(p.cost)}</td></tr>`}).join(""),
  refs=rosterSkillRefs(),
  refRows=refs.length?refs.map(x=>`<tr><td class="skillname">${esc(x.display)}</td><td class="usedby">${esc([...x.positions].join(", "))}</td><td>${esc(SKILLREF[x.key]||"Refer to the current Blood Bowl Third Season rules for the full effect of this ability.")}</td></tr>`).join(""):`<tr><td colspan="3">No starting Skills or Traits are present on this roster.</td></tr>`,
- statsRows=Array.from({length:20},(_,i)=>{const r=state.roster[i],p=r?pos(r.positionId):null;return `<tr><td>${i+1}</td><td class="statName">${r?(esc(r.name)||""):""}</td><td class="statPos">${p?esc(p.position):""}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`}).join("");
+ statsRows=Array.from({length:20},(_,i)=>{const r=state.roster[i],p=r?pos(r.positionId):null;return `<tr><td>${i+1}</td><td class="statName">${r?(esc(r.name)||""):""}</td><td class="statPos">${p?esc(p.position):""}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`}).join("");
  w.document.write(`<title>${esc(el.teamName.value||t.name)} Roster</title>
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
@@ -260,16 +260,19 @@ function printTeam(){
  .statsField{border:1px solid #153e52;border-radius:4px;padding:4px 5px;background:#f8fafb;min-height:31px;text-align:center}
  .statsField .sectionHead{font-size:5.4pt;letter-spacing:.01em;text-transform:uppercase;color:#526b77;line-height:1.05}
  .statsField .writeLine{display:block;height:11px;border-bottom:1px solid #7f9199;margin:4px 7px 0}
- .statsTable{table-layout:fixed;width:94%;margin:6px auto 0;font-size:7pt}
- .statsTable th,.statsTable td{height:20px;padding:3px 4px}
- .statsTable .sc-num{width:4%}
- .statsTable .sc-name{width:23%}
- .statsTable .sc-pos{width:20%}
- .statsTable .sc-stat{width:7.55%}
- .statsTable th:nth-child(n+4),.statsTable td:nth-child(n+4){text-align:center}
- .statsTable .statName{font-size:6.6pt;font-weight:400}
+ .statsTable{table-layout:fixed;width:96%;margin:5px auto 0;font-size:5.5pt}
+ .statsTable th,.statsTable td{height:18px;padding:2px 2px}
+ .statsTable .sc-num{width:2.8%}
+ .statsTable .sc-name{width:14.5%}
+ .statsTable .sc-pos{width:12.5%}
+ .statsTable .sc-mini{width:4.1%}
+ .statsTable .sc-spp{width:5.2%}
+ .statsTable .sc-notes{width:14.8%}
+ .statsTable th:nth-child(n+4):not(:last-child),.statsTable td:nth-child(n+4):not(:last-child){text-align:center}
+ .statsTable .statName{font-size:5.4pt;font-weight:400}
  .statsTable .statPos{font-weight:700}
- .statsLegend{width:94%;margin:7px auto 0;font-size:5.8pt;color:#555;line-height:1.4}
+ .statsTable th{font-size:5.1pt;line-height:1.05;white-space:normal}
+ .statsLegend{width:96%;margin:6px auto 0;font-size:5.1pt;color:#555;line-height:1.35}
  @media screen{.printPage{margin-bottom:28px;border-bottom:1px dashed #b7c4ca;padding-bottom:18px}.printPage:last-child{border-bottom:0}}@media print{button{display:none}.printPage{page-break-after:always;break-after:page}.printPage:last-child{page-break-after:auto;break-after:auto}}
  </style>
  <section class="printPage rosterpage">
@@ -320,24 +323,34 @@ function printTeam(){
    <table class="statsTable">
      <colgroup>
        <col class="sc-num"><col class="sc-name"><col class="sc-pos">
-       <col class="sc-stat"><col class="sc-stat"><col class="sc-stat"><col class="sc-stat">
-       <col class="sc-stat"><col class="sc-stat"><col class="sc-stat">
+       <col class="sc-mini"><col class="sc-mini"><col class="sc-mini"><col class="sc-mini">
+       <col class="sc-mini"><col class="sc-mini"><col class="sc-mini"><col class="sc-mini">
+       <col class="sc-mini"><col class="sc-mini"><col class="sc-mini">
+       <col class="sc-spp"><col class="sc-spp"><col class="sc-notes">
      </colgroup>
      <tr>
        <th>#</th><th>Player Name</th><th>Position</th>
-       <th>COMP</th><th>TTM</th><th>LAND</th><th>INT</th><th>CAS</th><th>TD</th><th>MVP</th>
+       <th>Pass Att</th><th>COMP</th><th>CATCH</th><th>TTM</th><th>LAND</th>
+       <th>INT</th><th>TD</th><th>CAS</th><th>KO</th><th>FOUL</th><th>MVP</th>
+       <th>SPP Adj</th><th>SPP Earned</th><th>Notes</th>
      </tr>
      ${statsRows}
    </table>
 
    <div class="statsLegend">
-     <b>COMP</b> = Completions &nbsp; • &nbsp;
-     <b>TTM</b> = Throw Team-mate &nbsp; • &nbsp;
-     <b>LAND</b> = Successful Landing &nbsp; • &nbsp;
+     <b>Pass Att</b> = Pass attempts &nbsp; • &nbsp;
+     <b>COMP</b> = Successful completions &nbsp; • &nbsp;
+     <b>CATCH</b> = Passes caught &nbsp; • &nbsp;
+     <b>TTM</b> = Successful Throw Team-mate completions &nbsp; • &nbsp;
+     <b>LAND</b> = Successful landings after being thrown &nbsp; • &nbsp;
      <b>INT</b> = Interceptions &nbsp; • &nbsp;
-     <b>CAS</b> = Casualties &nbsp; • &nbsp;
      <b>TD</b> = Touchdowns &nbsp; • &nbsp;
-     <b>MVP</b> = Most Valuable Player
+     <b>CAS</b> = SPP-earning casualties &nbsp; • &nbsp;
+     <b>KO</b> = Opponents knocked out &nbsp; • &nbsp;
+     <b>FOUL</b> = Fouls made &nbsp; • &nbsp;
+     <b>MVP</b> = 0 or 1 &nbsp; • &nbsp;
+     <b>SPP Adj</b> = Manual adjustment/special-rule SPP &nbsp; • &nbsp;
+     <b>SPP Earned</b> = Calculated SPP
    </div>
  </section>`);
  w.document.close();

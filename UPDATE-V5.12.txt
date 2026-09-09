@@ -1,0 +1,21 @@
+Rumble Train Blood Bowl Team Builder V5.12
+
+Player Game Stats Tracker now matches the useful stat columns from the
+PlayerGameStats Google Sheet:
+
+# | Player Name | Position | Pass Att | COMP | CATCH | TTM | LAND | INT |
+TD | CAS | KO | FOUL | MVP | SPP Adj | SPP Earned | Notes
+
+Game ID / Team ID / Team are not repeated on the printed rows because the
+page header already identifies the team/game context.
+
+Update GitHub:
+1. Replace team-builder.js
+2. Commit to main
+3. Wait for GitHub Pages
+4. Change GoDaddy loader from ?v=5.11 to ?v=5.12
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.12"></script>
+
+save-team.html does not need changing.
