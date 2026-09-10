@@ -1,0 +1,53 @@
+Rumble Train Blood Bowl Team Builder V5.16
+
+PRIMARY / SECONDARY SKILL ACCESS
+--------------------------------
+Restored Primary and Secondary skill access data for all 31 team rosters
+from the earlier multi-team builder data already prepared for this project.
+
+WEBSITE
+-------
+Choose Players now includes two new columns at the far right:
+
+Primary | Secondary
+
+Example:
+Grail Knight -> Primary GS | Secondary A
+Knight Catcher -> Primary GA | Secondary S
+Knight Thrower -> Primary GP | Secondary AS
+
+PRINT PAGE 2
+------------
+Below Skills & Traits Reference there is now:
+
+POSITION ADVANCEMENT REFERENCE
+
+Position | Primary | Secondary
+
+Only positions actually present on the selected roster are printed, keeping
+the reference compact.
+
+A legend is included:
+G = General
+A = Agility
+S = Strength
+P = Passing
+D = Devious
+M = Mutation
+
+No Primary / Secondary columns were added to "Your Roster", so the main
+builder roster remains uncluttered.
+
+UPDATE
+------
+1. Replace team-builder.js in GitHub.
+2. Commit to main.
+3. Wait for GitHub Pages to deploy.
+4. Change GoDaddy loader from ?v=5.15 to ?v=5.16.
+
+Loader:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.16"></script>
+
+save-team.html does not need changing.
