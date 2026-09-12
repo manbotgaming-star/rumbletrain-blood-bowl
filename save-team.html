@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Save Blood Bowl Team — V4.6</title>
+<title>Save Blood Bowl Team — V4.7</title>
 <style>
 :root{--ink:#153e52;--line:#d8e1e5;--soft:#f5f8f9;--accent:#1b607d;--muted:#60747e}
 *{box-sizing:border-box}
@@ -20,7 +20,7 @@ button:hover,a.download:hover{filter:brightness(.94)}
 </head>
 <body>
 <main>
-<h1>Save Blood Bowl Team</h1><p style="margin-top:-2px;font-size:12px;color:#60747e">Save helper V4.6</p>
+<h1>Save Blood Bowl Team</h1><p style="margin-top:-2px;font-size:12px;color:#60747e">Save helper V4.7</p>
 <p id="message">Preparing your roster file…</p>
 <div id="error"></div>
 <button id="save" type="button" style="display:none">Save Team File</button>
@@ -53,7 +53,11 @@ After saving, close this tab and return to RumbleTrain.
     if(!d || !d.state || !d.state.team)
       throw new Error("The team data is invalid.");
 
-    const filename=safe(d.teamName||d.state.team)+".rtbb.json";
+    const versionTag=String(d.version||"unknown")
+      .trim()
+      .replace(/[^0-9.]/g,"")
+      .replace(/\./g,"_") || "unknown";
+    const filename=safe(d.teamName||d.state.team)+".rtbb_v"+versionTag+".json";
     const content=JSON.stringify(d,null,2);
 
     msg.innerHTML="<b>"+(d.teamName||d.state.team)+"</b> is ready to save.";

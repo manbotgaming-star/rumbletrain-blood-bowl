@@ -1,0 +1,104 @@
+Rumble Train Blood Bowl Team Builder V5.18
+
+VERSION VISIBILITY
+------------------
+Added a small light-grey version label at the bottom of the Team Creator:
+
+Team Builder v5.18
+
+The label is intentionally subtle and is hidden by print CSS.
+
+
+VERSIONED SAVE FILE NAMES
+-------------------------
+Saved team files now include the Team Builder version in the filename.
+
+Example:
+
+Carcassonne-Crushers.rtbb_v5_18.json
+
+The version is taken from the saved roster payload, so future versions will
+automatically use the appropriate version tag.
+
+
+LEAGUE IMPORT SAVE FORMAT
+-------------------------
+Retains the V5.17 league-ready save schema:
+
+version: 5.18
+schemaVersion: 2
+
+Each saved roster player includes:
+
+uid
+positionId
+name
+number
+position
+ma
+st
+ag
+pa
+av
+skills
+primary
+secondary
+cost
+
+The saved team metadata also includes:
+
+teamCost
+treasuryRemaining
+playerCount
+
+Permanent League Player IDs are still generated only by the League workbook
+when the Commissioner imports the roster.
+
+
+SAVE HELPER
+-----------
+save-team.html updated internally from Save Helper V4.6 to V4.7.
+
+The public filename remains exactly:
+
+save-team.html
+
+
+FILES TO UPLOAD
+---------------
+team-builder.js
+save-team.html
+UPDATE-V5.18.txt
+
+
+GITHUB UPDATE
+-------------
+1. Replace the existing team-builder.js with the V5.18 team-builder.js.
+2. Replace the existing save-team.html with the V4.7 save helper.
+3. Upload UPDATE-V5.18.txt.
+4. Commit all three changes to main.
+5. Wait for GitHub Pages to deploy.
+
+
+GODADDY LOADER
+--------------
+Change the Team Creator loader to:
+
+<div id="rtbb-root"></div>
+<script src="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder.js?v=5.18"></script>
+
+
+VERIFY
+------
+After publishing, the bottom of the Team Creator should display:
+
+Team Builder v5.18
+
+A newly saved roster should have a filename similar to:
+
+Carcassonne-Crushers.rtbb_v5_18.json
+
+and the JSON should contain:
+
+"version": "5.18",
+"schemaVersion": 2
