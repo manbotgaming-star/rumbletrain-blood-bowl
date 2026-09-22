@@ -20,7 +20,7 @@
 // =====================================================
 
 const COACH_API_URL =
-  'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+  'https://script.google.com/macros/s/AKfycbwxdWB--Gqs1SapVbDXHLB4-C1Ib5ublMzgQ38P05sOdZXN5KF6d_8nh5xZqAL957ie/exec';
 
 
 // Used only for the current browser tab.
