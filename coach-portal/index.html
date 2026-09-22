@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Rumble Bowl Coach Portal</title>
+
+  <link
+    rel="stylesheet"
+    href="coach-portal.css"
+  >
+</head>
+
+<body>
+
+  <div class="coach-portal">
+
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
+    <section
+      id="coach-login"
+      class="coach-login"
+    >
+
+      <div class="coach-login-card">
+
+        <h1>Coach Portal</h1>
+
+        <p>
+          Enter your Coach Access Code to view your team.
+        </p>
+
+        <form id="coach-login-form">
+
+          <label for="coach-access-code">
+            Access Code
+          </label>
+
+          <input
+            id="coach-access-code"
+            name="accessCode"
+            type="text"
+            autocomplete="off"
+            required
+          >
+
+          <button type="submit">
+            Enter Coach Portal
+          </button>
+
+        </form>
+
+        <div
+          id="coach-login-message"
+          class="coach-message"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+    <section
+      id="coach-loading"
+      class="coach-loading"
+      hidden
+    >
+
+      <p>
+        Loading team data...
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+    <main
+      id="coach-dashboard"
+      class="coach-dashboard"
+      hidden
+    >
+
+      <!-- TEAM HEADER -->
+      <section class="coach-team-header">
+
+        <div class="coach-team-logo-wrap">
+
+          <img
+            id="coach-team-logo"
+            class="coach-team-logo"
+            alt="Team Logo"
+          >
+
+        </div>
+
+        <div class="coach-team-title">
+
+          <h1 id="coach-team-name">
+            Team
+          </h1>
+
+          <div id="coach-team-race"></div>
+
+          <div>
+            Coach:
+            <strong id="coach-name"></strong>
+          </div>
+
+        </div>
+
+        <button
+          id="coach-logout"
+          type="button"
+        >
+          Log Out
+        </button>
+
+      </section>
+
+
+      <!-- TEAM SUMMARY -->
+      <section class="coach-panel">
+
+        <h2>Team Information</h2>
+
+        <div class="coach-summary-grid">
+
+          <div>
+            <span>Team ID</span>
+            <strong id="coach-team-id">-</strong>
+          </div>
+
+          <div>
+            <span>Season</span>
+            <strong id="coach-season">-</strong>
+          </div>
+
+          <div>
+            <span>Dedicated Fans</span>
+            <strong id="coach-dedicated-fans">-</strong>
+          </div>
+
+          <div>
+            <span>Treasury</span>
+            <strong id="coach-treasury">-</strong>
+          </div>
+
+          <div>
+            <span>Re-rolls</span>
+            <strong id="coach-rerolls">-</strong>
+          </div>
+
+          <div>
+            <span>Apothecary</span>
+            <strong id="coach-apothecary">-</strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- NEXT GAME -->
+      <section class="coach-panel">
+
+        <h2>Fixtures</h2>
+
+        <div id="coach-games">
+          No fixtures available.
+        </div>
+
+      </section>
+
+
+      <!-- ROSTER -->
+      <section class="coach-panel">
+
+        <h2>Team Roster</h2>
+
+        <div class="coach-table-wrap">
+
+          <table class="coach-roster-table">
+
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Position</th>
+                <th>MA</th>
+                <th>ST</th>
+                <th>AG</th>
+                <th>PA</th>
+                <th>AV</th>
+                <th>Skills</th>
+                <th>SPP</th>
+                <th>Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="coach-roster-body">
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <script src="coach-portal.js"></script>
+
+</body>
+</html>
