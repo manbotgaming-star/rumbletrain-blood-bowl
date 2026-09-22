@@ -1123,7 +1123,9 @@ function showCoachAdvancementSelection(
 
             renderCoachAdvancementImprovements(
               improvementArea,
-              category
+              category,
+              player,
+              option
             );
 
           }
@@ -1186,14 +1188,15 @@ function showCoachAdvancementSelection(
   );
 }
 
-
 // =====================================================
 // RENDER LEGAL SKILLS / CHARACTERISTICS
 // =====================================================
 
 function renderCoachAdvancementImprovements(
   container,
-  category
+  category,
+  player,
+  option
 ) {
 
   container.innerHTML = '';
@@ -1291,7 +1294,17 @@ function renderCoachAdvancementImprovements(
             'selected'
           );
 
-      });
+
+          renderCoachAdvancementConfirmation(
+            container,
+            player,
+            option,
+            category,
+            improvement
+          );
+
+        }
+      );
 
 
       grid.appendChild(
@@ -1304,6 +1317,122 @@ function renderCoachAdvancementImprovements(
 
   container.appendChild(
     grid
+  );
+}
+
+// =====================================================
+// ADVANCEMENT FINAL CONFIRMATION PREVIEW
+// =====================================================
+
+function renderCoachAdvancementConfirmation(
+  container,
+  player,
+  option,
+  category,
+  improvement
+) {
+
+  const existing =
+    container.querySelector(
+      '.coach-advancement-confirmation'
+    );
+
+
+  if (existing) {
+    existing.remove();
+  }
+
+
+  const remainingSpp =
+    Number(player.availableSpp) -
+    Number(option.cost);
+
+
+  const confirmation =
+    document.createElement(
+      'div'
+    );
+
+
+  confirmation.className =
+    'coach-advancement-confirmation';
+
+
+  confirmation.innerHTML = `
+    <div class="coach-advancement-confirmation-title">
+      Advancement Ready
+    </div>
+
+    <div class="coach-advancement-confirmation-grid">
+
+      <div>
+        <span>Player</span>
+
+        <strong>
+          #${escapePortalHtml(player.number)}
+          ${escapePortalHtml(player.playerName)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Advancement</span>
+
+        <strong>
+          ${escapePortalHtml(option.type)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Category</span>
+
+        <strong>
+          ${escapePortalHtml(category.category)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Improvement</span>
+
+        <strong>
+          ${escapePortalHtml(improvement)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cost</span>
+
+        <strong>
+          ${escapePortalHtml(option.cost)} SPP
+        </strong>
+      </div>
+
+      <div>
+        <span>SPP Remaining</span>
+
+        <strong>
+          ${escapePortalHtml(remainingSpp)}
+        </strong>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="coach-advancement-confirm-button"
+      disabled
+    >
+      Confirm Advancement
+    </button>
+
+    <div class="coach-advancement-confirmation-note">
+      Confirmation is disabled while we complete
+      server-side validation. Nothing will be submitted yet.
+    </div>
+  `;
+
+
+  container.appendChild(
+    confirmation
   );
 }
 
