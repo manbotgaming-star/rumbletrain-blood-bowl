@@ -708,25 +708,40 @@ function renderCoachAdvancements(players) {
 
           const item =
             document.createElement(
-              'div'
+              'button'
             );
-
-
+          
+          
+          item.type = 'button';
+          
           item.className =
             'coach-advancement-option';
-
-
+          
+          
           item.innerHTML = `
             <span>
               ${escapePortalHtml(option.type)}
             </span>
-
+          
             <strong>
               ${escapePortalHtml(option.cost)} SPP
             </strong>
           `;
-
-
+          
+          
+          item.addEventListener(
+            'click',
+            function() {
+          
+              showCoachAdvancementSelection(
+                card,
+                player,
+                option
+              );
+            }
+          );
+          
+          
           options.appendChild(
             item
           );
@@ -753,6 +768,135 @@ function renderCoachAdvancements(players) {
       );
 
     }
+  );
+}
+
+// =====================================================
+// ADVANCEMENT SELECTION PREVIEW
+// =====================================================
+
+function showCoachAdvancementSelection(
+  card,
+  player,
+  option
+) {
+
+  // Remove an existing selector from this card
+  const existing =
+    card.querySelector(
+      '.coach-advancement-selection'
+    );
+
+
+  if (existing) {
+    existing.remove();
+  }
+
+
+  // Clear selected state from the option buttons
+  card
+    .querySelectorAll(
+      '.coach-advancement-option'
+    )
+    .forEach(
+      function(button) {
+
+        button.classList.remove(
+          'selected'
+        );
+      }
+    );
+
+
+  // Highlight the clicked option
+  const buttons =
+    card.querySelectorAll(
+      '.coach-advancement-option'
+    );
+
+
+  buttons.forEach(
+    function(button) {
+
+      const label =
+        button
+          .querySelector('span');
+
+
+      if (
+        label &&
+        label.textContent.trim() ===
+        String(option.type).trim()
+      ) {
+
+        button.classList.add(
+          'selected'
+        );
+      }
+    }
+  );
+
+
+  const selection =
+    document.createElement(
+      'div'
+    );
+
+
+  selection.className =
+    'coach-advancement-selection';
+
+
+  selection.innerHTML = `
+    <div class="coach-advancement-selection-title">
+      Advancement Selection
+    </div>
+
+    <div class="coach-advancement-selection-grid">
+
+      <div>
+        <span>Player</span>
+        <strong>
+          #${escapePortalHtml(player.number)}
+          ${escapePortalHtml(player.playerName)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Type</span>
+        <strong>
+          ${escapePortalHtml(option.type)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cost</span>
+        <strong>
+          ${escapePortalHtml(option.cost)} SPP
+        </strong>
+      </div>
+
+      <div>
+        <span>SPP After</span>
+        <strong>
+          ${escapePortalHtml(
+            Number(player.availableSpp) -
+            Number(option.cost)
+          )}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="coach-advancement-selection-note">
+      Selection preview only. Nothing has been submitted
+      to the league yet.
+    </div>
+  `;
+
+
+  card.appendChild(
+    selection
   );
 }
 
