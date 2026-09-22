@@ -901,6 +901,127 @@ strong {
   color: var(--accent);
 }
 
+.coach-advancement-option {
+  width: 100%;
+
+  font-family: inherit;
+
+  color: var(--ink-dark);
+
+  cursor: pointer;
+}
+
+.coach-advancement-option:hover {
+  border-color: var(--accent);
+
+  background: #fff7f7;
+}
+
+.coach-advancement-option.selected {
+  border-color: var(--accent);
+
+  background: #fbeaea;
+
+  box-shadow:
+    inset 4px 0 0
+    var(--accent);
+}
+
+
+/* ============================================================
+   ADVANCEMENT SELECTION
+   ============================================================ */
+
+.coach-advancement-selection {
+  grid-column: 1 / -1;
+
+  margin-top: 4px;
+
+  padding: 14px;
+
+  background: #eef3f5;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 7px;
+}
+
+.coach-advancement-selection-title {
+  margin-bottom: 10px;
+
+  color: var(--ink-dark);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+.coach-advancement-selection-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(120px, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.coach-advancement-selection-grid > div {
+  padding: 8px 10px;
+
+  background: #fff;
+
+  border:
+    1px solid #d8e0e3;
+
+  border-radius: 5px;
+}
+
+.coach-advancement-selection-grid span {
+  display: block;
+
+  color: var(--ink-muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.coach-advancement-selection-grid strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--ink-dark);
+}
+
+.coach-advancement-selection-note {
+  margin-top: 10px;
+
+  color: var(--ink-muted);
+
+  font-size: 12px;
+  font-style: italic;
+}
+
+
+@media (max-width: 720px) {
+
+  .coach-advancement-selection-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        1fr
+      );
+  }
+}
 
 /* ============================================================
    TABLET
