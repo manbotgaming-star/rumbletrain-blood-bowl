@@ -1,0 +1,132 @@
+/* =====================================================
+   RUMBLE TRAIN - COACH PORTAL
+   ===================================================== */
+
+:root {
+  --rt-dark: #103f50;
+  --rt-border: #7f9ca8;
+  --rt-bg: #edf1f3;
+  --rt-card: #ffffff;
+  --rt-text: #123f50;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--rt-bg);
+  color: var(--rt-text);
+  font-family: Arial, sans-serif;
+}
+
+.portal-shell {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.portal-card {
+  background: var(--rt-card);
+  border: 1px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+
+.portal-title {
+  margin: 0 0 6px;
+  font-size: 32px;
+  letter-spacing: 1px;
+  color: var(--rt-dark);
+}
+
+.portal-subtitle {
+  margin-bottom: 28px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.login-box {
+  max-width: 420px;
+  margin: 50px auto;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
+
+.access-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 17px;
+  border: 1px solid var(--rt-border);
+  border-radius: 5px;
+}
+
+.portal-button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--rt-dark);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.portal-button:hover {
+  opacity: .9;
+}
+
+.portal-message {
+  min-height: 24px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.portal-error {
+  color: #a00000;
+}
+
+.hidden {
+  display: none;
+}
+
+.team-header {
+  border-bottom: 2px solid var(--rt-dark);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.team-name {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.coach-name {
+  margin-top: 4px;
+}
+
+.game-card {
+  border: 1px solid var(--rt-border);
+  border-radius: 6px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.game-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.game-status {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
