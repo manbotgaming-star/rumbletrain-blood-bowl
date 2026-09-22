@@ -387,6 +387,14 @@ function renderCoachPortal(data) {
       ? data.players
       : [];
 
+  const advancementPlayers =
+  data.advancements &&
+  Array.isArray(
+    data.advancements.players
+  )
+    ? data.advancements.players
+    : [];
+  
   const games =
     Array.isArray(
       data.games
@@ -508,12 +516,245 @@ function renderCoachPortal(data) {
     coach
   );
 
+  renderCoachAdvancements(
+  advancementPlayers
+);
 
   renderCoachRoster(
     players
   );
 }
 
+// =====================================================
+// PLAYER ADVANCEMENTS
+// =====================================================
+
+function renderCoachAdvancements(players) {
+
+  const container =
+    document.getElementById(
+      'coach-advancements'
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  container.innerHTML = '';
+
+
+  // ---------------------------------------------------
+  // NO ELIGIBLE PLAYERS
+  // ---------------------------------------------------
+
+  if (!players.length) {
+
+    const empty =
+      document.createElement(
+        'div'
+      );
+
+
+    empty.className =
+      'coach-advancement-empty';
+
+
+    empty.innerHTML = `
+      <strong>No players can currently advance.</strong>
+
+      <span>
+        Players will appear here automatically when they
+        have enough available SPP to purchase their next
+        legal advancement.
+      </span>
+    `;
+
+
+    container.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+
+  // ---------------------------------------------------
+  // ELIGIBLE PLAYERS
+  // ---------------------------------------------------
+
+  players.forEach(
+    function(player) {
+
+      const card =
+        document.createElement(
+          'div'
+        );
+
+
+      card.className =
+        'coach-advancement-card';
+
+
+      const header =
+        document.createElement(
+          'div'
+        );
+
+
+      header.className =
+        'coach-advancement-player';
+
+
+      header.innerHTML = `
+        <div class="coach-advancement-number">
+          #${escapePortalHtml(player.number)}
+        </div>
+
+        <div>
+          <strong>
+            ${escapePortalHtml(player.playerName)}
+          </strong>
+
+          <span>
+            ${escapePortalHtml(player.position)}
+          </span>
+        </div>
+      `;
+
+
+      const stats =
+        document.createElement(
+          'div'
+        );
+
+
+      stats.className =
+        'coach-advancement-stats';
+
+
+      stats.innerHTML = `
+        <div>
+          <span>Available SPP</span>
+          <strong>
+            ${escapePortalHtml(player.availableSpp)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Career SPP</span>
+          <strong>
+            ${escapePortalHtml(player.careerSpp)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Next Advancement</span>
+          <strong>
+            #${escapePortalHtml(player.nextAdvancement)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Primary</span>
+          <strong>
+            ${escapePortalHtml(player.primary)}
+          </strong>
+        </div>
+
+        <div>
+          <span>Secondary</span>
+          <strong>
+            ${escapePortalHtml(player.secondary)}
+          </strong>
+        </div>
+      `;
+
+
+      const options =
+        document.createElement(
+          'div'
+        );
+
+
+      options.className =
+        'coach-advancement-options';
+
+
+      const title =
+        document.createElement(
+          'div'
+        );
+
+
+      title.className =
+        'coach-advancement-options-title';
+
+
+      title.textContent =
+        'Affordable Options';
+
+
+      options.appendChild(
+        title
+      );
+
+
+      (
+        player.options || []
+      ).forEach(
+        function(option) {
+
+          const item =
+            document.createElement(
+              'div'
+            );
+
+
+          item.className =
+            'coach-advancement-option';
+
+
+          item.innerHTML = `
+            <span>
+              ${escapePortalHtml(option.type)}
+            </span>
+
+            <strong>
+              ${escapePortalHtml(option.cost)} SPP
+            </strong>
+          `;
+
+
+          options.appendChild(
+            item
+          );
+
+        }
+      );
+
+
+      card.appendChild(
+        header
+      );
+
+      card.appendChild(
+        stats
+      );
+
+      card.appendChild(
+        options
+      );
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+}
 
 // =====================================================
 // FIXTURES
