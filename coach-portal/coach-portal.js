@@ -781,7 +781,6 @@ function showCoachAdvancementSelection(
   option
 ) {
 
-  // Remove an existing selector from this card
   const existing =
     card.querySelector(
       '.coach-advancement-selection'
@@ -793,7 +792,7 @@ function showCoachAdvancementSelection(
   }
 
 
-  // Clear selected state from the option buttons
+  // Clear previous selected option
   card
     .querySelectorAll(
       '.coach-advancement-option'
@@ -808,33 +807,32 @@ function showCoachAdvancementSelection(
     );
 
 
-  // Highlight the clicked option
-  const buttons =
-    card.querySelectorAll(
+  // Highlight current advancement type
+  card
+    .querySelectorAll(
       '.coach-advancement-option'
-    );
+    )
+    .forEach(
+      function(button) {
+
+        const label =
+          button.querySelector(
+            'span'
+          );
 
 
-  buttons.forEach(
-    function(button) {
+        if (
+          label &&
+          label.textContent.trim() ===
+            String(option.type).trim()
+        ) {
 
-      const label =
-        button
-          .querySelector('span');
-
-
-      if (
-        label &&
-        label.textContent.trim() ===
-        String(option.type).trim()
-      ) {
-
-        button.classList.add(
-          'selected'
-        );
+          button.classList.add(
+            'selected'
+          );
+        }
       }
-    }
-  );
+    );
 
 
   const selection =
@@ -887,16 +885,425 @@ function showCoachAdvancementSelection(
       </div>
 
     </div>
-
-    <div class="coach-advancement-selection-note">
-      Selection preview only. Nothing has been submitted
-      to the league yet.
-    </div>
   `;
+
+
+  // ===================================================
+  // LEGAL CHOICES
+  // ===================================================
+
+  const choices =
+    option &&
+    option.choices &&
+    Array.isArray(
+      option.choices.categories
+    )
+      ? option.choices.categories
+      : [];
+
+
+  const choiceArea =
+    document.createElement(
+      'div'
+    );
+
+
+  choiceArea.className =
+    'coach-advancement-choice-area';
+
+
+  // ---------------------------------------------------
+  // NO CHOICE DATA
+  // ---------------------------------------------------
+
+  if (!choices.length) {
+
+    choiceArea.innerHTML = `
+      <div class="coach-advancement-selection-note">
+        No legal advancement choices were returned.
+      </div>
+    `;
+
+  }
+
+  // ---------------------------------------------------
+  // RANDOM PRIMARY
+  // ---------------------------------------------------
+
+  else if (
+    option.type ===
+    'Random Primary'
+  ) {
+
+    const heading =
+      document.createElement(
+        'div'
+      );
+
+
+    heading.className =
+      'coach-advancement-choice-title';
+
+
+    heading.textContent =
+      'Eligible Random Skill Pool';
+
+
+    choiceArea.appendChild(
+      heading
+    );
+
+
+    choices.forEach(
+      function(category) {
+
+        const group =
+          document.createElement(
+            'div'
+          );
+
+
+        group.className =
+          'coach-random-skill-pool';
+
+
+        const skills =
+          Array.isArray(
+            category.improvements
+          )
+            ? category.improvements
+            : [];
+
+
+        group.innerHTML = `
+          <strong>
+            ${escapePortalHtml(category.category)}
+          </strong>
+
+          <span>
+            ${skills
+              .map(
+                function(skill) {
+                  return escapePortalHtml(skill);
+                }
+              )
+              .join(', ')}
+          </span>
+        `;
+
+
+        choiceArea.appendChild(
+          group
+        );
+
+      }
+    );
+
+
+    const note =
+      document.createElement(
+        'div'
+      );
+
+
+    note.className =
+      'coach-advancement-selection-note';
+
+
+    note.textContent =
+      'The random skill will be generated when the final advancement submission workflow is added.';
+
+
+    choiceArea.appendChild(
+      note
+    );
+
+  }
+
+  // ---------------------------------------------------
+  // CHOOSE / CHARACTERISTIC
+  // ---------------------------------------------------
+
+  else {
+
+    const heading =
+      document.createElement(
+        'div'
+      );
+
+
+    heading.className =
+      'coach-advancement-choice-title';
+
+
+    heading.textContent =
+      option.type === 'Characteristic'
+        ? 'Choose Characteristic'
+        : 'Choose Skill Category';
+
+
+    choiceArea.appendChild(
+      heading
+    );
+
+
+    const categoryButtons =
+      document.createElement(
+        'div'
+      );
+
+
+    categoryButtons.className =
+      'coach-advancement-category-buttons';
+
+
+    const improvementArea =
+      document.createElement(
+        'div'
+      );
+
+
+    improvementArea.className =
+      'coach-advancement-improvements';
+
+
+    choiceArea.appendChild(
+      categoryButtons
+    );
+
+
+    choiceArea.appendChild(
+      improvementArea
+    );
+
+
+    choices.forEach(
+      function(category) {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.type =
+          'button';
+
+
+        button.className =
+          'coach-advancement-category';
+
+
+        button.textContent =
+          category.category;
+
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            categoryButtons
+              .querySelectorAll(
+                '.coach-advancement-category'
+              )
+              .forEach(
+                function(other) {
+
+                  other.classList.remove(
+                    'selected'
+                  );
+                }
+              );
+
+
+            button.classList.add(
+              'selected'
+            );
+
+
+            renderCoachAdvancementImprovements(
+              improvementArea,
+              category
+            );
+
+          }
+        );
+
+
+        categoryButtons.appendChild(
+          button
+        );
+
+      }
+    );
+
+
+    // Automatically open if there is only one category
+    if (
+      choices.length === 1
+    ) {
+
+      const firstButton =
+        categoryButtons.querySelector(
+          '.coach-advancement-category'
+        );
+
+
+      if (firstButton) {
+        firstButton.click();
+      }
+    }
+
+  }
+
+
+  selection.appendChild(
+    choiceArea
+  );
+
+
+  const note =
+    document.createElement(
+      'div'
+    );
+
+
+  note.className =
+    'coach-advancement-selection-note';
+
+
+  note.textContent =
+    'Selection preview only. Nothing has been submitted to the league yet.';
+
+
+  selection.appendChild(
+    note
+  );
 
 
   card.appendChild(
     selection
+  );
+}
+
+
+// =====================================================
+// RENDER LEGAL SKILLS / CHARACTERISTICS
+// =====================================================
+
+function renderCoachAdvancementImprovements(
+  container,
+  category
+) {
+
+  container.innerHTML = '';
+
+
+  const improvements =
+    Array.isArray(
+      category.improvements
+    )
+      ? category.improvements
+      : [];
+
+
+  if (!improvements.length) {
+
+    container.innerHTML = `
+      <div class="coach-advancement-selection-note">
+        No legal improvements are available in this category.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const title =
+    document.createElement(
+      'div'
+    );
+
+
+  title.className =
+    'coach-advancement-choice-title';
+
+
+  title.textContent =
+    'Choose Improvement';
+
+
+  container.appendChild(
+    title
+  );
+
+
+  const grid =
+    document.createElement(
+      'div'
+    );
+
+
+  grid.className =
+    'coach-advancement-skill-grid';
+
+
+  improvements.forEach(
+    function(improvement) {
+
+      const button =
+        document.createElement(
+          'button'
+        );
+
+
+      button.type =
+        'button';
+
+
+      button.className =
+        'coach-advancement-skill';
+
+
+      button.textContent =
+        improvement;
+
+
+      button.addEventListener(
+        'click',
+        function() {
+
+          grid
+            .querySelectorAll(
+              '.coach-advancement-skill'
+            )
+            .forEach(
+              function(other) {
+
+                other.classList.remove(
+                  'selected'
+                );
+              }
+            );
+
+
+          button.classList.add(
+            'selected'
+          );
+
+      });
+
+
+      grid.appendChild(
+        button
+      );
+
+    }
+  );
+
+
+  container.appendChild(
+    grid
   );
 }
 
