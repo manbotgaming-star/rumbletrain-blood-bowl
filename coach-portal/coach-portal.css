@@ -710,6 +710,199 @@ strong {
 
 
 /* ============================================================
+   PLAYER ADVANCEMENTS
+   ============================================================ */
+
+#coach-advancements {
+  padding: 18px;
+
+  display: grid;
+  gap: 16px;
+}
+
+.coach-advancement-empty {
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  background: #f5f7f8;
+
+  border:
+    1px solid var(--line);
+
+  border-left:
+    5px solid var(--ink);
+
+  border-radius: 8px;
+}
+
+.coach-advancement-empty strong {
+  color: var(--ink-dark);
+
+  font-size: 17px;
+}
+
+.coach-advancement-empty span {
+  color: var(--ink-muted);
+}
+
+.coach-advancement-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(240px, 1.2fr)
+    minmax(400px, 2fr)
+    minmax(220px, 1fr);
+
+  gap: 18px;
+
+  align-items: center;
+
+  padding: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff,
+      #f5f7f8
+    );
+
+  border:
+    1px solid var(--line);
+
+  border-left:
+    5px solid var(--accent);
+
+  border-radius: 8px;
+}
+
+.coach-advancement-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coach-advancement-number {
+  min-width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--ink);
+
+  color: #fff;
+
+  border-radius: 6px;
+
+  font-weight: 800;
+}
+
+.coach-advancement-player strong {
+  display: block;
+
+  color: var(--ink-dark);
+
+  font-size: 17px;
+}
+
+.coach-advancement-player span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: var(--ink-muted);
+
+  font-size: 13px;
+}
+
+.coach-advancement-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      5,
+      minmax(70px, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.coach-advancement-stats > div {
+  padding: 8px;
+
+  background: #fff;
+
+  border:
+    1px solid #d8e0e3;
+
+  border-radius: 5px;
+
+  text-align: center;
+}
+
+.coach-advancement-stats span {
+  display: block;
+
+  color: var(--ink-muted);
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+}
+
+.coach-advancement-stats strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--ink-dark);
+}
+
+.coach-advancement-options {
+  display: grid;
+  gap: 5px;
+}
+
+.coach-advancement-options-title {
+  margin-bottom: 3px;
+
+  color: var(--ink-muted);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.coach-advancement-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 6px 8px;
+
+  background: #fff;
+
+  border:
+    1px solid #d8e0e3;
+
+  border-radius: 5px;
+
+  font-size: 13px;
+}
+
+.coach-advancement-option strong {
+  white-space: nowrap;
+
+  color: var(--accent);
+}
+
+
+/* ============================================================
    TABLET
    ============================================================ */
 
@@ -734,6 +927,19 @@ strong {
         1fr
       );
   }
+   
+   .coach-advancement-card {
+     grid-template-columns: 1fr;
+   }
+   
+   .coach-advancement-stats {
+     grid-template-columns:
+       repeat(
+         auto-fit,
+         minmax(100px, 1fr)
+       );
+   }
+
 }
 
 
@@ -807,6 +1013,7 @@ strong {
 
     padding: 12px;
   }
+   
 }
 
 
