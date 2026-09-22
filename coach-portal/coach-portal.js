@@ -584,14 +584,16 @@ function renderCoachGames(
 
 
       const home =
+        game.homeTeamName ||
         displayTeamForGame(
           game.homeTeamId,
           team,
           coach
         );
-
-
+      
+      
       const away =
+        game.awayTeamName ||
         displayTeamForGame(
           game.awayTeamId,
           team,
