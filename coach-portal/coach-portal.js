@@ -817,6 +817,51 @@ function renderCoachPortal(data) {
 
   setText('coach-apothecary',displayValue(team.apothecary));
 
+  // ---------------------------------------------------
+  // TEAM MANAGEMENT
+  // ---------------------------------------------------
+  
+  const currentPlayers =
+    players.filter(function(player) {
+      return String(player.status || '')
+        .trim()
+        .toLowerCase() !== 'dead';
+    }).length;
+  
+  setText(
+    'coach-management-treasury',
+    formatGold(team.treasury)
+  );
+  
+  setText(
+    'coach-management-players',
+    currentPlayers
+  );
+  
+  setText(
+    'coach-management-rerolls',
+    displayValue(team.rerolls)
+  );
+  
+  setText(
+    'coach-management-apothecary',
+    displayValue(team.apothecary)
+  );
+  
+  setText(
+    'coach-management-assistant-coaches',
+    displayValue(team.assistantCoaches)
+  );
+  
+  setText(
+    'coach-management-cheerleaders',
+    displayValue(team.cheerleaders)
+  );
+  
+  setText(
+    'coach-management-dedicated-fans',
+    displayValue(team.dedicatedFans)
+  );
 
   // ---------------------------------------------------
   // TEAM LOGO
