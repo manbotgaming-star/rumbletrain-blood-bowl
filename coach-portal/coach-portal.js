@@ -367,6 +367,199 @@ function coachApiRequest(accessCode) {
   );
 }
 
+// =====================================================
+// COACH ADVANCEMENT VALIDATION REQUEST
+//
+// READ ONLY.
+// Uses JSONP because GitHub and Apps Script are
+// on different domains.
+// =====================================================
+
+function coachApiValidateAdvancementRequest(
+  accessCode,
+  playerId,
+  type,
+  category,
+  improvement
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const callbackName =
+        'rumbleCoachValidateCallback_' +
+        Date.now() +
+        '_' +
+        Math.floor(
+          Math.random() * 100000
+        );
+
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+
+      let finished = false;
+
+
+      const cleanup =
+        function() {
+
+          if (script.parentNode) {
+
+            script.parentNode.removeChild(
+              script
+            );
+          }
+
+
+          try {
+
+            delete window[
+              callbackName
+            ];
+
+          }
+          catch (error) {
+
+            window[
+              callbackName
+            ] = undefined;
+          }
+        };
+
+
+      const timeout =
+        setTimeout(
+          function() {
+
+            if (finished) {
+              return;
+            }
+
+
+            finished = true;
+
+            cleanup();
+
+
+            reject(
+              new Error(
+                'Advancement validation timed out.'
+              )
+            );
+
+          },
+          15000
+        );
+
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          if (finished) {
+            return;
+          }
+
+
+          finished = true;
+
+
+          clearTimeout(
+            timeout
+          );
+
+
+          cleanup();
+
+
+          resolve(
+            data
+          );
+        };
+
+
+      script.onerror =
+        function() {
+
+          if (finished) {
+            return;
+          }
+
+
+          finished = true;
+
+
+          clearTimeout(
+            timeout
+          );
+
+
+          cleanup();
+
+
+          reject(
+            new Error(
+              'Unable to validate the advancement.'
+            )
+          );
+        };
+
+
+      const separator =
+        COACH_API_URL.includes('?')
+          ? '&'
+          : '?';
+
+
+      script.src =
+        COACH_API_URL +
+        separator +
+
+        'view=coachvalidate' +
+
+        '&code=' +
+        encodeURIComponent(
+          accessCode
+        ) +
+
+        '&playerId=' +
+        encodeURIComponent(
+          playerId
+        ) +
+
+        '&type=' +
+        encodeURIComponent(
+          type
+        ) +
+
+        '&category=' +
+        encodeURIComponent(
+          category
+        ) +
+
+        '&improvement=' +
+        encodeURIComponent(
+          improvement
+        ) +
+
+        '&callback=' +
+        encodeURIComponent(
+          callbackName
+        );
+
+
+      document.head.appendChild(
+        script
+      );
+
+    }
+  );
+}
 
 // =====================================================
 // RENDER PORTAL
@@ -1419,14 +1612,12 @@ function renderCoachAdvancementConfirmation(
     <button
       type="button"
       class="coach-advancement-confirm-button"
-      disabled
     >
-      Confirm Advancement
+      Validate Advancement
     </button>
 
     <div class="coach-advancement-confirmation-note">
-      Confirmation is disabled while we complete
-      server-side validation. Nothing will be submitted yet.
+      Validation only. Nothing will be submitted to the league.
     </div>
   `;
 
@@ -1434,7 +1625,114 @@ function renderCoachAdvancementConfirmation(
   container.appendChild(
     confirmation
   );
+
+
+  const button =
+    confirmation.querySelector(
+      '.coach-advancement-confirm-button'
+    );
+
+
+  const note =
+    confirmation.querySelector(
+      '.coach-advancement-confirmation-note'
+    );
+
+
+  if (!button || !note) {
+    return;
+  }
+
+
+  button.addEventListener(
+    'click',
+    function() {
+
+      const accessCode =
+        sessionStorage.getItem(
+          SESSION_KEY
+        ) || '';
+
+
+      if (!accessCode) {
+
+        note.textContent =
+          'Your Coach Portal session has expired. Please log in again.';
+
+        return;
+      }
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        'Validating...';
+
+
+      note.textContent =
+        'Checking the current league data...';
+
+
+      coachApiValidateAdvancementRequest(
+        accessCode,
+        player.playerId,
+        option.type,
+        category.category,
+        improvement
+      )
+
+        .then(
+          function(result) {
+
+            if (
+              !result ||
+              result.ok !== true ||
+              result.validated !== true
+            ) {
+
+              throw new Error(
+                result && result.error
+                  ? result.error
+                  : 'The advancement could not be validated.'
+              );
+            }
+
+
+            button.textContent =
+              'Server Validated';
+
+
+            note.textContent =
+              'Validation passed. Nothing has been submitted to the league yet.';
+
+          }
+        )
+
+        .catch(
+          function(error) {
+
+            button.disabled =
+              false;
+
+
+            button.textContent =
+              'Validate Advancement';
+
+
+            note.textContent =
+              error && error.message
+                ? error.message
+                : 'Advancement validation failed.';
+
+          }
+        );
+
+    }
+  );
 }
+
 
 // =====================================================
 // FIXTURES
