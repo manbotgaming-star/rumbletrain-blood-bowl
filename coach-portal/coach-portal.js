@@ -562,6 +562,91 @@ function coachApiValidateAdvancementRequest(
 }
 
 // =====================================================
+// COACH ADVANCEMENT SUBMISSION REQUEST
+//
+// WRITES to PlayerAdvancements after server validation.
+// Uses JSONP because GitHub and Apps Script are
+// on different domains.
+// =====================================================
+
+function coachApiSubmitAdvancementRequest(
+  accessCode,
+  playerId,
+  type,
+  category,
+  improvement,
+  expectedAdvancement
+) {
+
+  return new Promise(function(resolve, reject) {
+
+    const callbackName =
+      'rumbleCoachSubmitCallback_' +
+      Date.now() +
+      '_' +
+      Math.floor(Math.random() * 100000);
+
+    const script = document.createElement('script');
+    let finished = false;
+
+    const cleanup = function() {
+      if (script.parentNode) script.parentNode.removeChild(script);
+
+      try {
+        delete window[callbackName];
+      }
+      catch (error) {
+        window[callbackName] = undefined;
+      }
+    };
+
+    const timeout = setTimeout(function() {
+      if (finished) return;
+
+      finished = true;
+      cleanup();
+
+      reject(new Error('Advancement submission timed out.'));
+    }, 15000);
+
+    window[callbackName] = function(data) {
+      if (finished) return;
+
+      finished = true;
+      clearTimeout(timeout);
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = function() {
+      if (finished) return;
+
+      finished = true;
+      clearTimeout(timeout);
+      cleanup();
+
+      reject(new Error('Unable to submit the advancement.'));
+    };
+
+    const separator = COACH_API_URL.includes('?') ? '&' : '?';
+
+    script.src =
+      COACH_API_URL +
+      separator +
+      'view=coachsubmit' +
+      '&code=' + encodeURIComponent(accessCode) +
+      '&playerId=' + encodeURIComponent(playerId) +
+      '&type=' + encodeURIComponent(type) +
+      '&category=' + encodeURIComponent(category) +
+      '&improvement=' + encodeURIComponent(improvement) +
+      '&expectedAdvancement=' + encodeURIComponent(expectedAdvancement) +
+      '&callback=' + encodeURIComponent(callbackName);
+
+    document.head.appendChild(script);
+  });
+}
+
+// =====================================================
 // RENDER PORTAL
 // =====================================================
 
