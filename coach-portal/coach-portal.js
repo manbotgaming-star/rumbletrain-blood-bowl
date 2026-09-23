@@ -368,6 +368,114 @@ function coachApiRequest(accessCode) {
 }
 
 // =====================================================
+// COACH ADVANCEMENT CHOICES REQUEST
+//
+// Loads legal choices only after the coach clicks an
+// advancement option.
+// =====================================================
+
+function coachApiAdvancementChoicesRequest(
+  accessCode,
+  playerId,
+  type
+) {
+
+  return new Promise(function(resolve, reject) {
+
+    const callbackName =
+      'rumbleCoachChoicesCallback_' +
+      Date.now() +
+      '_' +
+      Math.floor(Math.random() * 100000);
+
+    const script =
+      document.createElement('script');
+
+    let finished = false;
+
+    const cleanup = function() {
+
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+
+      try {
+        delete window[callbackName];
+      }
+      catch (error) {
+        window[callbackName] = undefined;
+      }
+    };
+
+    const timeout =
+      setTimeout(function() {
+
+        if (finished) return;
+
+        finished = true;
+        cleanup();
+
+        reject(
+          new Error(
+            'Advancement choices request timed out.'
+          )
+        );
+
+      }, 45000);
+
+    window[callbackName] =
+      function(data) {
+
+        if (finished) return;
+
+        finished = true;
+
+        clearTimeout(timeout);
+        cleanup();
+
+        resolve(data);
+      };
+
+    script.onerror =
+      function() {
+
+        if (finished) return;
+
+        finished = true;
+
+        clearTimeout(timeout);
+        cleanup();
+
+        reject(
+          new Error(
+            'Unable to load advancement choices.'
+          )
+        );
+      };
+
+    const separator =
+      COACH_API_URL.includes('?')
+        ? '&'
+        : '?';
+
+    script.src =
+      COACH_API_URL +
+      separator +
+      'view=coachchoices' +
+      '&code=' +
+      encodeURIComponent(accessCode) +
+      '&playerId=' +
+      encodeURIComponent(playerId) +
+      '&type=' +
+      encodeURIComponent(type) +
+      '&callback=' +
+      encodeURIComponent(callbackName);
+
+    document.head.appendChild(script);
+  });
+}
+
+// =====================================================
 // COACH ADVANCEMENT VALIDATION REQUEST
 //
 // READ ONLY.
