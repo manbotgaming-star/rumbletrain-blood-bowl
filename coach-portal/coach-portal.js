@@ -760,8 +760,14 @@ function coachApiSubmitAdvancementRequest(
 
 function renderCoachPortal(data) {
 
-  const coach =
-    data.coach || {};
+  const management =
+    data.management || {};
+  
+  const managementDetails =
+    management.details || management;
+  
+  const rerollPurchase =
+    management.rerollPurchase || {};
 
   const team =
     data.team || {};
@@ -852,10 +858,10 @@ function renderCoachPortal(data) {
     );
   
   const rerollCost =
-    Number(management.rerollCost) || 0;
-  
-  const treasury =
-    Number(team.treasury) || 0;
+    Number(
+      rerollPurchase.cost ||
+      managementDetails.rerollCost
+    ) || 0;
   
   
   if (rerollButton) {
@@ -866,8 +872,7 @@ function renderCoachPortal(data) {
     `;
   
     rerollButton.disabled =
-      !rerollCost ||
-      treasury < rerollCost;
+      rerollPurchase.allowed !== true;
   }
   
   setText(
