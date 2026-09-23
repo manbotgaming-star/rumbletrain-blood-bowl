@@ -1759,7 +1759,7 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
   
   });
 
-
+}
 
 // =====================================================
 // FIXTURES
