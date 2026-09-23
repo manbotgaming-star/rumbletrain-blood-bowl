@@ -2228,20 +2228,21 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
           
           note.textContent = 'Successfully submitted.';
 
-          coachApiRequest(accessCode)
-            .then(function(data) {
+          const refreshedPlayers =
+            Array.isArray(result.players)
+              ? result.players
+              : [];
           
-              if (!data || data.ok !== true) {
-                throw new Error('Unable to refresh the Coach Portal.');
-              }
+          const refreshedAdvancements =
+            result.advancements &&
+            Array.isArray(result.advancements.players)
+              ? result.advancements.players
+              : [];
           
-              renderCoachPortal(data);
-              showCoachAdvancementSuccess(successMessage);
+          renderCoachAdvancements(refreshedAdvancements);
+          renderCoachRoster(refreshedPlayers);
           
-            })
-            .catch(function(error) {
-              console.error('Coach Portal refresh failed:', error);
-            });
+          showCoachAdvancementSuccess(successMessage);
   
         })
   
