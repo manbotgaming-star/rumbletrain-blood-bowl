@@ -1448,30 +1448,7 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
   }
 
 
-  const remainingSpp =
-    Number(player.availableSpp) -
-    Number(option.cost);
-  
-  const completedGames = (Array.isArray(games) ? games : [])
-    .filter(function(game) {
-      return String(game.status || '').trim().toLowerCase() === 'completed';
-    })
-    .sort(function(a, b) {
-      return Number(b.round || 0) - Number(a.round || 0);
-    });
-
-  const gameOptionsHtml = completedGames.map(function(game) {
-    const gameId = String(game.gameId || '').trim();
-    const round = game.round ? 'Round ' + game.round + ' — ' : '';
-    const home = game.homeTeamName || game.homeTeamId || 'Home';
-    const away = game.awayTeamName || game.awayTeamId || 'Away';
-  
-    return `<option value="${escapePortalHtml(gameId)}">${escapePortalHtml(round + home + ' vs ' + away + ' [' + gameId + ']')}</option>`;
-  }).join('');
-  
-  const gameFieldHtml = completedGames.length
-    ? `<select class="coach-advancement-game-select">${gameOptionsHtml}</select>`
-    : '<strong>No completed game available</strong>';
+  const remainingSpp = Number(player.availableSpp) - Number(option.cost);
 
   const confirmation =
     document.createElement(
@@ -1497,11 +1474,6 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
           #${escapePortalHtml(player.number)}
           ${escapePortalHtml(player.playerName)}
         </strong>
-      </div>
-
-      <div>
-        <span>Completed Game</span>
-        ${gameFieldHtml}
       </div>
 
       <div>
@@ -1571,20 +1543,10 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
     confirmation.querySelector(
       '.coach-advancement-confirmation-note'
     );
-  
-  const gameSelect = confirmation.querySelector('.coach-advancement-game-select');
 
   if (!button || !note) {
     return;
   }
-
-  if (!completedGames.length || !gameSelect) {
-    button.disabled = true;
-    button.textContent = 'No Completed Game';
-    note.textContent = 'A completed game is required before this advancement can be validated.';
-    return;
-  }
-
 
   button.addEventListener(
     'click',
