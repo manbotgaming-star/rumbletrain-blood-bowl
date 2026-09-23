@@ -1069,19 +1069,12 @@ function renderCoachPortal(data) {
             data.ok !== true
           ) {
 
-            throw new Error(
-              'The purchase succeeded, but the Coach Portal could not refresh.'
-            );
+            throw new Error('The purchase succeeded, but the Coach Portal could not refresh.');
           }
 
+          renderCoachPortal(data);
 
-          renderCoachPortal(
-            data
-          );
-
-          alert(
-            'Team Re-roll purchased successfully.'
-          );
+          showCoachManagementSuccess('Team Re-roll purchased successfully.');
         })
 
         .catch(function(error) {
@@ -3097,6 +3090,88 @@ function showCoachAdvancementSuccess(message) {
 
   setTimeout(function() {
     if (success.parentNode) success.remove();
+  }, 5000);
+}
+
+// =====================================================
+// TEAM MANAGEMENT SUCCESS MESSAGE
+// =====================================================
+
+function showCoachManagementSuccess(message) {
+
+  const button =
+    document.getElementById(
+      'coach-management-buy-reroll'
+    );
+
+  if (!button) {
+    return;
+  }
+
+
+  const panel =
+    button.closest(
+      '.coach-panel'
+    );
+
+  if (!panel) {
+    return;
+  }
+
+
+  const existing =
+    panel.querySelector(
+      '.coach-management-success'
+    );
+
+  if (existing) {
+    existing.remove();
+  }
+
+
+  const success =
+    document.createElement(
+      'div'
+    );
+
+
+  success.className =
+    'coach-management-success';
+
+
+  success.innerHTML = `
+    <strong>Purchase completed</strong>
+    <span>${escapePortalHtml(message)}</span>
+  `;
+
+
+  const heading =
+    panel.querySelector(
+      'h2'
+    );
+
+
+  if (heading) {
+
+    heading.insertAdjacentElement(
+      'afterend',
+      success
+    );
+  }
+  else {
+
+    panel.prepend(
+      success
+    );
+  }
+
+
+  setTimeout(function() {
+
+    if (success.parentNode) {
+      success.remove();
+    }
+
   }, 5000);
 }
 
