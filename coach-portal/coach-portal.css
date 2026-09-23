@@ -623,6 +623,60 @@ button {
   font-size: 19px;
 }
 
+.coach-management-action {
+  width: 100%;
+
+  margin-top: 6px;
+  padding: 6px 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  background: #fff;
+
+  border:
+    1px solid #d8e0e3;
+
+  border-radius: 5px;
+
+  color: var(--ink-dark);
+
+  font-family: inherit;
+  font-size: 13px;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.coach-management-action span {
+  margin: 0;
+
+  color: var(--ink-dark);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.coach-management-action strong {
+  color: var(--accent);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.coach-management-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #fff7f7;
+}
+
+.coach-management-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ============================================================
    FIXTURES
    ============================================================ */
