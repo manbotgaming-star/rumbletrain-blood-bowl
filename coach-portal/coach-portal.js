@@ -289,7 +289,7 @@ function coachApiRequest(accessCode) {
             );
 
           },
-          15000
+          45000
         );
 
 
