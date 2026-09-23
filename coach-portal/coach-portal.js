@@ -3214,8 +3214,7 @@ function formatGold(value) {
   return number
     .toLocaleString(
       'en-GB'
-    ) +
-    ' gp';
+    );
 }
 
 // =====================================================
