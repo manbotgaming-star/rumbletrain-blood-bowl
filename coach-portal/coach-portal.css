@@ -1275,6 +1275,38 @@ strong {
   text-align: center;
 }
 
+.coach-advancement-success {
+  padding: 14px 18px;
+
+  background: #eef7f1;
+
+  border:
+    1px solid var(--success);
+
+  border-left:
+    5px solid var(--success);
+
+  border-radius: 7px;
+}
+
+.coach-advancement-success strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: var(--success);
+
+  font-size: 16px;
+}
+
+.coach-advancement-success span {
+  display: block;
+
+  color: var(--ink-dark);
+
+  font-size: 14px;
+}
+
 @media (max-width: 720px) {
 
   .coach-advancement-selection-grid {
