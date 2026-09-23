@@ -845,6 +845,30 @@ function renderCoachPortal(data) {
     'coach-management-rerolls',
     displayValue(team.rerolls)
   );
+
+  const rerollButton =
+    document.getElementById(
+      'coach-management-buy-reroll'
+    );
+  
+  const rerollCost =
+    Number(management.rerollCost) || 0;
+  
+  const treasury =
+    Number(team.treasury) || 0;
+  
+  
+  if (rerollButton) {
+  
+    rerollButton.innerHTML = `
+      <span>Buy Re-roll</span>
+      <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
+    `;
+  
+    rerollButton.disabled =
+      !rerollCost ||
+      treasury < rerollCost;
+  }
   
   setText(
     'coach-management-apothecary',
