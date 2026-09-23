@@ -868,11 +868,7 @@ function renderCoachAdvancements(players,games) {
             'click',
             function() {
           
-              showCoachAdvancementSelection(
-                card,
-                player,
-                option
-              );
+              showCoachAdvancementSelection(card, player, option, games);
             }
           );
           
@@ -910,11 +906,7 @@ function renderCoachAdvancements(players,games) {
 // ADVANCEMENT SELECTION PREVIEW
 // =====================================================
 
-function showCoachAdvancementSelection(
-  card,
-  player,
-  option
-) {
+function showCoachAdvancementSelection(card, player, option, games) {
 
   const existing =
     card.querySelector(
@@ -1256,12 +1248,7 @@ function showCoachAdvancementSelection(
             );
 
 
-            renderCoachAdvancementImprovements(
-              improvementArea,
-              category,
-              player,
-              option
-            );
+            renderCoachAdvancementImprovements(improvementArea, category, player, option, games);
 
           }
         );
@@ -1327,12 +1314,7 @@ function showCoachAdvancementSelection(
 // RENDER LEGAL SKILLS / CHARACTERISTICS
 // =====================================================
 
-function renderCoachAdvancementImprovements(
-  container,
-  category,
-  player,
-  option
-) {
+function renderCoachAdvancementImprovements(container, category, player, option, games) {
 
   container.innerHTML = '';
 
@@ -1430,13 +1412,7 @@ function renderCoachAdvancementImprovements(
           );
 
 
-          renderCoachAdvancementConfirmation(
-            container,
-            player,
-            option,
-            category,
-            improvement
-          );
+          renderCoachAdvancementConfirmation(container, player, option, category, improvement, games);
 
         }
       );
@@ -1459,13 +1435,7 @@ function renderCoachAdvancementImprovements(
 // ADVANCEMENT FINAL CONFIRMATION PREVIEW
 // =====================================================
 
-function renderCoachAdvancementConfirmation(
-  container,
-  player,
-  option,
-  category,
-  improvement
-) {
+function renderCoachAdvancementConfirmation(container, player, option, category, improvement, games) {
 
   const existing =
     container.querySelector(
