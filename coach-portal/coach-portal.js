@@ -1155,6 +1155,103 @@ function showCoachAdvancementSelection(card, player, option) {
     );
 
 
+  // ---------------------------------------------------
+  // LOAD CHOICES ON DEMAND
+  // ---------------------------------------------------
+
+  if (!option.choices) {
+
+    const loading =
+      document.createElement('div');
+
+    loading.className =
+      'coach-advancement-selection';
+
+    loading.innerHTML = `
+      <div class="coach-advancement-selection-title">
+        Advancement Selection
+      </div>
+
+      <div class="coach-advancement-selection-note">
+        Loading legal advancement choices...
+      </div>
+    `;
+
+    card.appendChild(loading);
+
+    const accessCode =
+      sessionStorage.getItem(SESSION_KEY) || '';
+
+    if (!accessCode) {
+
+      loading.innerHTML = `
+        <div class="coach-advancement-selection-note">
+          Your Coach Portal session has expired. Please log in again.
+        </div>
+      `;
+
+      return;
+    }
+
+    coachApiAdvancementChoicesRequest(
+      accessCode,
+      player.playerId,
+      option.type
+    )
+
+      .then(function(result) {
+
+        if (
+          !result ||
+          result.ok !== true
+        ) {
+          throw new Error(
+            result && result.error
+              ? result.error
+              : 'Unable to load advancement choices.'
+          );
+        }
+
+        option.choices =
+          result.choices || {
+            categories: []
+          };
+
+        if (result.cost !== undefined) {
+          option.cost = result.cost;
+        }
+
+        if (result.nextAdvancement) {
+          player.nextAdvancement =
+            result.nextAdvancement;
+        }
+
+        showCoachAdvancementSelection(
+          card,
+          player,
+          option
+        );
+
+      })
+
+      .catch(function(error) {
+
+        loading.innerHTML = `
+          <div class="coach-advancement-selection-note">
+            ${escapePortalHtml(
+              error && error.message
+                ? error.message
+                : 'Unable to load advancement choices.'
+            )}
+          </div>
+        `;
+
+      });
+
+    return;
+  }
+
+
   const selection =
     document.createElement(
       'div'
@@ -1246,79 +1343,134 @@ function showCoachAdvancementSelection(card, player, option) {
 
   }
 
- // ---------------------------------------------------
-// RANDOM PRIMARY
-// ---------------------------------------------------
+  // ---------------------------------------------------
+  // RANDOM PRIMARY
+  // ---------------------------------------------------
 
-else if (option.type === 'Random Primary') {
+  else if (option.type === 'Random Primary') {
 
-  const heading = document.createElement('div');
-  heading.className = 'coach-advancement-choice-title';
-  heading.textContent = 'Choose Random Primary Category';
+    const heading =
+      document.createElement('div');
 
-  choiceArea.appendChild(heading);
+    heading.className =
+      'coach-advancement-choice-title';
 
-  const categoryButtons = document.createElement('div');
-  categoryButtons.className = 'coach-advancement-category-buttons';
+    heading.textContent =
+      'Choose Random Primary Category';
 
-  const randomArea = document.createElement('div');
-  randomArea.className = 'coach-advancement-improvements';
+    choiceArea.appendChild(heading);
 
-  choiceArea.appendChild(categoryButtons);
-  choiceArea.appendChild(randomArea);
 
-  const randomCategories = choices.filter(function(category) {
-    return Array.isArray(category.improvements) && category.improvements.length > 0;
-  });
+    const categoryButtons =
+      document.createElement('div');
 
-  randomCategories.forEach(function(category) {
+    categoryButtons.className =
+      'coach-advancement-category-buttons';
 
-    const button = document.createElement('button');
 
-    button.type = 'button';
-    button.className = 'coach-advancement-category';
-    button.textContent = category.category;
+    const randomArea =
+      document.createElement('div');
 
-    button.addEventListener('click', function() {
+    randomArea.className =
+      'coach-advancement-improvements';
 
-      categoryButtons
-        .querySelectorAll('.coach-advancement-category')
-        .forEach(function(other) {
-          other.classList.remove('selected');
-        });
 
-      button.classList.add('selected');
+    choiceArea.appendChild(categoryButtons);
+    choiceArea.appendChild(randomArea);
 
-      renderCoachRandomPrimaryConfirmation(
-        randomArea,
-        player,
-        option,
-        category
-      );
 
-    });
+    const randomCategories =
+      choices.filter(function(category) {
 
-    categoryButtons.appendChild(button);
+        return (
+          Array.isArray(category.improvements) &&
+          category.improvements.length > 0
+        );
+      });
 
-  });
 
-  if (!randomCategories.length) {
+    randomCategories.forEach(
+      function(category) {
 
-    randomArea.innerHTML = `
-      <div class="coach-advancement-selection-note">
-        No legal Random Primary skills remain for this player.
-      </div>
-    `;
+        const button =
+          document.createElement('button');
 
+        button.type = 'button';
+
+        button.className =
+          'coach-advancement-category';
+
+        button.textContent =
+          category.category;
+
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            categoryButtons
+              .querySelectorAll(
+                '.coach-advancement-category'
+              )
+              .forEach(
+                function(other) {
+
+                  other.classList.remove(
+                    'selected'
+                  );
+                }
+              );
+
+
+            button.classList.add(
+              'selected'
+            );
+
+
+            renderCoachRandomPrimaryConfirmation(
+              randomArea,
+              player,
+              option,
+              category
+            );
+
+          }
+        );
+
+
+        categoryButtons.appendChild(
+          button
+        );
+
+      }
+    );
+
+
+    if (!randomCategories.length) {
+
+      randomArea.innerHTML = `
+        <div class="coach-advancement-selection-note">
+          No legal Random Primary skills remain for this player.
+        </div>
+      `;
+
+    }
+    else if (
+      randomCategories.length === 1
+    ) {
+
+      const firstButton =
+        categoryButtons.querySelector(
+          '.coach-advancement-category'
+        );
+
+      if (firstButton) {
+        firstButton.click();
+      }
+    }
   }
-  else if (randomCategories.length === 1) {
 
-    const firstButton =
-      categoryButtons.querySelector('.coach-advancement-category');
 
-    if (firstButton) firstButton.click();
-  }
-}
   // ---------------------------------------------------
   // CHOOSE / CHARACTERISTIC
   // ---------------------------------------------------
@@ -1420,7 +1572,12 @@ else if (option.type === 'Random Primary') {
             );
 
 
-            renderCoachAdvancementImprovements(improvementArea, category, player, option);
+            renderCoachAdvancementImprovements(
+              improvementArea,
+              category,
+              player,
+              option
+            );
 
           }
         );
