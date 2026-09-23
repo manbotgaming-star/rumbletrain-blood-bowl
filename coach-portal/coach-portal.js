@@ -755,21 +755,22 @@ function coachApiSubmitAdvancementRequest(
 }
 
 // =====================================================
-// COACH RE-ROLL PURCHASE REQUEST
+// COACH TEAM MANAGEMENT PURCHASE REQUEST
 //
 // WRITES to TeamTransactions after server validation.
 // Uses JSONP because GitHub and Apps Script are
 // on different domains.
 // =====================================================
 
-function coachApiSubmitRerollPurchaseRequest(
-  accessCode
+function coachApiSubmitTeamManagementPurchaseRequest(
+  accessCode,
+  purchaseKey
 ) {
 
   return new Promise(function(resolve, reject) {
 
     const callbackName =
-      'rumbleCoachRerollPurchaseCallback_' +
+      'rumbleCoachManagementPurchaseCallback_' +
       Date.now() +
       '_' +
       Math.floor(Math.random() * 100000);
@@ -778,7 +779,6 @@ function coachApiSubmitRerollPurchaseRequest(
       document.createElement('script');
 
     let finished = false;
-
 
     const cleanup = function() {
 
@@ -794,7 +794,6 @@ function coachApiSubmitRerollPurchaseRequest(
       }
     };
 
-
     const timeout =
       setTimeout(function() {
 
@@ -805,12 +804,11 @@ function coachApiSubmitRerollPurchaseRequest(
 
         reject(
           new Error(
-            'Re-roll purchase request timed out.'
+            'Team Management purchase request timed out.'
           )
         );
 
       }, 45000);
-
 
     window[callbackName] =
       function(data) {
@@ -820,12 +818,10 @@ function coachApiSubmitRerollPurchaseRequest(
         finished = true;
 
         clearTimeout(timeout);
-
         cleanup();
 
         resolve(data);
       };
-
 
     script.onerror =
       function() {
@@ -835,37 +831,45 @@ function coachApiSubmitRerollPurchaseRequest(
         finished = true;
 
         clearTimeout(timeout);
-
         cleanup();
 
         reject(
           new Error(
-            'Unable to submit the Re-roll purchase.'
+            'Unable to submit the Team Management purchase.'
           )
         );
       };
-
 
     const separator =
       COACH_API_URL.includes('?')
         ? '&'
         : '?';
 
-
     script.src =
       COACH_API_URL +
       separator +
-      'view=coachbuyreroll' +
+      'view=coachbuymanagement' +
       '&code=' +
       encodeURIComponent(accessCode) +
+      '&purchase=' +
+      encodeURIComponent(purchaseKey) +
       '&callback=' +
       encodeURIComponent(callbackName);
-
 
     document.head.appendChild(
       script
     );
   });
+}
+
+
+// Legacy wrapper retained for older code paths.
+function coachApiSubmitRerollPurchaseRequest(accessCode) {
+
+  return coachApiSubmitTeamManagementPurchaseRequest(
+    accessCode,
+    'reroll'
+  );
 }
 
 // =====================================================
@@ -882,12 +886,6 @@ function renderCoachPortal(data) {
 
   const management =
     data.management || {};
-
-  const managementDetails =
-    management.details || management;
-
-  const rerollPurchase =
-    management.rerollPurchase || {};
 
   const players =
     Array.isArray(
@@ -943,175 +941,22 @@ function renderCoachPortal(data) {
   // ---------------------------------------------------
   // TEAM MANAGEMENT
   // ---------------------------------------------------
-  
+
   const currentPlayers =
     players.filter(function(player) {
       return String(player.status || '')
         .trim()
         .toLowerCase() !== 'dead';
     }).length;
-  
-  setText(
-    'coach-management-treasury',
-    formatGold(team.treasury)
-  );
-  
+
   setText(
     'coach-management-players',
     currentPlayers
   );
-  
-  setText(
-    'coach-management-rerolls',
-    displayValue(team.rerolls)
-  );
 
-  const rerollButton =
-    document.getElementById(
-      'coach-management-buy-reroll'
-    );
-  
-  const rerollCost =
-    Number(
-      rerollPurchase.cost ||
-      managementDetails.rerollCost
-    ) || 0;
-
-  const rerollCostDisplay =
-  rerollCost.toLocaleString('en-GB');
-  
-  if (rerollButton) {
-
-  rerollButton.innerHTML = `
-    <span>Buy Re-roll</span>
-    <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
-  `;
-
-  rerollButton.disabled =
-    rerollPurchase.allowed !== true;
-
-
-  // ===================================================
-  // BUY RE-ROLL
-  // ===================================================
-
-  rerollButton.onclick = async function() {
-
-      const accessCode =
-        sessionStorage.getItem(
-          SESSION_KEY
-        ) || '';
-
-
-      if (!accessCode) {
-
-        alert(
-          'Your Coach Portal session has expired. Please log in again.'
-        );
-
-        return;
-      }
-
-      const confirmed = await showCoachPurchaseConfirmation(rerollCost);
-      
-      if (!confirmed) return;
-
-
-      rerollButton.disabled = true;
-
-      rerollButton.innerHTML = `
-        <span>Purchasing...</span>
-        <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
-      `;
-
-
-      coachApiSubmitRerollPurchaseRequest(
-        accessCode
-      )
-
-      .then(function(result) {
-      
-        if (!result || result.ok !== true || result.submitted !== true) {
-          throw new Error(
-            result && result.reason
-              ? result.reason
-              : result && result.error
-                ? result.error
-                : 'The Re-roll purchase could not be completed.'
-          );
-        }
-      
-        setText('coach-management-treasury', formatGold(result.treasuryAfter));
-        setText('coach-management-rerolls', displayValue(result.rerollsAfter));
-      
-        rerollButton.innerHTML = `
-          <span>Buy Re-roll</span>
-          <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
-        `;
-      
-        rerollButton.disabled = result.allowedAfter !== true;
-      
-        showCoachManagementSuccess('Team Re-roll purchased successfully.');
-      })
-
-        .catch(function(error) {
-
-          alert(
-            error && error.message
-              ? error.message
-              : 'The Re-roll purchase failed.'
-          );
-
-
-          // Refresh current portal data so the button returns
-          // to the correct server-controlled state.
-          coachApiRequest(
-            accessCode
-          )
-
-            .then(function(data) {
-
-              if (
-                data &&
-                data.ok === true
-              ) {
-
-                renderCoachPortal(
-                  data
-                );
-              }
-            })
-
-            .catch(function(refreshError) {
-
-              console.error(
-                'Coach Portal refresh failed:',
-                refreshError
-              );
-            });
-        });
-    };
-}
-
-  
-  setText(
-    'coach-management-apothecary',
-    displayValue(team.apothecary)
-  );
-  
-  setText(
-    'coach-management-assistant-coaches',
-    displayValue(team.assistantCoaches)
-  );
-  
-  setText(
-    'coach-management-cheerleaders',
-    displayValue(team.cheerleaders)
-  );
-  
-  setText(
-    'coach-management-dedicated-fans',
-    displayValue(team.dedicatedFans)
+  renderCoachManagement(
+    team,
+    management
   );
 
   // ---------------------------------------------------
@@ -1147,6 +992,229 @@ function renderCoachPortal(data) {
   renderCoachAdvancements(advancementPlayers);
 
   renderCoachRoster(players);
+}
+
+// =====================================================
+// TEAM MANAGEMENT
+// =====================================================
+
+function renderCoachManagement(team, management) {
+
+  team = team || {};
+  management = management || {};
+
+  const purchases =
+    management.purchases || {};
+
+  setText(
+    'coach-management-treasury',
+    formatGold(team.treasury)
+  );
+
+  setText(
+    'coach-management-rerolls',
+    displayValue(team.rerolls)
+  );
+
+  setText(
+    'coach-management-apothecary',
+    displayValue(team.apothecary)
+  );
+
+  setText(
+    'coach-management-assistant-coaches',
+    displayValue(team.assistantCoaches)
+  );
+
+  setText(
+    'coach-management-cheerleaders',
+    displayValue(team.cheerleaders)
+  );
+
+  setText(
+    'coach-management-dedicated-fans',
+    displayValue(team.dedicatedFans)
+  );
+
+  // Keep any existing header/stat fields synchronized.
+  setText('coach-treasury', formatGold(team.treasury));
+  setText('coach-rerolls', displayValue(team.rerolls));
+  setText('coach-apothecary', displayValue(team.apothecary));
+
+  const options = [
+    {
+      key: 'reroll',
+      buttonId: 'coach-management-buy-reroll',
+      buttonLabel: 'Buy Re-roll',
+      confirmLabel: 'Team Re-roll'
+    },
+    {
+      key: 'apothecary',
+      buttonId: 'coach-management-buy-apothecary',
+      buttonLabel: 'Buy Apothecary',
+      confirmLabel: 'Apothecary'
+    },
+    {
+      key: 'assistantCoach',
+      buttonId: 'coach-management-buy-assistant-coach',
+      buttonLabel: 'Buy Assistant Coach',
+      confirmLabel: 'Assistant Coach'
+    },
+    {
+      key: 'cheerleader',
+      buttonId: 'coach-management-buy-cheerleader',
+      buttonLabel: 'Buy Cheerleader',
+      confirmLabel: 'Cheerleader'
+    }
+  ];
+
+  options.forEach(function(item) {
+
+    const purchase =
+      purchases[item.key] || {};
+
+    const button =
+      document.getElementById(
+        item.buttonId
+      );
+
+    if (!button) {
+      return;
+    }
+
+    const cost =
+      Number(
+        purchase.cost
+      ) || 0;
+
+    const costDisplay =
+      cost > 0
+        ? formatGold(cost)
+        : '-';
+
+    button.innerHTML = `
+      <span>${escapePortalHtml(item.buttonLabel)}</span>
+      <strong>${escapePortalHtml(costDisplay)}</strong>
+    `;
+
+    button.disabled =
+      purchase.allowed !== true;
+
+    button.title =
+      purchase.reason || '';
+
+    button.onclick = async function() {
+
+      const accessCode =
+        sessionStorage.getItem(
+          SESSION_KEY
+        ) || '';
+
+      if (!accessCode) {
+
+        alert(
+          'Your Coach Portal session has expired. Please log in again.'
+        );
+
+        return;
+      }
+
+      const confirmed =
+        await showCoachPurchaseConfirmation(
+          item.confirmLabel,
+          cost
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      button.disabled = true;
+
+      button.innerHTML = `
+        <span>Purchasing...</span>
+        <strong>${escapePortalHtml(costDisplay)}</strong>
+      `;
+
+      coachApiSubmitTeamManagementPurchaseRequest(
+        accessCode,
+        item.key
+      )
+
+        .then(function(result) {
+
+          if (
+            !result ||
+            result.ok !== true ||
+            result.submitted !== true
+          ) {
+
+            throw new Error(
+              result && result.reason
+                ? result.reason
+                : result && result.error
+                  ? result.error
+                  : 'The purchase could not be completed.'
+            );
+          }
+
+          if (
+            !result.team ||
+            !result.management
+          ) {
+
+            throw new Error(
+              'The purchase succeeded, but updated Team Management data was not returned.'
+            );
+          }
+
+          renderCoachManagement(
+            result.team,
+            result.management
+          );
+
+          showCoachManagementSuccess(
+            item.confirmLabel +
+            ' purchased successfully.'
+          );
+        })
+
+        .catch(function(error) {
+
+          alert(
+            error && error.message
+              ? error.message
+              : 'The Team Management purchase failed.'
+          );
+
+          // Failure-path safety refresh only.
+          coachApiRequest(
+            accessCode
+          )
+
+            .then(function(data) {
+
+              if (
+                data &&
+                data.ok === true
+              ) {
+
+                renderCoachPortal(
+                  data
+                );
+              }
+            })
+
+            .catch(function(refreshError) {
+
+              console.error(
+                'Coach Portal refresh failed:',
+                refreshError
+              );
+            });
+        });
+    };
+  });
 }
 
 // =====================================================
@@ -3262,18 +3330,32 @@ function formatGold(value) {
 // PURCHASE CONFIRMATION
 // =====================================================
 
-function showCoachPurchaseConfirmation(cost) {
+function showCoachPurchaseConfirmation(itemLabel, cost) {
 
   const modal = document.getElementById('coach-purchase-modal');
+  const messageText = document.getElementById('coach-purchase-modal-text');
   const costText = document.getElementById('coach-purchase-modal-cost');
   const cancelButton = document.getElementById('coach-purchase-cancel');
   const confirmButton = document.getElementById('coach-purchase-confirm');
 
-  if (!modal || !costText || !cancelButton || !confirmButton) {
+  if (
+    !modal ||
+    !messageText ||
+    !costText ||
+    !cancelButton ||
+    !confirmButton
+  ) {
     return Promise.resolve(false);
   }
 
-  costText.textContent = formatGold(cost);
+  messageText.textContent =
+    'Buy one ' +
+    itemLabel +
+    '?';
+
+  costText.textContent =
+    formatGold(cost);
+
   modal.hidden = false;
 
   return new Promise(function(resolve) {
@@ -3291,7 +3373,10 @@ function showCoachPurchaseConfirmation(cost) {
       confirmButton.onclick = null;
       modal.onclick = null;
 
-      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener(
+        'keydown',
+        handleKey
+      );
 
       resolve(result);
     }
@@ -3318,7 +3403,10 @@ function showCoachPurchaseConfirmation(cost) {
       }
     };
 
-    document.addEventListener('keydown', handleKey);
+    document.addEventListener(
+      'keydown',
+      handleKey
+    );
 
     confirmButton.focus();
   });
