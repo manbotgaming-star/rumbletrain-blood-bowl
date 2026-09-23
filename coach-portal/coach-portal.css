@@ -1643,4 +1643,109 @@ strong {
   font-size: 13px;
 }
 
+/* ============================================================
+   PURCHASE CONFIRMATION MODAL
+   ============================================================ */
+
+.coach-purchase-modal[hidden] {
+  display: none;
+}
+
+.coach-purchase-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(9, 31, 40, 0.68);
+}
+
+.coach-purchase-modal-card {
+  width: min(420px, 100%);
+
+  padding: 24px;
+
+  background: #fff;
+
+  border: 1px solid var(--line-dark);
+  border-top: 6px solid var(--ink);
+  border-radius: 9px;
+
+  box-shadow: 0 14px 40px rgba(0,0,0,0.28);
+}
+
+.coach-purchase-modal-card h2 {
+  margin: 0 0 12px;
+
+  color: var(--ink-dark);
+
+  font-size: 24px;
+}
+
+.coach-purchase-modal-card p {
+  margin: 0 0 8px;
+
+  color: var(--ink-muted);
+
+  font-size: 15px;
+}
+
+#coach-purchase-modal-cost {
+  display: block;
+
+  margin-bottom: 20px;
+
+  color: var(--accent);
+
+  font-size: 24px;
+}
+
+.coach-purchase-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.coach-purchase-modal-actions button {
+  padding: 11px 14px;
+
+  border-radius: 5px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+#coach-purchase-cancel {
+  background: #fff;
+
+  color: var(--ink-dark);
+
+  border: 1px solid var(--line-dark);
+}
+
+#coach-purchase-confirm {
+  background: var(--ink);
+
+  color: #fff;
+
+  border: 1px solid var(--ink);
+}
+
+#coach-purchase-cancel:hover {
+  background: #f3f6f7;
+}
+
+#coach-purchase-confirm:hover {
+  background: #1c5367;
+}
 
