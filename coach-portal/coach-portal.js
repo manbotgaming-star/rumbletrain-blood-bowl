@@ -1633,14 +1633,131 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
     return;
   }
 
-  button.addEventListener(
-    'click',
-    function() {
-
-      const accessCode =
-        sessionStorage.getItem(
-          SESSION_KEY
-        ) || '';
+  let readyToSubmit = false;
+  
+  button.addEventListener('click', function() {
+  
+    const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+  
+    if (!accessCode) {
+      note.textContent = 'Your Coach Portal session has expired. Please log in again.';
+      return;
+    }
+  
+  
+    // ===================================================
+    // SECOND CLICK = SUBMIT
+    // ===================================================
+  
+    if (readyToSubmit) {
+  
+      button.disabled = true;
+      button.textContent = 'Submitting...';
+      note.textContent = 'Writing the advancement to the league...';
+  
+      coachApiSubmitAdvancementRequest(
+        accessCode,
+        player.playerId,
+        option.type,
+        category.category,
+        improvement,
+        player.nextAdvancement
+      )
+  
+        .then(function(result) {
+  
+          if (
+            !result ||
+            result.ok !== true ||
+            result.submitted !== true
+          ) {
+            throw new Error(
+              result && result.error
+                ? result.error
+                : 'The advancement could not be submitted.'
+            );
+          }
+  
+          button.textContent = 'Advancement Submitted';
+  
+          note.textContent =
+            'Successfully submitted as ' +
+            (result.advancementId || 'a new advancement') +
+            '.';
+  
+        })
+  
+        .catch(function(error) {
+  
+          button.disabled = false;
+          button.textContent = 'SUBMIT ADVANCEMENT';
+  
+          note.textContent =
+            error && error.message
+              ? error.message
+              : 'Advancement submission failed.';
+  
+        });
+  
+      return;
+    }
+  
+  
+    // ===================================================
+    // FIRST CLICK = VALIDATE
+    // ===================================================
+  
+    button.disabled = true;
+    button.textContent = 'Validating...';
+    note.textContent = 'Checking the current league data...';
+  
+    coachApiValidateAdvancementRequest(
+      accessCode,
+      player.playerId,
+      option.type,
+      category.category,
+      improvement
+    )
+  
+      .then(function(result) {
+  
+        if (
+          !result ||
+          result.ok !== true ||
+          result.validated !== true
+        ) {
+          throw new Error(
+            result && result.error
+              ? result.error
+              : 'The advancement could not be validated.'
+          );
+        }
+  
+        readyToSubmit = true;
+  
+        button.disabled = false;
+        button.textContent = 'SUBMIT ADVANCEMENT';
+  
+        note.textContent =
+          'Server validation passed. Click SUBMIT ADVANCEMENT to add this advancement to the league.';
+  
+      })
+  
+      .catch(function(error) {
+  
+        readyToSubmit = false;
+  
+        button.disabled = false;
+        button.textContent = 'Validate Advancement';
+  
+        note.textContent =
+          error && error.message
+            ? error.message
+            : 'Advancement validation failed.';
+  
+      });
+  
+  });
 
 
       if (!accessCode) {
