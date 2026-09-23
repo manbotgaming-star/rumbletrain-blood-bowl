@@ -977,17 +977,149 @@ function renderCoachPortal(data) {
       managementDetails.rerollCost
     ) || 0;
   
-  
   if (rerollButton) {
-  
-    rerollButton.innerHTML = `
-      <span>Buy Re-roll</span>
-      <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
-    `;
-  
-    rerollButton.disabled =
-      rerollPurchase.allowed !== true;
-  }
+
+  rerollButton.innerHTML = `
+    <span>Buy Re-roll</span>
+    <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
+  `;
+
+  rerollButton.disabled =
+    rerollPurchase.allowed !== true;
+
+
+  // ===================================================
+  // BUY RE-ROLL
+  // ===================================================
+
+  rerollButton.onclick =
+    function() {
+
+      const accessCode =
+        sessionStorage.getItem(
+          SESSION_KEY
+        ) || '';
+
+
+      if (!accessCode) {
+
+        alert(
+          'Your Coach Portal session has expired. Please log in again.'
+        );
+
+        return;
+      }
+
+
+      const confirmed =
+        window.confirm(
+          'Buy one Team Re-roll for ' +
+          formatGold(rerollCost) +
+          '?'
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      rerollButton.disabled = true;
+
+      rerollButton.innerHTML = `
+        <span>Purchasing...</span>
+        <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
+      `;
+
+
+      coachApiSubmitRerollPurchaseRequest(
+        accessCode
+      )
+
+        .then(function(result) {
+
+          if (
+            !result ||
+            result.ok !== true ||
+            result.submitted !== true
+          ) {
+
+            throw new Error(
+              result && result.reason
+                ? result.reason
+                : result && result.error
+                  ? result.error
+                  : 'The Re-roll purchase could not be completed.'
+            );
+          }
+
+
+          return coachApiRequest(
+            accessCode
+          );
+        })
+
+        .then(function(data) {
+
+          if (
+            !data ||
+            data.ok !== true
+          ) {
+
+            throw new Error(
+              'The purchase succeeded, but the Coach Portal could not refresh.'
+            );
+          }
+
+
+          renderCoachPortal(
+            data
+          );
+
+          alert(
+            'Team Re-roll purchased successfully.'
+          );
+        })
+
+        .catch(function(error) {
+
+          alert(
+            error && error.message
+              ? error.message
+              : 'The Re-roll purchase failed.'
+          );
+
+
+          // Refresh current portal data so the button returns
+          // to the correct server-controlled state.
+          coachApiRequest(
+            accessCode
+          )
+
+            .then(function(data) {
+
+              if (
+                data &&
+                data.ok === true
+              ) {
+
+                renderCoachPortal(
+                  data
+                );
+              }
+            })
+
+            .catch(function(refreshError) {
+
+              console.error(
+                'Coach Portal refresh failed:',
+                refreshError
+              );
+            });
+        });
+    };
+}
+
   
   setText(
     'coach-management-apothecary',
