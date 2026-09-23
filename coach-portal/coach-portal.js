@@ -1041,23 +1041,18 @@ function renderCoachPortal(data) {
           );
         }
       
-        showCoachManagementSuccess('Team Re-roll purchased successfully.');
+        setText('coach-management-treasury', formatGold(result.treasuryAfter));
+        setText('coach-management-rerolls', displayValue(result.rerollsAfter));
       
-        return coachApiRequest(accessCode);
+        rerollButton.innerHTML = `
+          <span>Buy Re-roll</span>
+          <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
+        `;
+      
+        rerollButton.disabled = result.allowedAfter !== true;
+      
+        showCoachManagementSuccess('Team Re-roll purchased successfully.');
       })
-
-        .then(function(data) {
-
-          if (
-            !data ||
-            data.ok !== true
-          ) {
-
-            throw new Error('The purchase succeeded, but the Coach Portal could not refresh.');
-          }
-
-          renderCoachPortal(data);
-        })
 
         .catch(function(error) {
 
