@@ -995,8 +995,7 @@ function renderCoachPortal(data) {
   // BUY RE-ROLL
   // ===================================================
 
-  rerollButton.onclick =
-    function() {
+  rerollButton.onclick = async function() {
 
       const accessCode =
         sessionStorage.getItem(
@@ -1013,18 +1012,9 @@ function renderCoachPortal(data) {
         return;
       }
 
-
-      const confirmed =
-        window.confirm(
-          'Buy one Team Re-roll for ' +
-          formatGold(rerollCost) +
-          '?'
-        );
-
-
-      if (!confirmed) {
-        return;
-      }
+      const confirmed = await showCoachPurchaseConfirmation(rerollCost);
+      
+      if (!confirmed) return;
 
 
       rerollButton.disabled = true;
@@ -3290,6 +3280,72 @@ function formatGold(value) {
     .toLocaleString(
       'en-GB'
     );
+}
+
+// =====================================================
+// PURCHASE CONFIRMATION
+// =====================================================
+
+function showCoachPurchaseConfirmation(cost) {
+
+  const modal = document.getElementById('coach-purchase-modal');
+  const costText = document.getElementById('coach-purchase-modal-cost');
+  const cancelButton = document.getElementById('coach-purchase-cancel');
+  const confirmButton = document.getElementById('coach-purchase-confirm');
+
+  if (!modal || !costText || !cancelButton || !confirmButton) {
+    return Promise.resolve(false);
+  }
+
+  costText.textContent = formatGold(cost);
+  modal.hidden = false;
+
+  return new Promise(function(resolve) {
+
+    let finished = false;
+
+    function close(result) {
+
+      if (finished) return;
+
+      finished = true;
+      modal.hidden = true;
+
+      cancelButton.onclick = null;
+      confirmButton.onclick = null;
+      modal.onclick = null;
+
+      document.removeEventListener('keydown', handleKey);
+
+      resolve(result);
+    }
+
+    function handleKey(event) {
+
+      if (event.key === 'Escape') {
+        close(false);
+      }
+    }
+
+    cancelButton.onclick = function() {
+      close(false);
+    };
+
+    confirmButton.onclick = function() {
+      close(true);
+    };
+
+    modal.onclick = function(event) {
+
+      if (event.target === modal) {
+        close(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKey);
+
+    confirmButton.focus();
+  });
 }
 
 // =====================================================
