@@ -2302,6 +2302,27 @@ function clearLoginMessage() {
   );
 }
 
+function showCoachAdvancementSuccess(message) {
+
+  const container = document.getElementById('coach-advancements');
+
+  if (!container) return;
+
+  const success = document.createElement('div');
+
+  success.className = 'coach-advancement-success';
+
+  success.innerHTML = `
+    <strong>Advancement successfully recorded</strong>
+    <span>${escapePortalHtml(message)}</span>
+  `;
+
+  container.prepend(success);
+
+  setTimeout(function() {
+    if (success.parentNode) success.remove();
+  }, 5000);
+}
 
 // =====================================================
 // GENERAL HELPERS
