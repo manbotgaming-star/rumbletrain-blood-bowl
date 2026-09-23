@@ -424,6 +424,55 @@ button {
     rgba(255,255,255,0.20);
 }
 
+.coach-team-side {
+  position: relative;
+  z-index: 1;
+
+  justify-self: end;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  min-width: 150px;
+
+  text-align: left;
+}
+
+.coach-team-meta {
+  margin-top: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coach-team-meta > div {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 10px;
+
+  color: #fff;
+}
+
+.coach-team-meta span {
+  color: #d8e5e9;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.coach-team-meta strong {
+  color: #fff;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
 
 /* ============================================================
    PANELS
