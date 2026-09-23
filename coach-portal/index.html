@@ -126,28 +126,28 @@
         </div>
 
         <div class="coach-team-side">
-        
+
           <button
             id="coach-logout"
             type="button"
           >
             Log Out
           </button>
-        
+
           <div class="coach-team-meta">
-        
+
             <div>
               <span>Team ID</span>
               <strong id="coach-team-id">-</strong>
             </div>
-        
+
             <div>
               <span>Season</span>
               <strong id="coach-season">-</strong>
             </div>
-        
+
           </div>
-        
+
         </div>
 
       </section>
@@ -159,36 +159,36 @@
         id="coach-advancements-panel"
         class="coach-panel"
       >
-      
+
         <h2>Player Advancements</h2>
-      
+
         <div id="coach-advancements">
           Loading advancement information...
         </div>
-      
+
       </section>
 
       <section class="coach-panel">
-        
+
         <h2>Team Management</h2>
-      
+
         <div class="coach-management-grid">
-      
+
           <div>
             <span>Treasury</span>
             <strong id="coach-management-treasury">-</strong>
           </div>
-      
+
           <div>
             <span>Players</span>
             <strong id="coach-management-players">-</strong>
           </div>
-      
+
           <div>
             <span>Re-rolls</span>
-          
+
             <strong id="coach-management-rerolls">-</strong>
-          
+
             <button
               id="coach-management-buy-reroll"
               class="coach-management-action"
@@ -199,27 +199,57 @@
               <strong>-</strong>
             </button>
           </div>
-      
+
           <div>
             <span>Apothecary</span>
             <strong id="coach-management-apothecary">-</strong>
+
+            <button
+              id="coach-management-buy-apothecary"
+              class="coach-management-action"
+              type="button"
+              disabled
+            >
+              <span>Buy Apothecary</span>
+              <strong>-</strong>
+            </button>
           </div>
-      
+
           <div>
             <span>Assistant Coaches</span>
             <strong id="coach-management-assistant-coaches">-</strong>
+
+            <button
+              id="coach-management-buy-assistant-coach"
+              class="coach-management-action"
+              type="button"
+              disabled
+            >
+              <span>Buy Assistant Coach</span>
+              <strong>-</strong>
+            </button>
           </div>
-      
+
           <div>
             <span>Cheerleaders</span>
             <strong id="coach-management-cheerleaders">-</strong>
+
+            <button
+              id="coach-management-buy-cheerleader"
+              class="coach-management-action"
+              type="button"
+              disabled
+            >
+              <span>Buy Cheerleader</span>
+              <strong>-</strong>
+            </button>
           </div>
-      
+
           <div>
             <span>Dedicated Fans</span>
             <strong id="coach-management-dedicated-fans">-</strong>
           </div>
-      
+
         </div>
       </section>
 
@@ -273,6 +303,7 @@
     </main>
 
   </div>
+
 <!-- =====================================================
      PURCHASE CONFIRMATION
 ====================================================== -->
@@ -287,8 +318,8 @@
 
     <h2>Confirm Purchase</h2>
 
-    <p>
-      Buy one Team Re-roll?
+    <p id="coach-purchase-modal-text">
+      Confirm this Team Management purchase?
     </p>
 
     <strong id="coach-purchase-modal-cost">
@@ -317,8 +348,7 @@
 
 </div>
 
-  <script src="coach-portal.js?v=11"></script>
+  <script src="coach-portal.js?v=12"></script>
 
 </body>
 </html>
-
