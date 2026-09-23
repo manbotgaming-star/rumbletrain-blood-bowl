@@ -1138,100 +1138,79 @@ function showCoachAdvancementSelection(card, player, option) {
 
   }
 
-  // ---------------------------------------------------
-  // RANDOM PRIMARY
-  // ---------------------------------------------------
+ // ---------------------------------------------------
+// RANDOM PRIMARY
+// ---------------------------------------------------
 
-  else if (
-    option.type ===
-    'Random Primary'
-  ) {
+else if (option.type === 'Random Primary') {
 
-    const heading =
-      document.createElement(
-        'div'
+  const heading = document.createElement('div');
+  heading.className = 'coach-advancement-choice-title';
+  heading.textContent = 'Choose Random Primary Category';
+
+  choiceArea.appendChild(heading);
+
+  const categoryButtons = document.createElement('div');
+  categoryButtons.className = 'coach-advancement-category-buttons';
+
+  const randomArea = document.createElement('div');
+  randomArea.className = 'coach-advancement-improvements';
+
+  choiceArea.appendChild(categoryButtons);
+  choiceArea.appendChild(randomArea);
+
+  const randomCategories = choices.filter(function(category) {
+    return Array.isArray(category.improvements) && category.improvements.length > 0;
+  });
+
+  randomCategories.forEach(function(category) {
+
+    const button = document.createElement('button');
+
+    button.type = 'button';
+    button.className = 'coach-advancement-category';
+    button.textContent = category.category;
+
+    button.addEventListener('click', function() {
+
+      categoryButtons
+        .querySelectorAll('.coach-advancement-category')
+        .forEach(function(other) {
+          other.classList.remove('selected');
+        });
+
+      button.classList.add('selected');
+
+      renderCoachRandomPrimaryConfirmation(
+        randomArea,
+        player,
+        option,
+        category
       );
 
+    });
 
-    heading.className =
-      'coach-advancement-choice-title';
+    categoryButtons.appendChild(button);
 
+  });
 
-    heading.textContent =
-      'Eligible Random Skill Pool';
+  if (!randomCategories.length) {
 
-
-    choiceArea.appendChild(
-      heading
-    );
-
-
-    choices.forEach(
-      function(category) {
-
-        const group =
-          document.createElement(
-            'div'
-          );
-
-
-        group.className =
-          'coach-random-skill-pool';
-
-
-        const skills =
-          Array.isArray(
-            category.improvements
-          )
-            ? category.improvements
-            : [];
-
-
-        group.innerHTML = `
-          <strong>
-            ${escapePortalHtml(category.category)}
-          </strong>
-
-          <span>
-            ${skills
-              .map(
-                function(skill) {
-                  return escapePortalHtml(skill);
-                }
-              )
-              .join(', ')}
-          </span>
-        `;
-
-
-        choiceArea.appendChild(
-          group
-        );
-
-      }
-    );
-
-
-    const note =
-      document.createElement(
-        'div'
-      );
-
-
-    note.className =
-      'coach-advancement-selection-note';
-
-
-    note.textContent =
-      'The random skill will be generated when the final advancement submission workflow is added.';
-
-
-    choiceArea.appendChild(
-      note
-    );
+    randomArea.innerHTML = `
+      <div class="coach-advancement-selection-note">
+        No legal Random Primary skills remain for this player.
+      </div>
+    `;
 
   }
+  else if (randomCategories.length === 1) {
 
+    const firstButton =
+      categoryButtons.querySelector('.coach-advancement-category');
+
+    if (firstButton) firstButton.click();
+  }
+}
   // ---------------------------------------------------
   // CHOOSE / CHARACTERISTIC
   // ---------------------------------------------------
@@ -1781,6 +1760,201 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
   
   });
 
+}
+
+// =====================================================
+// RANDOM PRIMARY CONFIRMATION
+// =====================================================
+
+function renderCoachRandomPrimaryConfirmation(container, player, option, category) {
+
+  container.innerHTML = '';
+
+  const skills =
+    Array.isArray(category.improvements)
+      ? category.improvements
+      : [];
+
+  const remainingSpp =
+    Number(player.availableSpp) -
+    Number(option.cost);
+
+  const confirmation =
+    document.createElement('div');
+
+  confirmation.className =
+    'coach-advancement-confirmation';
+
+  confirmation.innerHTML = `
+    <div class="coach-advancement-confirmation-title">
+      Random Primary Ready
+    </div>
+
+    <div class="coach-advancement-confirmation-grid">
+
+      <div>
+        <span>Player</span>
+        <strong>
+          #${escapePortalHtml(player.number)}
+          ${escapePortalHtml(player.playerName)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Advancement</span>
+        <strong>Random Primary</strong>
+      </div>
+
+      <div>
+        <span>Category</span>
+        <strong>
+          ${escapePortalHtml(category.category)}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cost</span>
+        <strong>
+          ${escapePortalHtml(option.cost)} SPP
+        </strong>
+      </div>
+
+      <div>
+        <span>SPP Remaining</span>
+        <strong>
+          ${escapePortalHtml(remainingSpp)}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="coach-random-skill-pool">
+      <strong>Possible Skills</strong>
+      <span>
+        ${skills.map(function(skill) {
+          return escapePortalHtml(skill);
+        }).join(', ')}
+      </span>
+    </div>
+
+    <button
+      type="button"
+      class="coach-advancement-confirm-button"
+    >
+      ROLL RANDOM PRIMARY
+    </button>
+
+    <div class="coach-advancement-confirmation-note">
+      The server will randomly select one legal skill from this category.
+    </div>
+  `;
+
+  container.appendChild(confirmation);
+
+  const button =
+    confirmation.querySelector(
+      '.coach-advancement-confirm-button'
+    );
+
+  const note =
+    confirmation.querySelector(
+      '.coach-advancement-confirmation-note'
+    );
+
+  if (!button || !note) return;
+
+  button.addEventListener('click', function() {
+
+    const accessCode =
+      sessionStorage.getItem(SESSION_KEY) || '';
+
+    if (!accessCode) {
+      note.textContent =
+        'Your Coach Portal session has expired. Please log in again.';
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Rolling...';
+    note.textContent =
+      'Selecting a legal Random Primary skill...';
+
+    coachApiSubmitAdvancementRequest(
+      accessCode,
+      player.playerId,
+      option.type,
+      category.category,
+      '',
+      player.nextAdvancement
+    )
+
+      .then(function(result) {
+
+        if (
+          !result ||
+          result.ok !== true ||
+          result.submitted !== true
+        ) {
+          throw new Error(
+            result && result.error
+              ? result.error
+              : 'The Random Primary advancement could not be submitted.'
+          );
+        }
+
+        button.textContent =
+          'Random Primary Submitted';
+
+        note.textContent =
+          'Random skill selected: ' +
+          result.improvement;
+
+        const successMessage =
+          '#' + player.number + ' ' +
+          player.playerName + ' gained ' +
+          result.improvement + ' — ' +
+          (result.advancementId || 'Advancement recorded');
+
+        setTimeout(function() {
+
+          coachApiRequest(accessCode)
+            .then(function(data) {
+
+              if (!data || data.ok !== true) {
+                throw new Error(
+                  'Unable to refresh the Coach Portal.'
+                );
+              }
+
+              renderCoachPortal(data);
+              showCoachAdvancementSuccess(successMessage);
+
+            })
+            .catch(function(error) {
+              console.error(
+                'Coach Portal refresh failed:',
+                error
+              );
+            });
+
+        }, 1200);
+
+      })
+
+      .catch(function(error) {
+
+        button.disabled = false;
+        button.textContent =
+          'ROLL RANDOM PRIMARY';
+
+        note.textContent =
+          error && error.message
+            ? error.message
+            : 'Random Primary advancement failed.';
+
+      });
+
+  });
 }
 
 // =====================================================
