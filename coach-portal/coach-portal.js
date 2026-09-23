@@ -2473,20 +2473,21 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
           result.improvement + ' — ' +
           (result.advancementId || 'Advancement recorded');
 
-          coachApiRequest(accessCode)
-            .then(function(data) {
-          
-              if (!data || data.ok !== true) {
-                throw new Error('Unable to refresh the Coach Portal.');
-              }
-          
-              renderCoachPortal(data);
-              showCoachAdvancementSuccess(successMessage);
-          
-            })
-            .catch(function(error) {
-              console.error('Coach Portal refresh failed:', error);
-            });
+        const refreshedPlayers =
+          Array.isArray(result.players)
+            ? result.players
+            : [];
+        
+        const refreshedAdvancements =
+          result.advancements &&
+          Array.isArray(result.advancements.players)
+            ? result.advancements.players
+            : [];
+        
+        renderCoachAdvancements(refreshedAdvancements);
+        renderCoachRoster(refreshedPlayers);
+        
+        showCoachAdvancementSuccess(successMessage);
 
       })
 
