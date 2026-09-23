@@ -760,20 +760,20 @@ function coachApiSubmitAdvancementRequest(
 
 function renderCoachPortal(data) {
 
-  const management =
-    data.management || {};
-  
-  const managementDetails =
-    management.details || management;
-  
-  const rerollPurchase =
-    management.rerollPurchase || {};
+  const coach =
+    data.coach || {};
 
   const team =
     data.team || {};
 
   const management =
-  data.management || {};
+    data.management || {};
+
+  const managementDetails =
+    management.details || management;
+
+  const rerollPurchase =
+    management.rerollPurchase || {};
 
   const players =
     Array.isArray(
