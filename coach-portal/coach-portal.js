@@ -608,11 +608,7 @@ function renderCoachPortal(data) {
   );
 
 
-  setText(
-    'coach-team-race',
-    team.race || ''
-  );
-
+  setText('coach-team-race',team.race || '');
 
   setText('coach-name',coach.name || team.coach || '');
 
