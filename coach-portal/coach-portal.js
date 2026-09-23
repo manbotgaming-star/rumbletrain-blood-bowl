@@ -614,60 +614,19 @@ function renderCoachPortal(data) {
   );
 
 
-  setText(
-    'coach-name',
-    coach.name ||
-    team.coach ||
-    ''
-  );
+  setText('coach-name',coach.name || team.coach || '');
 
+  setText('coach-team-id',team.teamId || coach.teamId || '-');
 
-  setText(
-    'coach-team-id',
-    team.teamId ||
-    coach.teamId ||
-    '-'
-  );
+  setText('coach-season',coach.seasonId || team.seasonId || '-');
 
+  setText('coach-dedicated-fans',displayValue(team.dedicatedFans));
 
-  setText(
-    'coach-season',
-    coach.seasonId ||
-    team.seasonId ||
-    '-'
-  );
+  setText('coach-treasury',formatGold(team.treasury));
 
+  setText('coach-rerolls',displayValue(team.rerolls));
 
-  setText(
-    'coach-dedicated-fans',
-    displayValue(
-      team.dedicatedFans
-    )
-  );
-
-
-  setText(
-    'coach-treasury',
-    formatGold(
-      team.treasury
-    )
-  );
-
-
-  setText(
-    'coach-rerolls',
-    displayValue(
-      team.rerolls
-    )
-  );
-
-
-  setText(
-    'coach-apothecary',
-    displayValue(
-      team.apothecary
-    )
-  );
+  setText('coach-apothecary',displayValue(team.apothecary));
 
 
   // ---------------------------------------------------
@@ -684,45 +643,32 @@ function renderCoachPortal(data) {
 
     if (team.logoUrl) {
 
-      logo.src =
-        team.logoUrl;
+      logo.src = team.logoUrl;
 
-      logo.hidden =
-        false;
+      logo.hidden = false;
 
     }
     else {
 
-      logo.removeAttribute(
-        'src'
-      );
+      logo.removeAttribute('src');
 
-      logo.hidden =
-        true;
+      logo.hidden = true;
     }
   }
 
 
-  renderCoachGames(
-    games,
-    team,
-    coach
-  );
+  renderCoachGames(games,team,coach);
 
-  renderCoachAdvancements(
-  advancementPlayers
-);
+  renderCoachAdvancements(advancementPlayers,games);
 
-  renderCoachRoster(
-    players
-  );
+  renderCoachRoster(players);
 }
 
 // =====================================================
 // PLAYER ADVANCEMENTS
 // =====================================================
 
-function renderCoachAdvancements(players) {
+function renderCoachAdvancements(players,games) {
 
   const container =
     document.getElementById(
