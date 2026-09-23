@@ -976,12 +976,15 @@ function renderCoachPortal(data) {
       rerollPurchase.cost ||
       managementDetails.rerollCost
     ) || 0;
+
+  const rerollCostDisplay =
+  rerollCost.toLocaleString('en-GB');
   
   if (rerollButton) {
 
   rerollButton.innerHTML = `
     <span>Buy Re-roll</span>
-    <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
+    <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
   `;
 
   rerollButton.disabled =
@@ -1028,7 +1031,7 @@ function renderCoachPortal(data) {
 
       rerollButton.innerHTML = `
         <span>Purchasing...</span>
-        <strong>${escapePortalHtml(formatGold(rerollCost))}</strong>
+        <strong>${escapePortalHtml(rerollCostDisplay)}</strong>
       `;
 
 
