@@ -1679,11 +1679,33 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
           }
   
           button.textContent = 'Advancement Submitted';
-  
-          note.textContent =
-            'Successfully submitted as ' +
-            (result.advancementId || 'a new advancement') +
-            '.';
+          
+          const successMessage =
+            '#' + player.number + ' ' +
+            player.playerName + ' gained ' +
+            improvement + ' — ' +
+            (result.advancementId || 'Advancement recorded');
+          
+          note.textContent = 'Successfully submitted.';
+
+          setTimeout(function() {
+          
+            coachApiRequest(accessCode)
+              .then(function(data) {
+          
+                if (!data || data.ok !== true) {
+                  throw new Error('Unable to refresh the Coach Portal.');
+                }
+          
+                renderCoachPortal(data);
+                showCoachAdvancementSuccess(successMessage);
+          
+              })
+              .catch(function(error) {
+                console.error('Coach Portal refresh failed:', error);
+              });
+          
+          }, 1200);
   
         })
   
