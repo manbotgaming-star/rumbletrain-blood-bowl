@@ -2228,24 +2228,20 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
           
           note.textContent = 'Successfully submitted.';
 
-          setTimeout(function() {
+          coachApiRequest(accessCode)
+            .then(function(data) {
           
-            coachApiRequest(accessCode)
-              .then(function(data) {
+              if (!data || data.ok !== true) {
+                throw new Error('Unable to refresh the Coach Portal.');
+              }
           
-                if (!data || data.ok !== true) {
-                  throw new Error('Unable to refresh the Coach Portal.');
-                }
+              renderCoachPortal(data);
+              showCoachAdvancementSuccess(successMessage);
           
-                renderCoachPortal(data);
-                showCoachAdvancementSuccess(successMessage);
-          
-              })
-              .catch(function(error) {
-                console.error('Coach Portal refresh failed:', error);
-              });
-          
-          }, 1200);
+            })
+            .catch(function(error) {
+              console.error('Coach Portal refresh failed:', error);
+            });
   
         })
   
@@ -2476,29 +2472,20 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
           result.improvement + ' — ' +
           (result.advancementId || 'Advancement recorded');
 
-        setTimeout(function() {
-
           coachApiRequest(accessCode)
             .then(function(data) {
-
+          
               if (!data || data.ok !== true) {
-                throw new Error(
-                  'Unable to refresh the Coach Portal.'
-                );
+                throw new Error('Unable to refresh the Coach Portal.');
               }
-
+          
               renderCoachPortal(data);
               showCoachAdvancementSuccess(successMessage);
-
+          
             })
             .catch(function(error) {
-              console.error(
-                'Coach Portal refresh failed:',
-                error
-              );
+              console.error('Coach Portal refresh failed:', error);
             });
-
-        }, 1200);
 
       })
 
