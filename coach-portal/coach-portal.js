@@ -607,7 +607,7 @@ function coachApiSubmitAdvancementRequest(
       cleanup();
 
       reject(new Error('Advancement submission timed out.'));
-    }, 15000);
+    }, 45000);
 
     window[callbackName] = function(data) {
       if (finished) return;
@@ -1942,16 +1942,27 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
       })
 
       .catch(function(error) {
-
-        button.disabled = false;
-        button.textContent =
-          'ROLL RANDOM PRIMARY';
-
-        note.textContent =
+      
+        const message =
           error && error.message
             ? error.message
             : 'Random Primary advancement failed.';
-
+      
+        if (message === 'Advancement submission timed out.') {
+      
+          button.disabled = true;
+          button.textContent = 'CHECKING RESULT...';
+      
+          note.textContent =
+            'The server did not respond in time. Refresh the portal before attempting another roll. If the roll was recorded, the result is already locked in.';
+      
+          return;
+        }
+      
+        button.disabled = false;
+        button.textContent = 'ROLL RANDOM PRIMARY';
+        note.textContent = message;
+      
       });
 
   });
