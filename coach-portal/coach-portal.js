@@ -766,6 +766,9 @@ function renderCoachPortal(data) {
   const team =
     data.team || {};
 
+  const management =
+  data.management || {};
+
   const players =
     Array.isArray(
       data.players
@@ -841,6 +844,13 @@ function renderCoachPortal(data) {
   setText(
     'coach-management-rerolls',
     displayValue(team.rerolls)
+  );
+
+  setText(
+    'coach-management-reroll-cost',
+    Number(management.rerollCost) > 0
+      ? formatGold(management.rerollCost) + ' to buy'
+      : '-'
   );
   
   setText(
