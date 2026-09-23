@@ -845,13 +845,6 @@ function renderCoachPortal(data) {
     'coach-management-rerolls',
     displayValue(team.rerolls)
   );
-
-  setText(
-    'coach-management-reroll-cost',
-    Number(management.rerollCost) > 0
-      ? formatGold(management.rerollCost) + ' to buy'
-      : '-'
-  );
   
   setText(
     'coach-management-apothecary',
