@@ -1029,28 +1029,22 @@ function renderCoachPortal(data) {
         accessCode
       )
 
-        .then(function(result) {
-
-          if (
-            !result ||
-            result.ok !== true ||
-            result.submitted !== true
-          ) {
-
-            throw new Error(
-              result && result.reason
-                ? result.reason
-                : result && result.error
-                  ? result.error
-                  : 'The Re-roll purchase could not be completed.'
-            );
-          }
-
-
-          return coachApiRequest(
-            accessCode
+      .then(function(result) {
+      
+        if (!result || result.ok !== true || result.submitted !== true) {
+          throw new Error(
+            result && result.reason
+              ? result.reason
+              : result && result.error
+                ? result.error
+                : 'The Re-roll purchase could not be completed.'
           );
-        })
+        }
+      
+        showCoachManagementSuccess('Team Re-roll purchased successfully.');
+      
+        return coachApiRequest(accessCode);
+      })
 
         .then(function(data) {
 
@@ -1063,8 +1057,6 @@ function renderCoachPortal(data) {
           }
 
           renderCoachPortal(data);
-
-          showCoachManagementSuccess('Team Re-roll purchased successfully.');
         })
 
         .catch(function(error) {
