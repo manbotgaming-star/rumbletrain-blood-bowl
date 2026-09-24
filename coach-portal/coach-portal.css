@@ -816,22 +816,20 @@ button {
 }
 
 /* ============================================================
-   ROSTER - RETIRE PLAYER
-   ============================================================ */
-/* ============================================================
    ROSTER - STATUS / RETIRE PLAYER
    ============================================================ */
 
 .coach-roster-status-content {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 10px;
   white-space: nowrap;
 }
 
 .coach-roster-status-text {
-  display: inline-block;
+  flex: 1;
+  text-align: center;
 }
 
 .coach-roster-table .coach-roster-retire-button {
@@ -868,17 +866,6 @@ button {
 }
 
 .coach-roster-table .coach-roster-retire-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.coach-roster-retire-button:hover:not(:disabled) {
-  background: #fff7f7;
-  border-color: var(--accent-dark);
-  color: var(--accent-dark);
-}
-
-.coach-roster-retire-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
