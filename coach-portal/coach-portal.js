@@ -937,6 +937,13 @@ function coachApiSubmitPlayerPurchaseRequest(accessCode,position,playerNumber,pl
   },'Unable to submit the player purchase.');
 }
 
+function coachApiSubmitJourneymanHireRequest(accessCode,journeymanId,playerNumber){
+  return coachApiPlayerRequest('coachhirejourneyman',{
+    code:accessCode,
+    journeymanId:journeymanId,
+    number:playerNumber
+  },'Unable to hire the Journeyman.');
+}
 
 // =====================================================
 // RENDER PORTAL
@@ -1601,18 +1608,63 @@ function showCoachPlayerPurchaseModal(accessCode,options){
   confirmButton.onclick=async function(){
     const playerNumber=Number(numberSelect.value);
 
-    if(typeSelect.value==='journeyman'){
-      const selected=selectedJourneyman();
+if(typeSelect.value==='journeyman'){
+  const selected=selectedJourneyman();
 
-      if(!selected||!playerNumber){
-        message.textContent='Choose a Journeyman and permanent player number.';
-        refreshState();
-        return;
-      }
+  if(!selected||!playerNumber){
+    message.textContent='Choose a Journeyman and permanent player number.';
+    refreshState();
+    return;
+  }
 
-      message.textContent='Journeyman selected. Hire submission is not enabled yet.';
-      return;
+  confirmButton.disabled=true;
+  cancelButton.disabled=true;
+  randomButton.disabled=true;
+  message.textContent='Hiring Journeyman...';
+
+  try{
+    const result=await coachApiSubmitJourneymanHireRequest(accessCode,selected.journeymanId,playerNumber);
+
+    if(!result||result.ok!==true||result.submitted!==true||result.purchased!==true){
+      throw new Error(
+        result&&result.reason?result.reason:
+        result&&result.error?result.error:
+        'The Journeyman could not be hired.'
+      );
     }
+
+    if(!result.team||!result.management||!Array.isArray(result.players)){
+      throw new Error('The Journeyman was hired, but updated team data was not returned.');
+    }
+
+    closeModal();
+    renderCoachManagement(result.team,result.management);
+
+    const currentPlayers=result.players.filter(function(player){
+      return String(player.status||'').trim().toLowerCase()!=='dead';
+    }).length;
+
+    setText('coach-management-players',currentPlayers);
+    renderCoachRoster(result.players);
+
+    const advancementPlayers=result.advancements&&Array.isArray(result.advancements.players)
+      ?result.advancements.players
+      :[];
+
+    renderCoachAdvancements(advancementPlayers);
+
+    showCoachManagementSuccess(
+      'Journeyman #'+result.playerNumber+' '+result.playerName+' — '+result.position+' hired successfully.'
+    );
+  }
+  catch(error){
+    message.textContent=error&&error.message?error.message:'The Journeyman hire failed.';
+    cancelButton.disabled=false;
+    refreshState();
+  }
+
+  return;
+}
 
     const selected=selectedPosition();
     const playerName=String(nameInput.value||'').trim();
