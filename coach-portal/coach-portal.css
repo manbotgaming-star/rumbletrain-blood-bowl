@@ -1805,6 +1805,28 @@ strong {
 }
 
 /* ============================================================
+   RETIRE PLAYER CONFIRMATION
+   ============================================================ */
+
+.coach-retire-confirmation .coach-purchase-modal-card {
+  border-top-color: var(--danger);
+}
+
+.coach-retire-confirmation .coach-purchase-modal-card h2 {
+  color: var(--danger);
+}
+
+.coach-retire-confirmation #coach-purchase-confirm {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.coach-retire-confirmation #coach-purchase-confirm:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+/* ============================================================
    TEAM MANAGEMENT - TOP ALIGN ITEMS
    ============================================================ */
 
