@@ -815,6 +815,40 @@ button {
   vertical-align: middle;
 }
 
+/* ============================================================
+   ROSTER - RETIRE PLAYER
+   ============================================================ */
+.coach-roster-retire-button {
+  width: 28px;
+  height: 28px;
+  margin-top: 4px;
+  padding: 0;
+
+  background: #fff;
+  border: 1px solid var(--danger);
+  border-radius: 5px;
+
+  color: var(--danger);
+
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.coach-roster-retire-button:hover:not(:disabled) {
+  background: #fff7f7;
+  border-color: var(--accent-dark);
+  color: var(--accent-dark);
+}
+
+.coach-roster-retire-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .coach-roster-table tbody tr:nth-child(even) {
   background: #f6f8f9;
 }
