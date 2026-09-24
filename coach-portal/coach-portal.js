@@ -913,31 +913,48 @@ function renderCoachPortal(data) {
   // ---------------------------------------------------
   // TEAM HEADER
   // ---------------------------------------------------
-
-  setText(
-    'coach-team-name',
-    team.teamName ||
-    coach.teamName ||
-    'Team'
-  );
-
-
+  setText('coach-team-name',team.teamName || coach.teamName || 'Team');
   setText('coach-team-race',team.race || '');
-
   setText('coach-name',coach.name || team.coach || '');
-
   setText('coach-team-id',team.teamId || coach.teamId || '-');
-
   setText('coach-season',coach.seasonId || team.seasonId || '-');
-
+  renderCoachGameDayPackLink(team,coach,games);
   setText('coach-dedicated-fans',displayValue(team.dedicatedFans));
-
   setText('coach-treasury',formatGold(team.treasury));
-
   setText('coach-rerolls',displayValue(team.rerolls));
-
   setText('coach-apothecary',displayValue(team.apothecary));
 
+// =====================================================
+// GAME DAY PACK LINK
+// =====================================================
+function renderCoachGameDayPackLink(team,coach,games) {
+  const link = document.getElementById('coach-game-day-pack');
+
+  if (!link) {
+    return;
+  }
+
+  const teamId = String(team.teamId || coach.teamId || '').trim();
+
+  const seasonId = String(coach.seasonId || team.seasonId || '').trim();
+
+  const hasUpcomingGame = Array.isArray(games) && games.some(function(game) {
+      const status = String(game.status || '').trim().toLowerCase();
+      return (status !== '' && status !== 'completed');
+    });
+
+  if (!teamId || !seasonId || !hasUpcomingGame) {
+    link.hidden = true;
+    link.removeAttribute('href');
+    return;
+  }
+
+  link.href =
+    COACH_API_URL + '?view=gameDayPack' + '&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
+
+  link.hidden = false;
+}
+  
   // ---------------------------------------------------
   // TEAM MANAGEMENT
   // ---------------------------------------------------
