@@ -1011,7 +1011,7 @@ function renderCoachPortal(data) {
   // TEAM MANAGEMENT
   // ---------------------------------------------------
 
-  const currentPlayers=result.players.filter(function(player){
+  const currentPlayers=players.filter(function(player){
     return !isCoachPlayerOffRoster(player.status);
   }).length;
 
