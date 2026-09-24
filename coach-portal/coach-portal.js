@@ -873,6 +873,72 @@ function coachApiSubmitRerollPurchaseRequest(accessCode) {
 }
 
 // =====================================================
+// COACH BUY PLAYER REQUESTS
+// =====================================================
+
+function coachApiPlayerRequest(view,params,errorMessage) {
+  return new Promise(function(resolve,reject) {
+    const callbackName = 'rumbleCoachPlayerCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+    const script = document.createElement('script');
+    let finished = false;
+
+    function cleanup() {
+      if (script.parentNode) script.parentNode.removeChild(script);
+      try { delete window[callbackName]; }
+      catch (error) { window[callbackName] = undefined; }
+    }
+
+    const timeout = setTimeout(function() {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      reject(new Error(errorMessage || 'Coach Player request timed out.'));
+    },45000);
+
+    window[callbackName] = function(data) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout);
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = function() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout);
+      cleanup();
+      reject(new Error(errorMessage || 'Unable to complete the Coach Player request.'));
+    };
+
+    const query = Object.keys(params || {}).map(function(key) {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key] ?? '');
+    }).join('&');
+
+    script.src = COACH_API_URL + '?view=' + encodeURIComponent(view) + (query ? '&' + query : '') + '&callback=' + encodeURIComponent(callbackName);
+    document.head.appendChild(script);
+  });
+}
+
+function coachApiGetPlayerPurchaseOptionsRequest(accessCode) {
+  return coachApiPlayerRequest('coachplayeroptions',{code:accessCode},'Unable to load Buy Player options.');
+}
+
+function coachApiGeneratePlayerNameRequest(accessCode,position) {
+  return coachApiPlayerRequest('coachplayername',{code:accessCode,position:position},'Unable to generate a player name.');
+}
+
+function coachApiSubmitPlayerPurchaseRequest(accessCode,position,playerNumber,playerName) {
+  return coachApiPlayerRequest('coachbuyplayer',{
+    code:accessCode,
+    position:position,
+    number:playerNumber,
+    name:playerName
+  },'Unable to submit the player purchase.');
+}
+
+
+// =====================================================
 // RENDER PORTAL
 // =====================================================
 
@@ -1056,6 +1122,14 @@ function renderCoachManagement(team, management) {
   setText('coach-rerolls', displayValue(team.rerolls));
   setText('coach-apothecary', displayValue(team.apothecary));
 
+  const buyPlayerButton = document.getElementById('coach-management-buy-player');
+  if (buyPlayerButton) {
+    buyPlayerButton.disabled = false;
+    buyPlayerButton.title = 'Choose a player to purchase.';
+    buyPlayerButton.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
+    buyPlayerButton.onclick = openCoachPlayerPurchase;
+  }
+
   const options = [
     {
       key: 'reroll',
@@ -1231,6 +1305,223 @@ function renderCoachManagement(team, management) {
     };
   });
 }
+
+// =====================================================
+// BUY PLAYER MODAL
+// =====================================================
+
+async function openCoachPlayerPurchase() {
+  const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+  const launchButton = document.getElementById('coach-management-buy-player');
+
+  if (!accessCode) {
+    alert('Your Coach Portal session has expired. Please log in again.');
+    return;
+  }
+
+  if (launchButton) {
+    launchButton.disabled = true;
+    launchButton.innerHTML = '<span>Loading...</span><strong>Please wait</strong>';
+  }
+
+  try {
+    const result = await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+
+    if (!result || result.ok !== true) {
+      throw new Error(result && result.error ? result.error : 'Unable to load Buy Player options.');
+    }
+
+    if (result.canBuy !== true) {
+      throw new Error(result.reason || 'A player cannot currently be purchased.');
+    }
+
+    showCoachPlayerPurchaseModal(accessCode,result);
+  }
+  catch (error) {
+    alert(error && error.message ? error.message : 'Unable to load Buy Player options.');
+  }
+  finally {
+    if (launchButton) {
+      launchButton.disabled = false;
+      launchButton.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
+    }
+  }
+}
+
+
+function showCoachPlayerPurchaseModal(accessCode,options) {
+  const modal = document.getElementById('coach-player-modal');
+  const positionSelect = document.getElementById('coach-player-position');
+  const numberSelect = document.getElementById('coach-player-number');
+  const nameInput = document.getElementById('coach-player-name');
+  const randomButton = document.getElementById('coach-player-random-name');
+  const costText = document.getElementById('coach-player-cost');
+  const message = document.getElementById('coach-player-message');
+  const cancelButton = document.getElementById('coach-player-cancel');
+  const confirmButton = document.getElementById('coach-player-confirm');
+
+  if (!modal || !positionSelect || !numberSelect || !nameInput || !randomButton || !costText || !message || !cancelButton || !confirmButton) {
+    alert('The Buy Player window could not be opened.');
+    return;
+  }
+
+  const positions = Array.isArray(options.positions) ? options.positions : [];
+  const numbers = Array.isArray(options.availableNumbers) ? options.availableNumbers : [];
+
+  positionSelect.innerHTML = '';
+  positions.forEach(function(item) {
+    const option = document.createElement('option');
+    option.value = item.position || '';
+    option.textContent = (item.position || 'Player') + ' — ' + formatGold(item.cost) + ' (' + item.current + '/' + item.max + ')';
+    option.disabled = item.affordable !== true;
+    positionSelect.appendChild(option);
+  });
+
+  const firstAffordable = positions.find(function(item) { return item.affordable === true; });
+  if (firstAffordable) positionSelect.value = firstAffordable.position;
+
+  numberSelect.innerHTML = '';
+  numbers.forEach(function(number) {
+    const option = document.createElement('option');
+    option.value = String(number);
+    option.textContent = '#' + number;
+    numberSelect.appendChild(option);
+  });
+
+  nameInput.value = '';
+  message.textContent = '';
+
+  function selectedPosition() {
+    return positions.find(function(item) { return item.position === positionSelect.value; }) || null;
+  }
+
+  function refreshState() {
+    const selected = selectedPosition();
+    costText.textContent = selected ? formatGold(selected.cost) : '-';
+    randomButton.disabled = !selected;
+    confirmButton.disabled = !selected || selected.affordable !== true || !numberSelect.value || !String(nameInput.value || '').trim();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    cancelButton.onclick = null;
+    confirmButton.onclick = null;
+    randomButton.onclick = null;
+    modal.onclick = null;
+    document.removeEventListener('keydown',handleKey);
+  }
+
+  function handleKey(event) {
+    if (event.key === 'Escape') closeModal();
+  }
+
+  positionSelect.onchange = function() {
+    nameInput.value = '';
+    message.textContent = '';
+    refreshState();
+  };
+
+  numberSelect.onchange = refreshState;
+  nameInput.oninput = refreshState;
+
+  randomButton.onclick = async function() {
+    const selected = selectedPosition();
+    if (!selected) return;
+
+    randomButton.disabled = true;
+    randomButton.textContent = 'Generating...';
+    message.textContent = '';
+
+    try {
+      const result = await coachApiGeneratePlayerNameRequest(accessCode,selected.position);
+
+      if (!result || result.ok !== true || !result.name) {
+        throw new Error(result && result.error ? result.error : 'Unable to generate a player name.');
+      }
+
+      nameInput.value = result.name;
+      refreshState();
+      nameInput.focus();
+    }
+    catch (error) {
+      message.textContent = error && error.message ? error.message : 'Unable to generate a player name.';
+    }
+    finally {
+      randomButton.textContent = 'Random Name';
+      refreshState();
+    }
+  };
+
+  cancelButton.onclick = closeModal;
+
+  confirmButton.onclick = async function() {
+    const selected = selectedPosition();
+    const playerNumber = Number(numberSelect.value);
+    const playerName = String(nameInput.value || '').trim();
+
+    if (!selected || !playerNumber || !playerName) {
+      message.textContent = 'Choose a position, player number and player name.';
+      refreshState();
+      return;
+    }
+
+    confirmButton.disabled = true;
+    cancelButton.disabled = true;
+    randomButton.disabled = true;
+    message.textContent = 'Purchasing player...';
+
+    try {
+      const result = await coachApiSubmitPlayerPurchaseRequest(accessCode,selected.position,playerNumber,playerName);
+
+      if (!result || result.ok !== true || result.submitted !== true || result.purchased !== true) {
+        throw new Error(
+          result && result.reason ? result.reason :
+          result && result.error ? result.error :
+          'The player purchase could not be completed.'
+        );
+      }
+
+      if (!result.team || !result.management || !Array.isArray(result.players)) {
+        throw new Error('The player was purchased, but updated team data was not returned.');
+      }
+
+      closeModal();
+      renderCoachManagement(result.team,result.management);
+
+      const currentPlayers = result.players.filter(function(player) {
+        return String(player.status || '').trim().toLowerCase() !== 'dead';
+      }).length;
+
+      setText('coach-management-players',currentPlayers);
+      renderCoachRoster(result.players);
+
+      const advancementPlayers = result.advancements && Array.isArray(result.advancements.players)
+        ? result.advancements.players
+        : [];
+
+      renderCoachAdvancements(advancementPlayers);
+
+      showCoachManagementSuccess(
+        'Player #' + result.playerNumber + ' ' + result.playerName + ' — ' + result.position + ' purchased successfully.'
+      );
+    }
+    catch (error) {
+      message.textContent = error && error.message ? error.message : 'The player purchase failed.';
+      cancelButton.disabled = false;
+      refreshState();
+    }
+  };
+
+  modal.onclick = function(event) {
+    if (event.target === modal) closeModal();
+  };
+
+  document.addEventListener('keydown',handleKey);
+  refreshState();
+  modal.hidden = false;
+  positionSelect.focus();
+}
+
 
 // =====================================================
 // PLAYER ADVANCEMENTS
