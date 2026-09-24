@@ -3383,7 +3383,9 @@ function renderCoachRoster(players){
       const retireButton=document.createElement('button');
       retireButton.type='button';
       retireButton.className='coach-roster-retire-button';
-      retireButton.textContent='Retire Player';
+      retireButton.textContent='×';
+      retireButton.title='Retire '+player.playerName;
+      retireButton.setAttribute('aria-label','Retire '+player.playerName);
 
       retireButton.onclick=async function(){
         const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
@@ -3394,7 +3396,7 @@ function renderCoachRoster(players){
         }
 
         const confirmed=window.confirm(
-          'Retire #'+player.number+' '+player.playerName+'?\n\n'+
+          'Are you sure you want to retire #'+player.number+' '+player.playerName+'?\n\n'+
           'This removes the player from the active roster.\n'+
           'Career statistics and history will be preserved.\n'+
           'There is no Treasury refund.'
@@ -3403,7 +3405,7 @@ function renderCoachRoster(players){
         if(!confirmed) return;
 
         retireButton.disabled=true;
-        retireButton.textContent='Retiring...';
+        retireButton.textContent='…';
 
         try{
           const result=await coachApiSubmitPlayerRetirementRequest(accessCode,player.playerId);
