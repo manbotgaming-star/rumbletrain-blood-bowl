@@ -1705,7 +1705,7 @@ if(typeSelect.value==='journeyman'){
       closeModal();
       renderCoachManagement(result.team,result.management);
 
-      const currentPlayers=players.filter(function(player){
+      const currentPlayers=result.players.filter(function(player){
         return !isCoachPlayerOffRoster(player.status);
       }).length;
 
