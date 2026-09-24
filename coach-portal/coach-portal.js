@@ -3374,11 +3374,18 @@ function renderCoachRoster(players){
     }
 
     const statusCell=document.createElement('td');
-
-    const statusText=document.createElement('div');
+    statusCell.className='coach-roster-status-cell';
+    
+    const statusContent=document.createElement('div');
+    statusContent.className='coach-roster-status-content';
+    
+    const statusText=document.createElement('span');
+    statusText.className='coach-roster-status-text';
     statusText.textContent=displayValue(status);
-    statusCell.appendChild(statusText);
-
+    
+    statusContent.appendChild(statusText);
+    statusCell.appendChild(statusContent);
+    
     if(playerStatus==='active'){
       const retireButton=document.createElement('button');
       retireButton.type='button';
@@ -3458,7 +3465,7 @@ function renderCoachRoster(players){
         }
       };
 
-      statusCell.appendChild(retireButton);
+      statusContent.appendChild(retireButton);
     }
 
     row.appendChild(statusCell);
