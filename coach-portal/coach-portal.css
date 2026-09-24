@@ -818,24 +818,58 @@ button {
 /* ============================================================
    ROSTER - RETIRE PLAYER
    ============================================================ */
-.coach-roster-retire-button {
+/* ============================================================
+   ROSTER - STATUS / RETIRE PLAYER
+   ============================================================ */
+
+.coach-roster-status-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.coach-roster-status-text {
+  display: inline-block;
+}
+
+.coach-roster-table .coach-roster-retire-button {
+  appearance: none;
+  -webkit-appearance: none;
+
   width: 28px;
   height: 28px;
-  margin-top: 4px;
+  min-width: 28px;
   padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   background: #fff;
   border: 1px solid var(--danger);
-  border-radius: 5px;
+  border-radius: 6px;
 
   color: var(--danger);
 
-  font-family: inherit;
-  font-size: 22px;
-  font-weight: 800;
+  font-family: Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
   line-height: 1;
 
   cursor: pointer;
+}
+
+.coach-roster-table .coach-roster-retire-button:hover:not(:disabled) {
+  background: #fbeaea;
+  border-color: var(--accent-dark);
+  color: var(--accent-dark);
+}
+
+.coach-roster-table .coach-roster-retire-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .coach-roster-retire-button:hover:not(:disabled) {
