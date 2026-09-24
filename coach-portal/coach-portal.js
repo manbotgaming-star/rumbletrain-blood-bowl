@@ -1049,30 +1049,65 @@ function renderCoachPortal(data) {
 // =====================================================
 function renderCoachGameDayPackLink(team,coach,games) {
   const link = document.getElementById('coach-game-day-pack');
-
-  if (!link) {
-    return;
-  }
+  if (!link) return;
 
   const teamId = String(team.teamId || coach.teamId || '').trim();
-
   const seasonId = String(coach.seasonId || team.seasonId || '').trim();
 
   const hasUpcomingGame = Array.isArray(games) && games.some(function(game) {
-      const status = String(game.status || '').trim().toLowerCase();
-      return (status !== '' && status !== 'completed');
-    });
+    const status = String(game.status || '').trim().toLowerCase();
+    return status !== '' && status !== 'completed';
+  });
 
   if (!teamId || !seasonId || !hasUpcomingGame) {
     link.hidden = true;
     link.removeAttribute('href');
+    link.onclick = null;
     return;
   }
 
-  link.href =
-    COACH_API_URL + '?view=gameDayPack' + '&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
+  const packUrl = COACH_API_URL + '?view=gameDayPack&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
 
+  link.href = packUrl;
   link.hidden = false;
+
+  link.onclick = function(event) {
+    event.preventDefault();
+
+    const packWindow = window.open('','_blank');
+    if (!packWindow) {
+      window.open(packUrl,'_blank');
+      return;
+    }
+
+    packWindow.document.open();
+    packWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Preparing Game Day Pack</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#eef3f5;font-family:Georgia,serif;color:#123f4e}
+body{display:flex;align-items:center;justify-content:center}
+.loading-card{background:#fff;border:1px solid #9eb4bd;border-top:6px solid #174f61;border-radius:8px;padding:38px 48px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:320px}
+.loading-card h1{margin:0 0 12px;font-size:26px;text-transform:uppercase}
+.loading-card p{margin:0 0 22px;color:#5d7078}
+.spinner{width:38px;height:38px;margin:0 auto;border:4px solid #d8e1e5;border-top-color:#174f61;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="loading-card">
+<h1>Preparing Game Day Pack</h1>
+<p>Loading current roster and game information...</p>
+<div class="spinner"></div>
+</div>
+</body>
+</html>`);
+    packWindow.document.close();
+
+    setTimeout(function(){ packWindow.location.href = packUrl; },100);
+  };
 }
 
 // =====================================================
