@@ -1315,21 +1315,11 @@ function applyCoachBuyPlayerButtonState(result) {
   const button = document.getElementById('coach-management-buy-player');
   if (!button) return;
 
-  const positions = result && Array.isArray(result.positions) ? result.positions : [];
-  let cheapestCost = 0;
-
-  positions.forEach(function(item) {
-    const cost = Number(item.cost) || 0;
-    if (cost > 0 && (!cheapestCost || cost < cheapestCost)) cheapestCost = cost;
-  });
-
   const available = result && result.ok === true && result.canBuy === true;
 
   button.disabled = !available;
   button.title = result && (result.reason || result.error) ? (result.reason || result.error) : '';
-
-  const display = available ? 'Select' : cheapestCost ? formatGold(cheapestCost) : 'Unavailable';
-  button.innerHTML = '<span>Buy Player</span><strong>' + escapePortalHtml(display) + '</strong>';
+  button.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
   button.onclick = available ? openCoachPlayerPurchase : null;
 }
 
