@@ -376,7 +376,13 @@
 
     <h2>Buy Player</h2>
 
-    <label for="coach-player-position">Position</label>
+    <label for="coach-player-purchase-type">Purchase Type</label>
+    <select id="coach-player-purchase-type">
+      <option value="new">New Player</option>
+      <option value="journeyman">Hire Journeyman</option>
+    </select>
+    
+    <label id="coach-player-position-label" for="coach-player-position">Position</label>
     <select id="coach-player-position"></select>
 
     <label for="coach-player-number">Player #</label>
@@ -404,7 +410,7 @@
   </div>
 </div>
   
-  <script src="coach-portal.js?v=15"></script>
+  <script src="coach-portal.js?v=16"></script>
 
 </body>
 </html>
