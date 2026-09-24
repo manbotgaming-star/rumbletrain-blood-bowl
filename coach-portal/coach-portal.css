@@ -1791,3 +1791,73 @@ strong {
 #coach-game-day-pack:hover {
   background: rgba(255,255,255,0.20);
 }
+
+/* ============================================================
+   BUY PLAYER MODAL
+   ============================================================ */
+
+.coach-player-modal-card {
+  width: min(520px, calc(100vw - 32px));
+}
+
+.coach-player-modal-card label {
+  display: block;
+  margin: 12px 0 5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.coach-player-modal-card select,
+.coach-player-modal-card input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--line-dark);
+  border-radius: 5px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.coach-player-name-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+#coach-player-random-name {
+  padding: 10px 12px;
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.coach-player-cost {
+  margin: 18px 0 10px;
+  font-size: 18px;
+}
+
+#coach-player-cost {
+  color: var(--accent);
+}
+
+.coach-player-message {
+  min-height: 20px;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+#coach-player-cancel {
+  background: #fff;
+  color: var(--ink-dark);
+  border: 1px solid var(--line-dark);
+}
+
+#coach-player-confirm {
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+}
