@@ -946,6 +946,16 @@ function coachApiSubmitJourneymanHireRequest(accessCode,journeymanId,playerNumbe
 }
 
 // =====================================================
+// RETIRE PLAYER REQUEST
+// =====================================================
+function coachApiSubmitPlayerRetirementRequest(accessCode,playerId){
+  return coachApiPlayerRequest('coachretireplayer',{
+    code:accessCode,
+    playerId:playerId
+  },'Unable to retire the player.');
+}
+
+// =====================================================
 // RENDER PORTAL
 // =====================================================
 
