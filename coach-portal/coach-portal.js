@@ -1011,12 +1011,9 @@ function renderCoachPortal(data) {
   // TEAM MANAGEMENT
   // ---------------------------------------------------
 
-  const currentPlayers =
-    players.filter(function(player) {
-      return String(player.status || '')
-        .trim()
-        .toLowerCase() !== 'dead';
-    }).length;
+  const currentPlayers=result.players.filter(function(player){
+    return !isCoachPlayerOffRoster(player.status);
+  }).length;
 
   setText(
     'coach-management-players',
@@ -1651,7 +1648,7 @@ if(typeSelect.value==='journeyman'){
     renderCoachManagement(result.team,result.management);
 
     const currentPlayers=result.players.filter(function(player){
-      return String(player.status||'').trim().toLowerCase()!=='dead';
+      return !isCoachPlayerOffRoster(player.status);
     }).length;
 
     setText('coach-management-players',currentPlayers);
@@ -1708,8 +1705,8 @@ if(typeSelect.value==='journeyman'){
       closeModal();
       renderCoachManagement(result.team,result.management);
 
-      const currentPlayers=result.players.filter(function(player){
-        return String(player.status||'').trim().toLowerCase()!=='dead';
+      const currentPlayers=players.filter(function(player){
+        return !isCoachPlayerOffRoster(player.status);
       }).length;
 
       setText('coach-management-players',currentPlayers);
@@ -3322,185 +3319,150 @@ function displayTeamForGame(
   return id || '-';
 }
 
-
 // =====================================================
 // ROSTER
 // =====================================================
+function renderCoachRoster(players){
+  const body=document.getElementById('coach-roster-body');
+  if(!body) return;
 
-function renderCoachRoster(players) {
+  body.innerHTML='';
 
-  const body =
-    document.getElementById(
-      'coach-roster-body'
-    );
-
-
-  if (!body) {
+  if(!players.length){
+    const row=document.createElement('tr');
+    const cell=document.createElement('td');
+    cell.colSpan=12;
+    cell.textContent='No players found.';
+    row.appendChild(cell);
+    body.appendChild(row);
     return;
   }
 
+  players.forEach(function(player){
+    const row=document.createElement('tr');
+    const playerStatus=String(player.status||'').trim().toLowerCase();
 
-  body.innerHTML = '';
+    // ---------------------------------------------------
+    // PLAYER ROW STATE
+    // ---------------------------------------------------
+    if(playerStatus==='dead') row.classList.add('coach-player-dead');
+    if(playerStatus==='retired') row.classList.add('coach-player-retired');
 
+    appendCell(row,player.number);
+    appendCell(row,player.playerName);
+    appendCell(row,player.position);
+    appendCell(row,player.ma);
+    appendCell(row,player.st);
+    appendCell(row,player.ag);
+    appendCell(row,player.pa);
+    appendCell(row,player.av);
+    appendCell(row,player.skills);
+    appendCell(row,player.spp);
+    appendCell(row,formatGold(player.value));
 
-  if (!players.length) {
+    // ---------------------------------------------------
+    // STATUS + RETIRE PLAYER
+    // ---------------------------------------------------
+    let status=player.status||'';
 
-    const row =
-      document.createElement(
-        'tr'
-      );
-
-
-    const cell =
-      document.createElement(
-        'td'
-      );
-
-
-    cell.colSpan = 12;
-
-    cell.textContent =
-      'No players found.';
-
-
-    row.appendChild(
-      cell
-    );
-
-    body.appendChild(
-      row
-    );
-
-    return;
-  }
-
-
-  players.forEach(
-    function(player) {
-
-      const row =
-        document.createElement(
-          'tr'
-        );
-
-
-      if (
-        String(
-          player.status || ''
-        ).toLowerCase() ===
-        'dead'
-      ) {
-
-        row.classList.add(
-          'coach-player-dead'
-        );
-      }
-
-
-      appendCell(
-        row,
-        player.number
-      );
-
-      appendCell(
-        row,
-        player.playerName
-      );
-
-      appendCell(
-        row,
-        player.position
-      );
-
-      appendCell(
-        row,
-        player.ma
-      );
-
-      appendCell(
-        row,
-        player.st
-      );
-
-      appendCell(
-        row,
-        player.ag
-      );
-
-      appendCell(
-        row,
-        player.pa
-      );
-
-      appendCell(
-        row,
-        player.av
-      );
-
-      appendCell(
-        row,
-        player.skills
-      );
-
-      appendCell(
-        row,
-        player.spp
-      );
-
-      appendCell(
-        row,
-        formatGold(
-          player.value
-        )
-      );
-
-
-      let status =
-        player.status || '';
-
-
-      if (
-        String(
-          player.mng || ''
-        ).toLowerCase() ===
-        'yes'
-      ) {
-
-        status +=
-          status
-            ? ' / MNG'
-            : 'MNG';
-      }
-
-
-      if (
-        Number(
-          player.niggling || 0
-        ) > 0
-      ) {
-
-        status +=
-          ' / Niggling ' +
-          Number(
-            player.niggling
-          );
-      }
-
-
-      appendCell(
-        row,
-        status
-      );
-
-
-      body.appendChild(
-        row
-      );
-
+    if(String(player.mng||'').toLowerCase()==='yes'){
+      status+=status?' / MNG':'MNG';
     }
-  );
-}
 
+    if(Number(player.niggling||0)>0){
+      status+=' / Niggling '+Number(player.niggling);
+    }
+
+    const statusCell=document.createElement('td');
+
+    const statusText=document.createElement('div');
+    statusText.textContent=displayValue(status);
+    statusCell.appendChild(statusText);
+
+    if(playerStatus==='active'){
+      const retireButton=document.createElement('button');
+      retireButton.type='button';
+      retireButton.className='coach-roster-retire-button';
+      retireButton.textContent='Retire Player';
+
+      retireButton.onclick=async function(){
+        const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+
+        if(!accessCode){
+          alert('Your Coach Portal session has expired. Please log in again.');
+          return;
+        }
+
+        const confirmed=window.confirm(
+          'Retire #'+player.number+' '+player.playerName+'?\n\n'+
+          'This removes the player from the active roster.\n'+
+          'Career statistics and history will be preserved.\n'+
+          'There is no Treasury refund.'
+        );
+
+        if(!confirmed) return;
+
+        retireButton.disabled=true;
+        retireButton.textContent='Retiring...';
+
+        try{
+          const result=await coachApiSubmitPlayerRetirementRequest(accessCode,player.playerId);
+
+          if(!result||result.ok!==true||result.submitted!==true||result.retired!==true){
+            throw new Error(
+              result&&result.error
+                ?result.error
+                :'The player could not be retired.'
+            );
+          }
+
+          if(!result.team||!result.management||!Array.isArray(result.players)){
+            throw new Error('The player was retired, but updated team data was not returned.');
+          }
+
+          renderCoachManagement(result.team,result.management);
+
+          const currentPlayers=result.players.filter(function(item){
+            return !isCoachPlayerOffRoster(item.status);
+          }).length;
+
+          setText('coach-management-players',currentPlayers);
+          renderCoachRoster(result.players);
+
+          const advancementPlayers=
+            result.advancements&&Array.isArray(result.advancements.players)
+              ?result.advancements.players
+              :[];
+
+          renderCoachAdvancements(advancementPlayers);
+
+          showCoachRosterSuccess(
+            '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' retired.'
+          );
+        }
+        catch(error){
+          alert(
+            (error&&error.message?error.message:'The player retirement failed.')+
+            '\n\nThe portal will refresh before another retirement is attempted.'
+          );
+
+          coachApiRequest(accessCode)
+            .then(function(data){
+              if(data&&data.ok===true) renderCoachPortal(data);
+            })
+            .catch(function(refreshError){
+              console.error('Coach Portal refresh failed:',refreshError);
+            });
+        }
+      };
+
+      statusCell.appendChild(retireButton);
+    }
+
+    row.appendChild(statusCell);
+    body.appendChild(row);
+  });
+}
 
 // =====================================================
 // LOG OUT
@@ -3735,8 +3697,38 @@ function showCoachManagementSuccess(message) {
 }
 
 // =====================================================
+// ROSTER SUCCESS MESSAGE
+// =====================================================
+function showCoachRosterSuccess(message){
+  const body=document.getElementById('coach-roster-body');
+  if(!body) return;
+
+  const panel=body.closest('.coach-panel');
+  if(!panel) return;
+
+  const existing=panel.querySelector('.coach-management-success');
+  if(existing) existing.remove();
+
+  const success=document.createElement('div');
+  success.className='coach-management-success';
+  success.innerHTML='<strong>Player retired</strong><span>'+escapePortalHtml(message)+'</span>';
+
+  const heading=panel.querySelector('h2');
+  if(heading) heading.insertAdjacentElement('afterend',success);
+  else panel.prepend(success);
+
+  setTimeout(function(){
+    if(success.parentNode) success.remove();
+  },5000);
+}
+
+// =====================================================
 // GENERAL HELPERS
 // =====================================================
+
+function isCoachPlayerOffRoster(status){
+  return ['dead','retired','released'].includes(String(status||'').trim().toLowerCase());
+}
 
 function setHidden(
   id,
