@@ -3402,13 +3402,7 @@ function renderCoachRoster(players){
           return;
         }
 
-        const confirmed=window.confirm(
-          'Are you sure you want to retire #'+player.number+' '+player.playerName+'?\n\n'+
-          'This removes the player from the active roster.\n'+
-          'Career statistics and history will be preserved.\n'+
-          'There is no Treasury refund.'
-        );
-
+        const confirmed=await showCoachRetirementConfirmation(player);
         if(!confirmed) return;
 
         retireButton.disabled=true;
@@ -3850,6 +3844,62 @@ function formatGold(value) {
     .toLocaleString(
       'en-GB'
     );
+}
+
+// =====================================================
+// RETIRE PLAYER CONFIRMATION
+// =====================================================
+function showCoachRetirementConfirmation(player){
+  const modal=document.getElementById('coach-purchase-modal');
+  const heading=modal?modal.querySelector('h2'):null;
+  const messageText=document.getElementById('coach-purchase-modal-text');
+  const costText=document.getElementById('coach-purchase-modal-cost');
+  const cancelButton=document.getElementById('coach-purchase-cancel');
+  const confirmButton=document.getElementById('coach-purchase-confirm');
+
+  if(!modal||!heading||!messageText||!costText||!cancelButton||!confirmButton) return Promise.resolve(false);
+
+  heading.textContent='Retire Player';
+  messageText.textContent='Are you sure you want to retire #'+player.number+' '+player.playerName+'? Career statistics and history will be preserved.';
+  costText.textContent='No Treasury refund';
+  confirmButton.textContent='Retire Player';
+  modal.classList.add('coach-retire-confirmation');
+  modal.hidden=false;
+
+  return new Promise(function(resolve){
+    let finished=false;
+
+    function close(result){
+      if(finished) return;
+      finished=true;
+
+      modal.hidden=true;
+      modal.classList.remove('coach-retire-confirmation');
+
+      heading.textContent='Confirm Purchase';
+      messageText.textContent='Confirm this Team Management purchase?';
+      costText.textContent='-';
+      confirmButton.textContent='Confirm Purchase';
+
+      cancelButton.onclick=null;
+      confirmButton.onclick=null;
+      modal.onclick=null;
+      document.removeEventListener('keydown',handleKey);
+
+      resolve(result);
+    }
+
+    function handleKey(event){
+      if(event.key==='Escape') close(false);
+    }
+
+    cancelButton.onclick=function(){ close(false); };
+    confirmButton.onclick=function(){ close(true); };
+    modal.onclick=function(event){ if(event.target===modal) close(false); };
+
+    document.addEventListener('keydown',handleKey);
+    confirmButton.focus();
+  });
 }
 
 // =====================================================
