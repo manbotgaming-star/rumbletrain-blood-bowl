@@ -1124,10 +1124,11 @@ function renderCoachManagement(team, management) {
 
   const buyPlayerButton = document.getElementById('coach-management-buy-player');
   if (buyPlayerButton) {
-    buyPlayerButton.disabled = false;
-    buyPlayerButton.title = 'Choose a player to purchase.';
-    buyPlayerButton.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
+    buyPlayerButton.disabled = true;
+    buyPlayerButton.title = 'Checking player purchase availability...';
+    buyPlayerButton.innerHTML = '<span>Buy Player</span><strong>Checking...</strong>';
     buyPlayerButton.onclick = openCoachPlayerPurchase;
+    refreshCoachBuyPlayerButtonState();
   }
 
   const options = [
@@ -1310,6 +1311,46 @@ function renderCoachManagement(team, management) {
 // BUY PLAYER MODAL
 // =====================================================
 
+function applyCoachBuyPlayerButtonState(result) {
+  const button = document.getElementById('coach-management-buy-player');
+  if (!button) return;
+
+  const positions = result && Array.isArray(result.positions) ? result.positions : [];
+  let cheapestCost = 0;
+
+  positions.forEach(function(item) {
+    const cost = Number(item.cost) || 0;
+    if (cost > 0 && (!cheapestCost || cost < cheapestCost)) cheapestCost = cost;
+  });
+
+  const available = result && result.ok === true && result.canBuy === true;
+
+  button.disabled = !available;
+  button.title = result && (result.reason || result.error) ? (result.reason || result.error) : '';
+
+  const display = available ? 'Select' : cheapestCost ? formatGold(cheapestCost) : 'Unavailable';
+  button.innerHTML = '<span>Buy Player</span><strong>' + escapePortalHtml(display) + '</strong>';
+  button.onclick = available ? openCoachPlayerPurchase : null;
+}
+
+async function refreshCoachBuyPlayerButtonState() {
+  const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+  const button = document.getElementById('coach-management-buy-player');
+
+  if (!button || !accessCode) return;
+
+  try {
+    const result = await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+    applyCoachBuyPlayerButtonState(result);
+  }
+  catch (error) {
+    button.disabled = true;
+    button.title = error && error.message ? error.message : 'Unable to check player purchase availability.';
+    button.innerHTML = '<span>Buy Player</span><strong>Unavailable</strong>';
+    button.onclick = null;
+  }
+}
+
 async function openCoachPlayerPurchase() {
   const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
   const launchButton = document.getElementById('coach-management-buy-player');
@@ -1331,20 +1372,15 @@ async function openCoachPlayerPurchase() {
       throw new Error(result && result.error ? result.error : 'Unable to load Buy Player options.');
     }
 
-    if (result.canBuy !== true) {
-      throw new Error(result.reason || 'A player cannot currently be purchased.');
-    }
-
-    showCoachPlayerPurchaseModal(accessCode,result);
+  applyCoachBuyPlayerButtonState(result);
+  
+  if (result.canBuy !== true) return;
+  
+  showCoachPlayerPurchaseModal(accessCode,result);
+    
   }
   catch (error) {
     alert(error && error.message ? error.message : 'Unable to load Buy Player options.');
-  }
-  finally {
-    if (launchButton) {
-      launchButton.disabled = false;
-      launchButton.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
-    }
   }
 }
 
