@@ -1346,16 +1346,16 @@ function renderCoachManagement(team, management) {
 // BUY PLAYER MODAL
 // =====================================================
 
-function applyCoachBuyPlayerButtonState(result) {
-  const button = document.getElementById('coach-management-buy-player');
-  if (!button) return;
+function applyCoachBuyPlayerButtonState(result){
+  const button=document.getElementById('coach-management-buy-player');
+  if(!button) return;
 
-  const available = result && result.ok === true && result.canBuy === true;
+  const available=result&&result.ok===true&&(result.canBuy===true||result.canHireJourneyman===true);
 
-  button.disabled = !available;
-  button.title = result && (result.reason || result.error) ? (result.reason || result.error) : '';
-  button.innerHTML = '<span>Buy Player</span><strong>Select</strong>';
-  button.onclick = available ? openCoachPlayerPurchase : null;
+  button.disabled=!available;
+  button.title=result&&(result.reason||result.error)?(result.reason||result.error):'';
+  button.innerHTML='<span>Buy Player</span><strong>Select</strong>';
+  button.onclick=available?openCoachPlayerPurchase:null;
 }
 
 async function refreshCoachBuyPlayerButtonState() {
@@ -1396,7 +1396,7 @@ async function openCoachPlayerPurchase() {
     if(!result||result.ok!==true) throw new Error(result&&result.error?result.error:'Unable to load Buy Player options.');
 
     const journeymen=Array.isArray(result.availableJourneymen)?result.availableJourneymen:[];
-    const canHireJourneyman=journeymen.some(item=>item.affordable!==false);
+    const canHireJourneyman=result.canHireJourneyman===true||journeymen.some(item=>item.affordable===true);
     const canOpen=result.canBuy===true||canHireJourneyman;
 
     if(!canOpen) throw new Error(result.reason||'No player is currently available to purchase.');
@@ -1413,180 +1413,272 @@ async function openCoachPlayerPurchase() {
   }
 }
 
-function showCoachPlayerPurchaseModal(accessCode,options) {
-  const modal = document.getElementById('coach-player-modal');
-  const positionSelect = document.getElementById('coach-player-position');
-  const numberSelect = document.getElementById('coach-player-number');
-  const nameInput = document.getElementById('coach-player-name');
-  const randomButton = document.getElementById('coach-player-random-name');
-  const costText = document.getElementById('coach-player-cost');
-  const message = document.getElementById('coach-player-message');
-  const cancelButton = document.getElementById('coach-player-cancel');
-  const confirmButton = document.getElementById('coach-player-confirm');
+function showCoachPlayerPurchaseModal(accessCode,options){
+  const modal=document.getElementById('coach-player-modal');
+  const typeSelect=document.getElementById('coach-player-purchase-type');
+  const positionLabel=document.getElementById('coach-player-position-label');
+  const positionSelect=document.getElementById('coach-player-position');
+  const numberSelect=document.getElementById('coach-player-number');
+  const nameInput=document.getElementById('coach-player-name');
+  const randomButton=document.getElementById('coach-player-random-name');
+  const costText=document.getElementById('coach-player-cost');
+  const message=document.getElementById('coach-player-message');
+  const cancelButton=document.getElementById('coach-player-cancel');
+  const confirmButton=document.getElementById('coach-player-confirm');
 
-  if (!modal || !positionSelect || !numberSelect || !nameInput || !randomButton || !costText || !message || !cancelButton || !confirmButton) {
+  if(!modal||!typeSelect||!positionLabel||!positionSelect||!numberSelect||!nameInput||!randomButton||!costText||!message||!cancelButton||!confirmButton){
     alert('The Buy Player window could not be opened.');
     return;
   }
 
-  const positions = Array.isArray(options.positions) ? options.positions : [];
-  const numbers = Array.isArray(options.availableNumbers) ? options.availableNumbers : [];
+  const positions=Array.isArray(options.positions)?options.positions:[];
+  const numbers=Array.isArray(options.availableNumbers)?options.availableNumbers:[];
   const journeymen=Array.isArray(options.availableJourneymen)?options.availableJourneymen:[];
+  const canBuyNew=options.canBuy===true;
+  const canHire=options.canHireJourneyman===true||journeymen.some(item=>item.affordable===true);
 
-  positionSelect.innerHTML = '';
-  positions.forEach(function(item) {
-    const option = document.createElement('option');
-    option.value = item.position || '';
-    option.textContent = (item.position || 'Player') + ' — ' + formatGold(item.cost) + ' (' + item.current + '/' + item.max + ')';
-    option.disabled = item.affordable !== true;
-    positionSelect.appendChild(option);
-  });
+  typeSelect.innerHTML='';
 
-  const firstAffordable = positions.find(function(item) { return item.affordable === true; });
-  if (firstAffordable) positionSelect.value = firstAffordable.position;
+  const newOption=document.createElement('option');
+  newOption.value='new';
+  newOption.textContent='New Player';
+  newOption.disabled=!canBuyNew;
+  typeSelect.appendChild(newOption);
 
-  numberSelect.innerHTML = '';
-  numbers.forEach(function(number) {
-    const option = document.createElement('option');
-    option.value = String(number);
-    option.textContent = '#' + number;
+  const journeymanOption=document.createElement('option');
+  journeymanOption.value='journeyman';
+  journeymanOption.textContent='Hire Journeyman';
+  journeymanOption.disabled=!canHire;
+  typeSelect.appendChild(journeymanOption);
+
+  typeSelect.value=canBuyNew?'new':'journeyman';
+
+  numberSelect.innerHTML='';
+  numbers.forEach(function(number){
+    const option=document.createElement('option');
+    option.value=String(number);
+    option.textContent='#'+number;
     numberSelect.appendChild(option);
   });
 
-  nameInput.value = '';
-  message.textContent = '';
-
-  function selectedPosition() {
-    return positions.find(function(item) { return item.position === positionSelect.value; }) || null;
+  function selectedPosition(){
+    return positions.find(item=>item.position===positionSelect.value)||null;
   }
 
-  function refreshState() {
-    const selected = selectedPosition();
-    costText.textContent = selected ? formatGold(selected.cost) : '-';
-    randomButton.disabled = !selected;
-    confirmButton.disabled = !selected || selected.affordable !== true || !numberSelect.value || !String(nameInput.value || '').trim();
+  function selectedJourneyman(){
+    return journeymen.find(item=>item.journeymanId===positionSelect.value)||null;
   }
 
-  function closeModal() {
-    modal.hidden = true;
-    cancelButton.onclick = null;
-    confirmButton.onclick = null;
-    randomButton.onclick = null;
-    modal.onclick = null;
+  function loadPurchaseType(){
+    positionSelect.innerHTML='';
+    message.textContent='';
+
+    if(typeSelect.value==='journeyman'){
+      positionLabel.textContent='Journeyman';
+      nameInput.readOnly=true;
+      randomButton.hidden=true;
+      confirmButton.textContent='Hire Journeyman';
+
+      journeymen.forEach(function(item){
+        const option=document.createElement('option');
+        option.value=item.journeymanId||'';
+        option.textContent=(item.journeymanNumber||'JM')+' '+(item.playerName||'Journeyman')+' — '+(item.position||'Player')+' — '+formatGold(item.cost);
+        option.disabled=item.affordable!==true;
+        positionSelect.appendChild(option);
+      });
+
+      const firstAffordable=journeymen.find(item=>item.affordable===true);
+      if(firstAffordable) positionSelect.value=firstAffordable.journeymanId;
+
+      const selected=selectedJourneyman();
+      nameInput.value=selected?selected.playerName:'';
+    }
+    else{
+      positionLabel.textContent='Position';
+      nameInput.readOnly=false;
+      nameInput.value='';
+      randomButton.hidden=false;
+      confirmButton.textContent='Buy Player';
+
+      positions.forEach(function(item){
+        const option=document.createElement('option');
+        option.value=item.position||'';
+        option.textContent=(item.position||'Player')+' — '+formatGold(item.cost)+' ('+item.current+'/'+item.max+')';
+        option.disabled=item.affordable!==true;
+        positionSelect.appendChild(option);
+      });
+
+      const firstAffordable=positions.find(item=>item.affordable===true);
+      if(firstAffordable) positionSelect.value=firstAffordable.position;
+    }
+
+    refreshState();
+  }
+
+  function refreshState(){
+    if(typeSelect.value==='journeyman'){
+      const selected=selectedJourneyman();
+      nameInput.value=selected?selected.playerName:'';
+      costText.textContent=selected?formatGold(selected.cost):'-';
+      confirmButton.disabled=!selected||selected.affordable!==true||!numberSelect.value;
+      return;
+    }
+
+    const selected=selectedPosition();
+    costText.textContent=selected?formatGold(selected.cost):'-';
+    randomButton.disabled=!selected;
+    confirmButton.disabled=!selected||selected.affordable!==true||!numberSelect.value||!String(nameInput.value||'').trim();
+  }
+
+  function closeModal(){
+    modal.hidden=true;
+    nameInput.readOnly=false;
+    randomButton.hidden=false;
+    cancelButton.onclick=null;
+    confirmButton.onclick=null;
+    randomButton.onclick=null;
+    typeSelect.onchange=null;
+    positionSelect.onchange=null;
+    modal.onclick=null;
     document.removeEventListener('keydown',handleKey);
   }
 
-  function handleKey(event) {
-    if (event.key === 'Escape') closeModal();
+  function handleKey(event){
+    if(event.key==='Escape') closeModal();
   }
 
-  positionSelect.onchange = function() {
-    nameInput.value = '';
-    message.textContent = '';
+  typeSelect.onchange=loadPurchaseType;
+
+  positionSelect.onchange=function(){
+    message.textContent='';
+
+    if(typeSelect.value==='journeyman'){
+      const selected=selectedJourneyman();
+      nameInput.value=selected?selected.playerName:'';
+    }
+    else{
+      nameInput.value='';
+    }
+
     refreshState();
   };
 
-  numberSelect.onchange = refreshState;
-  nameInput.oninput = refreshState;
+  numberSelect.onchange=refreshState;
+  nameInput.oninput=refreshState;
 
-  randomButton.onclick = async function() {
-    const selected = selectedPosition();
-    if (!selected) return;
+  randomButton.onclick=async function(){
+    if(typeSelect.value!=='new') return;
 
-    randomButton.disabled = true;
-    randomButton.textContent = 'Generating...';
-    message.textContent = '';
+    const selected=selectedPosition();
+    if(!selected) return;
 
-    try {
-      const result = await coachApiGeneratePlayerNameRequest(accessCode,selected.position);
+    randomButton.disabled=true;
+    randomButton.textContent='Generating...';
+    message.textContent='';
 
-      if (!result || result.ok !== true || !result.name) {
-        throw new Error(result && result.error ? result.error : 'Unable to generate a player name.');
+    try{
+      const result=await coachApiGeneratePlayerNameRequest(accessCode,selected.position);
+
+      if(!result||result.ok!==true||!result.name){
+        throw new Error(result&&result.error?result.error:'Unable to generate a player name.');
       }
 
-      nameInput.value = result.name;
+      nameInput.value=result.name;
       refreshState();
       nameInput.focus();
     }
-    catch (error) {
-      message.textContent = error && error.message ? error.message : 'Unable to generate a player name.';
+    catch(error){
+      message.textContent=error&&error.message?error.message:'Unable to generate a player name.';
     }
-    finally {
-      randomButton.textContent = 'Random Name';
+    finally{
+      randomButton.textContent='Random Name';
       refreshState();
     }
   };
 
-  cancelButton.onclick = closeModal;
+  cancelButton.onclick=closeModal;
 
-  confirmButton.onclick = async function() {
-    const selected = selectedPosition();
-    const playerNumber = Number(numberSelect.value);
-    const playerName = String(nameInput.value || '').trim();
+  confirmButton.onclick=async function(){
+    const playerNumber=Number(numberSelect.value);
 
-    if (!selected || !playerNumber || !playerName) {
-      message.textContent = 'Choose a position, player number and player name.';
+    if(typeSelect.value==='journeyman'){
+      const selected=selectedJourneyman();
+
+      if(!selected||!playerNumber){
+        message.textContent='Choose a Journeyman and permanent player number.';
+        refreshState();
+        return;
+      }
+
+      message.textContent='Journeyman selected. Hire submission is not enabled yet.';
+      return;
+    }
+
+    const selected=selectedPosition();
+    const playerName=String(nameInput.value||'').trim();
+
+    if(!selected||!playerNumber||!playerName){
+      message.textContent='Choose a position, player number and player name.';
       refreshState();
       return;
     }
 
-    confirmButton.disabled = true;
-    cancelButton.disabled = true;
-    randomButton.disabled = true;
-    message.textContent = 'Purchasing player...';
+    confirmButton.disabled=true;
+    cancelButton.disabled=true;
+    randomButton.disabled=true;
+    message.textContent='Purchasing player...';
 
-    try {
-      const result = await coachApiSubmitPlayerPurchaseRequest(accessCode,selected.position,playerNumber,playerName);
+    try{
+      const result=await coachApiSubmitPlayerPurchaseRequest(accessCode,selected.position,playerNumber,playerName);
 
-      if (!result || result.ok !== true || result.submitted !== true || result.purchased !== true) {
+      if(!result||result.ok!==true||result.submitted!==true||result.purchased!==true){
         throw new Error(
-          result && result.reason ? result.reason :
-          result && result.error ? result.error :
+          result&&result.reason?result.reason:
+          result&&result.error?result.error:
           'The player purchase could not be completed.'
         );
       }
 
-      if (!result.team || !result.management || !Array.isArray(result.players)) {
+      if(!result.team||!result.management||!Array.isArray(result.players)){
         throw new Error('The player was purchased, but updated team data was not returned.');
       }
 
       closeModal();
       renderCoachManagement(result.team,result.management);
 
-      const currentPlayers = result.players.filter(function(player) {
-        return String(player.status || '').trim().toLowerCase() !== 'dead';
+      const currentPlayers=result.players.filter(function(player){
+        return String(player.status||'').trim().toLowerCase()!=='dead';
       }).length;
 
       setText('coach-management-players',currentPlayers);
       renderCoachRoster(result.players);
 
-      const advancementPlayers = result.advancements && Array.isArray(result.advancements.players)
-        ? result.advancements.players
-        : [];
+      const advancementPlayers=result.advancements&&Array.isArray(result.advancements.players)
+        ?result.advancements.players
+        :[];
 
       renderCoachAdvancements(advancementPlayers);
 
       showCoachManagementSuccess(
-        'Player #' + result.playerNumber + ' ' + result.playerName + ' — ' + result.position + ' purchased successfully.'
+        'Player #'+result.playerNumber+' '+result.playerName+' — '+result.position+' purchased successfully.'
       );
     }
-    catch (error) {
-      message.textContent = error && error.message ? error.message : 'The player purchase failed.';
-      cancelButton.disabled = false;
+    catch(error){
+      message.textContent=error&&error.message?error.message:'The player purchase failed.';
+      cancelButton.disabled=false;
       refreshState();
     }
   };
 
-  modal.onclick = function(event) {
-    if (event.target === modal) closeModal();
+  modal.onclick=function(event){
+    if(event.target===modal) closeModal();
   };
 
   document.addEventListener('keydown',handleKey);
-  refreshState();
-  modal.hidden = false;
-  positionSelect.focus();
+  loadPurchaseType();
+  modal.hidden=false;
+  typeSelect.focus();
 }
-
 
 // =====================================================
 // PLAYER ADVANCEMENTS
