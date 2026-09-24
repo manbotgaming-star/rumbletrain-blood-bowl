@@ -18,7 +18,7 @@
 
   <link
     rel="stylesheet"
-    href="coach-portal.css?v=13"
+    href="coach-portal.css?v=14"
   >
 </head>
 
@@ -196,6 +196,11 @@
           <div>
             <span>Players</span>
             <strong id="coach-management-players">-</strong>
+          
+            <button id="coach-management-buy-player" class="coach-management-action" type="button">
+              <span>Buy Player</span>
+              <strong>Select</strong>
+            </button>
           </div>
 
           <div>
@@ -362,7 +367,44 @@
 
 </div>
 
-  <script src="coach-portal.js?v=13"></script>
+<!-- =====================================================
+     BUY PLAYER
+====================================================== -->
+
+<div id="coach-player-modal" class="coach-purchase-modal" hidden>
+  <div class="coach-purchase-modal-card coach-player-modal-card">
+
+    <h2>Buy Player</h2>
+
+    <label for="coach-player-position">Position</label>
+    <select id="coach-player-position"></select>
+
+    <label for="coach-player-number">Player #</label>
+    <select id="coach-player-number"></select>
+
+    <label for="coach-player-name">Player Name</label>
+
+    <div class="coach-player-name-row">
+      <input id="coach-player-name" type="text" maxlength="60" autocomplete="off">
+      <button id="coach-player-random-name" type="button">Random Name</button>
+    </div>
+
+    <div class="coach-player-cost">
+      Cost:
+      <strong id="coach-player-cost">-</strong>
+    </div>
+
+    <div id="coach-player-message" class="coach-player-message"></div>
+
+    <div class="coach-purchase-modal-actions">
+      <button id="coach-player-cancel" type="button">Cancel</button>
+      <button id="coach-player-confirm" type="button">Buy Player</button>
+    </div>
+
+  </div>
+</div>
+  
+  <script src="coach-portal.js?v=14"></script>
 
 </body>
 </html>
