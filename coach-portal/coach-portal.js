@@ -1377,38 +1377,41 @@ async function refreshCoachBuyPlayerButtonState() {
 }
 
 async function openCoachPlayerPurchase() {
-  const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
-  const launchButton = document.getElementById('coach-management-buy-player');
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+  const launchButton=document.getElementById('coach-management-buy-player');
 
-  if (!accessCode) {
+  if(!accessCode){
     alert('Your Coach Portal session has expired. Please log in again.');
     return;
   }
 
-  if (launchButton) {
-    launchButton.disabled = true;
-    launchButton.innerHTML = '<span>Loading...</span><strong>Please wait</strong>';
+  if(launchButton){
+    launchButton.disabled=true;
+    launchButton.innerHTML='<span>Loading...</span><strong>Please wait</strong>';
   }
 
-  try {
-    const result = await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+  try{
+    const result=await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
 
-    if (!result || result.ok !== true) {
-      throw new Error(result && result.error ? result.error : 'Unable to load Buy Player options.');
+    if(!result||result.ok!==true) throw new Error(result&&result.error?result.error:'Unable to load Buy Player options.');
+
+    const journeymen=Array.isArray(result.availableJourneymen)?result.availableJourneymen:[];
+    const canHireJourneyman=journeymen.some(item=>item.affordable!==false);
+    const canOpen=result.canBuy===true||canHireJourneyman;
+
+    if(!canOpen) throw new Error(result.reason||'No player is currently available to purchase.');
+
+    showCoachPlayerPurchaseModal(accessCode,result);
+  }
+  catch(error){
+    alert(error&&error.message?error.message:'Unable to load Buy Player options.');
+  }
+  finally{
+    if(launchButton){
+      launchButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
     }
-
-  applyCoachBuyPlayerButtonState(result);
-  
-  if (result.canBuy !== true) return;
-  
-  showCoachPlayerPurchaseModal(accessCode,result);
-    
-  }
-  catch (error) {
-    alert(error && error.message ? error.message : 'Unable to load Buy Player options.');
   }
 }
-
 
 function showCoachPlayerPurchaseModal(accessCode,options) {
   const modal = document.getElementById('coach-player-modal');
@@ -1428,6 +1431,7 @@ function showCoachPlayerPurchaseModal(accessCode,options) {
 
   const positions = Array.isArray(options.positions) ? options.positions : [];
   const numbers = Array.isArray(options.availableNumbers) ? options.availableNumbers : [];
+  const journeymen=Array.isArray(options.availableJourneymen)?options.availableJourneymen:[];
 
   positionSelect.innerHTML = '';
   positions.forEach(function(item) {
