@@ -3338,7 +3338,25 @@ function renderCoachRoster(players){
     return;
   }
 
-  players.forEach(function(player){
+  // ---------------------------------------------------
+  // ROSTER DISPLAY ORDER
+  // Active → MNG → Retired/Released → Dead
+  // ---------------------------------------------------
+  const sortedPlayers=players.slice().sort(function(a,b){
+    function rosterRank(player){
+      const status=String(player.status||'').trim().toLowerCase();
+      const mng=String(player.mng||'').trim().toLowerCase()==='yes';
+  
+      if(status==='dead') return 3;
+      if(status==='retired'||status==='released') return 2;
+      if(mng) return 1;
+      return 0;
+    }
+  
+    return rosterRank(a)-rosterRank(b);
+  });
+  
+  sortedPlayers.forEach(function(player){
     const row=document.createElement('tr');
     const playerStatus=String(player.status||'').trim().toLowerCase();
 
