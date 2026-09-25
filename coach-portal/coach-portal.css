@@ -2001,9 +2001,9 @@ strong {
 .coach-game-submission-table td { text-align:center; }
 .coach-game-submission-table th:nth-child(2),.coach-game-submission-table th:nth-child(3),.coach-game-submission-table th:nth-child(11),.coach-game-submission-table td:nth-child(2),.coach-game-submission-table td:nth-child(3),.coach-game-submission-table td:nth-child(11) { text-align:left; }
 
-.coach-game-submission-player-cell { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.coach-game-submission-player-name { flex:1; min-width:0; text-align:left; }
-.coach-game-submission-jm { flex:0 0 auto; min-width:22px; padding:1px 4px; border:1px solid var(--line-dark); border-radius:999px; background:#eef4f6; color:var(--ink); font-size:9px; font-weight:800; text-align:center; }
+.coach-game-submission-player-cell { position:relative; text-align:left !important; }
+.coach-game-submission-player-name { display:block; padding-right:32px; text-align:left; }
+.coach-game-submission-jm { position:absolute; right:5px; top:50%; transform:translateY(-50%); min-width:22px; padding:1px 4px; border:1px solid var(--line-dark); border-radius:999px; background:#eef4f6; color:var(--ink); font-size:9px; font-weight:800; text-align:center; }
 
 .coach-game-submission-stat { width:38px; box-sizing:border-box; padding:5px 2px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; text-align:center; }
 select.coach-game-submission-stat { width:42px; text-align-last:center; }
