@@ -1964,45 +1964,124 @@ strong {
    ============================================================ */
 
 .coach-game-submit-button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--ink);
-  border-radius: 5px;
-  background: var(--ink);
-  color: #fff;
-  font-family: inherit;
-  font-weight: 800;
-  text-transform: uppercase;
-  cursor: pointer;
+  width:100%;
+  margin-top:10px;
+  padding:8px 10px;
+  border:1px solid var(--ink);
+  border-radius:5px;
+  background:var(--ink);
+  color:#fff;
+  font-family:inherit;
+  font-weight:800;
+  text-transform:uppercase;
+  cursor:pointer;
 }
 
-.coach-game-submit-button:hover:not(:disabled) { background: #1c5367; }
-.coach-game-submit-button:disabled { opacity: 0.55; cursor: wait; }
+.coach-game-submit-button:hover:not(:disabled) { background:#1c5367; }
+.coach-game-submit-button:disabled { opacity:.55; cursor:wait; }
+
+/* ============================================================
+   SUBMISSION MODAL
+   ============================================================ */
 
 .coach-game-submission-card {
-  width: min(820px, calc(100vw - 32px));
-  max-height: 85vh;
-  overflow: auto;
+  width:min(1180px, calc(100vw - 32px));
+  max-height:90vh;
+  overflow:auto;
 }
 
+#coach-game-submission-summary {
+  margin-bottom:18px;
+}
+
+/* ============================================================
+   GAME RESULT
+   ============================================================ */
+
+.coach-game-submission-result-grid {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(120px,1fr));
+  gap:10px;
+  margin:16px 0 20px;
+}
+
+.coach-game-submission-result-grid label,
+.coach-game-submission-notes-label {
+  display:block;
+  color:var(--ink-dark);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.coach-game-submission-result-grid input,
+.coach-game-submission-result-grid select,
+#coach-game-submission-notes {
+  width:100%;
+  margin-top:5px;
+  padding:8px;
+  border:1px solid var(--line-dark);
+  border-radius:5px;
+  background:#fff;
+  color:var(--ink-dark);
+  font-family:inherit;
+}
+
+#coach-game-submission-notes {
+  box-sizing:border-box;
+  resize:vertical;
+}
+
+/* ============================================================
+   PLAYER STATS TABLE
+   ============================================================ */
+
 .coach-game-submission-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
+  width:100%;
+  min-width:1080px;
+  border-collapse:collapse;
+  margin:16px 0;
 }
 
 .coach-game-submission-table th,
 .coach-game-submission-table td {
-  padding: 7px 9px;
-  border: 1px solid var(--line);
-  text-align: left;
+  padding:6px 7px;
+  border:1px solid var(--line);
+  text-align:center;
+  vertical-align:middle;
 }
 
 .coach-game-submission-table th {
-  background: var(--ink);
-  color: #fff;
+  background:var(--ink);
+  color:#fff;
+  font-size:11px;
+  text-transform:uppercase;
+  white-space:nowrap;
 }
+
+.coach-game-submission-table th:nth-child(2),
+.coach-game-submission-table th:nth-child(3),
+.coach-game-submission-table th:nth-child(11),
+.coach-game-submission-table td:nth-child(2),
+.coach-game-submission-table td:nth-child(3),
+.coach-game-submission-table td:nth-child(11) {
+  text-align:left;
+}
+
+.coach-game-submission-table th:nth-child(1),
+.coach-game-submission-table td:nth-child(1) { width:40px; }
+
+.coach-game-submission-table th:nth-child(2),
+.coach-game-submission-table td:nth-child(2) { min-width:190px; }
+
+.coach-game-submission-table th:nth-child(3),
+.coach-game-submission-table td:nth-child(3) { min-width:155px; }
+
+.coach-game-submission-table th:nth-child(n+4):nth-child(-n+10),
+.coach-game-submission-table td:nth-child(n+4):nth-child(-n+10) { width:58px; }
+
+.coach-game-submission-table th:nth-child(11),
+.coach-game-submission-table td:nth-child(11) { min-width:170px; }
 
 /* Player name left / JM badge right */
 .coach-game-submission-player-cell {
@@ -2032,19 +2111,85 @@ strong {
   text-align:center;
 }
 
+.coach-game-submission-stat {
+  width:44px;
+  padding:5px 3px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:#fff;
+  color:var(--ink-dark);
+  font-family:inherit;
+  text-align:center;
+}
+
+.coach-game-submission-injury {
+  width:100%;
+  min-width:150px;
+  padding:5px 6px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:#fff;
+  color:var(--ink-dark);
+  font-family:inherit;
+}
+
+/* ============================================================
+   MESSAGE + ACTIONS
+   ============================================================ */
+
+.coach-game-submission-message {
+  min-height:22px;
+  margin:12px 0;
+  color:var(--ink-muted);
+  font-size:13px;
+}
+
+.coach-game-submission-message.is-error {
+  color:var(--danger);
+  font-weight:800;
+}
+
+.coach-game-submission-message.is-success {
+  color:var(--success);
+  font-weight:800;
+}
+
 .coach-game-submission-actions {
-  display: flex;
-  justify-content: flex-end;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:14px;
+}
+
+#coach-game-submission-close,
+#coach-game-submission-review {
+  padding:10px 18px;
+  border-radius:5px;
+  font-family:inherit;
+  font-weight:800;
+  text-transform:uppercase;
+  cursor:pointer;
 }
 
 #coach-game-submission-close {
-  padding: 10px 18px;
-  border: 1px solid var(--ink);
-  border-radius: 5px;
-  background: var(--ink);
-  color: #fff;
-  font-family: inherit;
-  font-weight: 800;
-  text-transform: uppercase;
-  cursor: pointer;
+  border:1px solid var(--line-dark);
+  background:#fff;
+  color:var(--ink-dark);
+}
+
+#coach-game-submission-review {
+  border:1px solid var(--ink);
+  background:var(--ink);
+  color:#fff;
+}
+
+#coach-game-submission-close:hover { background:#f3f6f7; }
+#coach-game-submission-review:hover { background:#1c5367; }
+
+/* ============================================================
+   POST-GAME MOBILE
+   ============================================================ */
+
+@media (max-width:800px) {
+  .coach-game-submission-result-grid { grid-template-columns:repeat(2,1fr); }
 }
