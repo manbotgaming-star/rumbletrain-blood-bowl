@@ -3360,7 +3360,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     notes.value='';
 
     message.className='coach-game-submission-message';
-    message.textContent='Preview only — nothing will be submitted to the league yet.';
+    message.textContent='Complete the Game Day Pack entries, then select Review Entries.';
 
     // =====================================================
     // PRE-GAME FAN CALCULATION
@@ -3531,74 +3531,303 @@ async function openCoachGameSubmissionPreview(launchButton){
       body.appendChild(row);
     });
 
-    // =====================================================
-    // LOCAL REVIEW ONLY
-    // =====================================================
-    reviewButton.onclick=function(){
-      message.className='coach-game-submission-message';
+// =====================================================
+// BUILD SUBMISSION PAYLOAD
+// =====================================================
+function collectGameSubmissionPayload(){
+  const home=scoreValue(homeScore);
+  const away=scoreValue(awayScore);
 
-      const home=scoreValue(homeScore);
-      const away=scoreValue(awayScore);
+  const players=Array.from(body.querySelectorAll('tr')).map(function(row){
+    function stat(field){
+      const input=row.querySelector('[data-field="'+field+'"]');
+      const value=String(input?input.value:'').trim();
+      return value===''?0:Number(value);
+    }
 
-      if(home===null||away===null){
-        message.classList.add('is-error');
-        message.textContent='Enter both final scores.';
-        return;
-      }
+    const injury=row.querySelector('.coach-submit-injury-result');
+    const lasting=row.querySelector('.coach-submit-lasting-injury');
 
-      if(!homeFair.value||!awayFair.value){
-        message.classList.add('is-error');
-        message.textContent='Enter both Fair-Weather D3 rolls.';
-        return;
-      }
+    return {
+      playerId:String(row.dataset.playerId||''),
+      playerNumber:String(row.dataset.playerNumber||''),
+      playerName:String(row.dataset.playerName||''),
+      position:String(row.dataset.position||''),
 
-      if(!homeStalled.value||!awayStalled.value){
-        message.classList.add('is-error');
-        message.textContent='Select Stalled? for both teams.';
-        return;
-      }
+      comp:stat('comp'),
+      ttm:stat('ttm'),
+      land:stat('land'),
+      int:stat('int'),
+      td:stat('td'),
+      cas:stat('cas'),
+      mvp:stat('mvp'),
 
-      if(home!==away&&(!homeDfRoll.value||!awayDfRoll.value)){
-        message.classList.add('is-error');
-        message.textContent='Enter both Post-Game Dedicated Fans D6 rolls.';
-        return;
-      }
-
-      const statInputs=Array.from(body.querySelectorAll('input.coach-game-submission-stat'));
-      const invalidStat=statInputs.find(function(input){
-        const value=String(input.value||'').trim();
-        if(value==='') return false;
-        if(!/^\d+$/.test(value)) return true;
-
-        const max=input.dataset.max!==''?Number(input.dataset.max):null;
-        return max!==null&&Number(value)>max;
-      });
-
-      if(invalidStat){
-        invalidStat.focus();
-        message.classList.add('is-error');
-        message.textContent='Player stat entries must be whole numbers.';
-        return;
-      }
-
-      const injuryCells=Array.from(body.querySelectorAll('.coach-submit-injury-cell'));
-      const missingLasting=injuryCells.find(function(cell){
-        const injury=cell.querySelector('.coach-submit-injury-result');
-        const lasting=cell.querySelector('.coach-submit-lasting-injury');
-        return injury&&lasting&&injury.value==='Lasting Injury'&&!lasting.value;
-      });
-
-      if(missingLasting){
-        missingLasting.querySelector('.coach-submit-lasting-injury').focus();
-        message.classList.add('is-error');
-        message.textContent='Select the specific Lasting Injury.';
-        return;
-      }
-
-      message.classList.add('is-success');
-      message.textContent='Entries look valid. Preview only — nothing has been submitted yet.';
+      injuryResult:injury?injury.value:'',
+      lastingInjury:lasting?lasting.value:''
     };
+  });
 
+  return {
+    gameId:String(game.gameId||''),
+
+    homeFairWeather:Number(homeFair.value),
+    awayFairWeather:Number(awayFair.value),
+
+    homeScore:home,
+    awayScore:away,
+
+    homeStalled:homeStalled.value,
+    awayStalled:awayStalled.value,
+
+    homeDfRoll:home===away?'':Number(homeDfRoll.value),
+    awayDfRoll:home===away?'':Number(awayDfRoll.value),
+
+    coachNotes:String(notes.value||'').trim(),
+    players:players
+  };
+}
+
+
+// =====================================================
+// FINAL REVIEW
+// =====================================================
+function openFinalGameReview(payload){
+  const reviewModal=document.getElementById('coach-game-review-modal');
+  const reviewMatch=document.getElementById('coach-game-review-match');
+  const reviewDetails=document.getElementById('coach-game-review-details');
+  const reviewPlayers=document.getElementById('coach-game-review-players');
+  const reviewNotes=document.getElementById('coach-game-review-notes');
+  const reviewMessage=document.getElementById('coach-game-review-message');
+  const backButton=document.getElementById('coach-game-review-back');
+  const submitButton=document.getElementById('coach-game-review-submit');
+
+  if(!reviewModal||!reviewMatch||!reviewDetails||!reviewPlayers||!reviewNotes||!reviewMessage||!backButton||!submitButton){
+    alert('The Final Review window could not be opened.');
+    return;
+  }
+
+  const homeFan=Number(game.homeDfBefore||0)+Number(payload.homeFairWeather||0);
+  const awayFan=Number(game.awayDfBefore||0)+Number(payload.awayFairWeather||0);
+  const attendance=homeFan+awayFan;
+
+  reviewMatch.textContent=
+    String(game.homeTeam||'HOME')+'  '+payload.homeScore+
+    '  —  '+payload.awayScore+'  '+
+    String(game.awayTeam||'AWAY');
+
+  reviewDetails.innerHTML=
+    '<div class="coach-game-review-detail"><strong>Home Fair-Weather</strong><span>'+escapePortalHtml(payload.homeFairWeather)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Away Fair-Weather</strong><span>'+escapePortalHtml(payload.awayFairWeather)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Home Fan Factor</strong><span>'+escapePortalHtml(homeFan)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Away Fan Factor</strong><span>'+escapePortalHtml(awayFan)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Fan Attendance</strong><span>'+escapePortalHtml(attendance)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Submitting Side</strong><span>'+escapePortalHtml(game.submittingSide||game.side||'')+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Home Stalled?</strong><span>'+escapePortalHtml(payload.homeStalled)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Away Stalled?</strong><span>'+escapePortalHtml(payload.awayStalled)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Home DF Roll</strong><span>'+escapePortalHtml(payload.homeDfRoll===''?'-':payload.homeDfRoll)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Away DF Roll</strong><span>'+escapePortalHtml(payload.awayDfRoll===''?'-':payload.awayDfRoll)+'</span></div>';
+
+  reviewPlayers.innerHTML='';
+
+  const meaningfulPlayers=payload.players.filter(function(player){
+    return Number(player.comp)||Number(player.ttm)||Number(player.land)||Number(player.int)||
+           Number(player.td)||Number(player.cas)||Number(player.mvp)||
+           String(player.injuryResult||'').trim();
+  });
+
+  if(!meaningfulPlayers.length){
+    const row=document.createElement('tr');
+    const cell=document.createElement('td');
+
+    cell.colSpan=3;
+    cell.textContent='No player statistics or injuries recorded.';
+
+    row.appendChild(cell);
+    reviewPlayers.appendChild(row);
+  }
+  else{
+    meaningfulPlayers.forEach(function(player){
+      const row=document.createElement('tr');
+
+      const number=document.createElement('td');
+      number.textContent=player.playerNumber;
+
+      const name=document.createElement('td');
+      name.textContent=player.playerName;
+
+      const resultCell=document.createElement('td');
+
+      const parts=[];
+
+      if(player.comp) parts.push('COMP '+player.comp);
+      if(player.ttm) parts.push('TTM '+player.ttm);
+      if(player.land) parts.push('LAND '+player.land);
+      if(player.int) parts.push('INT '+player.int);
+      if(player.td) parts.push('TD '+player.td);
+      if(player.cas) parts.push('CAS '+player.cas);
+      if(player.mvp) parts.push('MVP '+player.mvp);
+
+      if(player.injuryResult){
+        parts.push(
+          player.injuryResult==='Lasting Injury'
+            ?'Lasting Injury — '+player.lastingInjury
+            :player.injuryResult
+        );
+      }
+
+      resultCell.textContent=parts.join(' | ');
+
+      row.appendChild(number);
+      row.appendChild(name);
+      row.appendChild(resultCell);
+
+      reviewPlayers.appendChild(row);
+    });
+  }
+
+  reviewNotes.textContent=payload.coachNotes||'None';
+
+  reviewMessage.className='coach-game-review-warning';
+  reviewMessage.textContent='Check the information carefully before submitting. Once submitted, this game will be sent for opponent comparison and commissioner review.';
+
+  modal.hidden=true;
+  reviewModal.hidden=false;
+
+  document.removeEventListener('keydown',handleKey);
+
+  backButton.onclick=function(){
+    reviewModal.hidden=true;
+    modal.hidden=false;
+    document.addEventListener('keydown',handleKey);
+  };
+
+  submitButton.onclick=async function(){
+    submitButton.disabled=true;
+    submitButton.textContent='Submitting...';
+
+    reviewMessage.className='coach-game-review-warning';
+    reviewMessage.textContent='Submitting game...';
+
+    try{
+      const submitted=await coachApiSubmitGameSubmissionRequest(accessCode,payload);
+
+      if(!submitted||submitted.ok!==true||submitted.submitted!==true){
+        throw new Error(submitted&&submitted.error?submitted.error:'The game could not be submitted.');
+      }
+
+      reviewModal.hidden=true;
+      modal.hidden=true;
+
+      let successMessage='Game submission received.';
+
+      if(submitted.validationStatus==='Awaiting Opponent'){
+        successMessage+=' Waiting for the opposing coach submission.';
+      }
+      else if(submitted.validationStatus==='Matched'){
+        successMessage+=' Both coach submissions match.';
+      }
+      else if(submitted.validationStatus==='Mismatch'){
+        successMessage+=' A mismatch was detected and has been flagged for commissioner review.';
+      }
+
+      alert(successMessage);
+
+      coachApiRequest(accessCode)
+        .then(function(data){
+          if(data&&data.ok===true) renderCoachPortal(data);
+        })
+        .catch(function(refreshError){
+          console.error('Coach Portal refresh failed:',refreshError);
+        });
+    }
+    catch(error){
+      reviewMessage.className='coach-game-review-warning is-error';
+      reviewMessage.textContent=error&&error.message?error.message:'The game submission failed.';
+    }
+    finally{
+      submitButton.disabled=false;
+      submitButton.textContent='Submit Game';
+    }
+  };
+}
+
+// =====================================================
+// VALIDATE THEN REVIEW
+// =====================================================
+reviewButton.onclick=function(){
+  message.className='coach-game-submission-message';
+
+  const home=scoreValue(homeScore);
+  const away=scoreValue(awayScore);
+
+  if(home===null||away===null){
+    message.classList.add('is-error');
+    message.textContent='Enter both final scores.';
+    return;
+  }
+
+  if(!homeFair.value||!awayFair.value){
+    message.classList.add('is-error');
+    message.textContent='Enter both Fair-Weather D3 rolls.';
+    return;
+  }
+
+  if(!homeStalled.value||!awayStalled.value){
+    message.classList.add('is-error');
+    message.textContent='Select Stalled? for both teams.';
+    return;
+  }
+
+  if(home!==away&&(!homeDfRoll.value||!awayDfRoll.value)){
+    message.classList.add('is-error');
+    message.textContent='Enter both Post-Game Dedicated Fans D6 rolls.';
+    return;
+  }
+
+  const statInputs=Array.from(body.querySelectorAll('input.coach-game-submission-stat'));
+
+  const invalidStat=statInputs.find(function(input){
+    const value=String(input.value||'').trim();
+
+    if(value==='') return false;
+    if(!/^\d+$/.test(value)) return true;
+
+    const max=input.dataset.max!==''?Number(input.dataset.max):null;
+
+    return max!==null&&Number(value)>max;
+  });
+
+  if(invalidStat){
+    invalidStat.focus();
+    message.classList.add('is-error');
+    message.textContent='Player stat entries must be whole numbers.';
+    return;
+  }
+
+  const injuryCells=Array.from(body.querySelectorAll('.coach-submit-injury-cell'));
+
+  const missingLasting=injuryCells.find(function(cell){
+    const injury=cell.querySelector('.coach-submit-injury-result');
+    const lasting=cell.querySelector('.coach-submit-lasting-injury');
+
+    return injury&&lasting&&injury.value==='Lasting Injury'&&!lasting.value;
+  });
+
+  if(missingLasting){
+    missingLasting.querySelector('.coach-submit-lasting-injury').focus();
+    message.classList.add('is-error');
+    message.textContent='Select the specific Lasting Injury.';
+    return;
+  }
+
+  const payload=collectGameSubmissionPayload();
+
+  message.classList.add('is-success');
+  message.textContent='Entries look valid. Opening Final Review...';
+
+  openFinalGameReview(payload);
+};
+    
     // =====================================================
     // CLOSE MODAL
     // =====================================================
