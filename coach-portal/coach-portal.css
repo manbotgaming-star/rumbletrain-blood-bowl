@@ -2008,9 +2008,9 @@ strong {
 .coach-game-submission-stat { width:38px; box-sizing:border-box; padding:5px 2px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; text-align:center; }
 select.coach-game-submission-stat { width:42px; text-align-last:center; }
 
-.coach-submit-injury-cell { min-width:180px; }
+.coach-submit-injury-cell { min-width:180px; display:grid; grid-template-rows:auto auto; gap:4px; }
 .coach-submit-injury-result,.coach-submit-lasting-injury { width:100%; box-sizing:border-box; padding:5px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
-.coach-submit-lasting-injury { margin-top:4px; }
+.coach-submit-lasting-injury.is-hidden { visibility:hidden; pointer-events:none; }
 
 /* POST-GAME DEDICATED FANS */
 .coach-submit-post-df { width:100%; border-collapse:collapse; }
