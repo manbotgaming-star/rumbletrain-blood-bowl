@@ -3317,7 +3317,19 @@ async function openCoachGameSubmissionPreview(launchButton){
       number.textContent=displayValue(player.playerNumber);
 
       const name=document.createElement('td');
-      name.textContent=String(player.playerName||'')+(player.isJourneyman?' (JM)':'');
+      name.className='coach-game-submission-player-cell';
+      
+      const nameText=document.createElement('span');
+      nameText.className='coach-game-submission-player-name';
+      nameText.textContent=String(player.playerName||'');
+      name.appendChild(nameText);
+      
+      if(player.isJourneyman){
+        const jmTag=document.createElement('span');
+        jmTag.className='coach-game-submission-jm';
+        jmTag.textContent='JM';
+        name.appendChild(jmTag);
+      }
 
       const position=document.createElement('td');
       position.textContent=displayValue(player.position);
