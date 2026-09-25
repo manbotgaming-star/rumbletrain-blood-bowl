@@ -3225,7 +3225,6 @@ function renderCoachGames(games,team,coach){
   refreshCoachGameSubmissionButton();
 }
 
-
 // =====================================================
 // POST-GAME SUBMISSION - AVAILABLE GAME BUTTON
 // =====================================================
@@ -3236,31 +3235,54 @@ async function refreshCoachGameSubmissionButton(){
   try{
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
 
-    if(!result||result.ok!==true||result.canSubmit!==true||!result.game) return;
+    if(!result||result.ok!==true||!result.game) return;
 
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
       return item.dataset.gameId===String(result.game.gameId||'');
     });
 
-    if(!card||card.querySelector('.coach-game-submit-button')) return;
+    if(!card) return;
 
-    const button=document.createElement('button');
-    button.type='button';
-    button.className='coach-game-submit-button';
-    button.textContent='Submit Game';
+    let button=card.querySelector('.coach-game-submit-button');
 
-    button.onclick=function(){
-      openCoachGameSubmissionPreview(button);
-    };
+    if(!button){
+      button=document.createElement('button');
+      button.type='button';
+      button.className='coach-game-submit-button';
+      card.appendChild(button);
+    }
 
-    card.appendChild(button);
+    // ---------------------------------------------------
+    // ALREADY SUBMITTED
+    // ---------------------------------------------------
+    if(result.existingSubmission){
+      button.disabled=true;
+      button.textContent='Game Submitted';
+      button.title='This game has already been submitted.';
+      button.onclick=null;
+      return;
+    }
+
+    // ---------------------------------------------------
+    // AVAILABLE TO SUBMIT
+    // ---------------------------------------------------
+    if(result.canSubmit===true){
+      button.disabled=false;
+      button.textContent='Submit Game';
+      button.title='';
+      button.onclick=function(){
+        openCoachGameSubmissionPreview(button);
+      };
+      return;
+    }
+
+    button.remove();
   }
   catch(error){
     console.error('Post-game submission availability check failed:',error);
   }
 }
-
 
 // =====================================================
 // POST-GAME SUBMISSION - GAME DAY PACK ENTRY FORM
@@ -3688,7 +3710,7 @@ function openFinalGameReview(payload){
   reviewNotes.textContent=payload.coachNotes||'None';
 
   reviewMessage.className='coach-game-review-warning';
-  reviewMessage.textContent='Check the information carefully before submitting. Once submitted, this game will be sent for opponent comparison and commissioner review.';
+  reviewMessage.textContent='Check the information carefully before submitting. Once submitted, this game will be sent to the commissioner for review.';
 
   modal.hidden=true;
   reviewModal.hidden=false;
@@ -3718,19 +3740,7 @@ function openFinalGameReview(payload){
       reviewModal.hidden=true;
       modal.hidden=true;
 
-      let successMessage='Game submission received.';
-
-      if(submitted.validationStatus==='Awaiting Opponent'){
-        successMessage+=' Waiting for the opposing coach submission.';
-      }
-      else if(submitted.validationStatus==='Matched'){
-        successMessage+=' Both coach submissions match.';
-      }
-      else if(submitted.validationStatus==='Mismatch'){
-        successMessage+=' A mismatch was detected and has been flagged for commissioner review.';
-      }
-
-      alert(successMessage);
+      alert('Game submission received successfully.');
 
       coachApiRequest(accessCode)
         .then(function(data){
