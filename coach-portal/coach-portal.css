@@ -1963,22 +1963,80 @@ strong {
    POST-GAME SUBMISSION
    ============================================================ */
 
-.coach-game-submit-button {
-  width:100%;
-  margin-top:10px;
-  padding:8px 10px;
-  border:1px solid var(--ink);
-  border-radius:5px;
-  background:var(--ink);
-  color:#fff;
-  font-family:inherit;
-  font-weight:800;
-  text-transform:uppercase;
-  cursor:pointer;
-}
-
+.coach-game-submit-button { width:100%; margin-top:10px; padding:8px 10px; border:1px solid var(--ink); border-radius:5px; background:var(--ink); color:#fff; font-family:inherit; font-weight:800; text-transform:uppercase; cursor:pointer; }
 .coach-game-submit-button:hover:not(:disabled) { background:#1c5367; }
 .coach-game-submit-button:disabled { opacity:.55; cursor:wait; }
+
+.coach-game-submission-card { width:min(1180px,calc(100vw - 32px)); max-height:92vh; overflow:auto; }
+.coach-submit-header h2 { margin-bottom:4px; }
+#coach-game-submission-summary { color:var(--ink-muted); font-size:12px; }
+
+.coach-submit-section-title { margin:16px 0 6px; color:var(--ink); font-size:18px; font-weight:800; text-transform:uppercase; }
+
+/* PRE-GAME FANS */
+.coach-submit-fan-scroll { overflow-x:auto; }
+.coach-submit-fan-flow { min-width:1000px; display:grid; grid-template-columns:1fr 22px 1fr 22px 1fr 22px 1.25fr 22px 1fr 22px 1fr 22px 1fr; align-items:center; gap:4px; }
+.coach-submit-fan-box { min-height:58px; padding:7px; border:1px solid var(--line-dark); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:#f9fbfc; }
+.coach-submit-fan-box span { font-size:10px; font-weight:800; }
+.coach-submit-fan-box small { font-size:9px; color:var(--ink-muted); }
+.coach-submit-fan-box strong { margin-top:3px; font-size:18px; }
+.coach-submit-fan-box select { width:54px; margin-top:3px; padding:3px; text-align:center; text-align-last:center; }
+.coach-submit-fan-total { border:2px solid var(--ink); background:#fff; }
+.coach-submit-arrow { text-align:center; font-size:20px; font-weight:800; }
+
+/* HOME / AWAY SCORE */
+.coach-submit-matchup { margin:8px 0 14px; display:grid; grid-template-columns:auto 105px minmax(165px,1fr) 48px 26px 48px minmax(165px,1fr) 105px auto; gap:8px; align-items:center; }
+.coach-submit-side { font-size:18px; font-weight:800; }
+.coach-submit-team { font-size:17px; font-weight:800; text-align:center; }
+.coach-submit-vs { text-align:center; font-weight:800; }
+.coach-submit-score { width:48px; height:38px; box-sizing:border-box; border:1px solid var(--ink); border-radius:5px; font-family:inherit; font-size:20px; font-weight:800; text-align:center; }
+.coach-submit-stall { padding:4px 6px; border:1px solid var(--line-dark); border-radius:6px; text-align:center; }
+.coach-submit-stall span { display:block; font-size:9px; font-weight:800; }
+.coach-submit-stall select { width:72px; border:0; background:transparent; font-family:inherit; text-align:center; text-align-last:center; }
+
+/* PLAYER GAME STATS */
+.coach-game-submission-table { width:100%; min-width:1040px; border-collapse:collapse; margin:0; }
+.coach-game-submission-table th,.coach-game-submission-table td { padding:5px 6px; border:1px solid var(--line); vertical-align:middle; }
+.coach-game-submission-table th { background:var(--ink); color:#fff; font-size:10px; text-align:center; white-space:nowrap; }
+.coach-game-submission-table td { text-align:center; }
+.coach-game-submission-table th:nth-child(2),.coach-game-submission-table th:nth-child(3),.coach-game-submission-table th:nth-child(11),.coach-game-submission-table td:nth-child(2),.coach-game-submission-table td:nth-child(3),.coach-game-submission-table td:nth-child(11) { text-align:left; }
+
+.coach-game-submission-player-cell { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.coach-game-submission-player-name { flex:1; min-width:0; text-align:left; }
+.coach-game-submission-jm { flex:0 0 auto; min-width:22px; padding:1px 4px; border:1px solid var(--line-dark); border-radius:999px; background:#eef4f6; color:var(--ink); font-size:9px; font-weight:800; text-align:center; }
+
+.coach-game-submission-stat { width:38px; box-sizing:border-box; padding:5px 2px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; text-align:center; }
+select.coach-game-submission-stat { width:42px; text-align-last:center; }
+
+.coach-submit-injury-cell { min-width:180px; }
+.coach-submit-injury-result,.coach-submit-lasting-injury { width:100%; box-sizing:border-box; padding:5px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
+.coach-submit-lasting-injury { margin-top:4px; }
+
+/* POST-GAME DEDICATED FANS */
+.coach-submit-post-df { width:100%; border-collapse:collapse; }
+.coach-submit-post-df th,.coach-submit-post-df td { padding:7px 8px; border:1px solid var(--line-dark); text-align:center; }
+.coach-submit-post-df th { background:var(--ink); color:#fff; font-size:10px; }
+.coach-submit-post-df td:first-child { text-align:left; font-weight:800; }
+.coach-submit-post-df select { min-width:58px; padding:4px; text-align:center; text-align-last:center; }
+
+/* NOTES / ACTIONS */
+.coach-submit-notes-label { display:block; margin-top:14px; font-size:12px; font-weight:800; }
+#coach-game-submission-notes { width:100%; box-sizing:border-box; margin-top:5px; padding:8px; border:1px solid var(--line-dark); border-radius:5px; resize:vertical; font-family:inherit; }
+
+.coach-game-submission-message { min-height:20px; margin:10px 0; color:var(--ink-muted); font-size:12px; }
+.coach-game-submission-message.is-error { color:var(--danger); font-weight:800; }
+.coach-game-submission-message.is-success { color:var(--success); font-weight:800; }
+
+.coach-game-submission-actions { display:flex; justify-content:flex-end; gap:10px; }
+#coach-game-submission-close,#coach-game-submission-review { padding:10px 18px; border-radius:5px; font-family:inherit; font-weight:800; text-transform:uppercase; cursor:pointer; }
+#coach-game-submission-close { border:1px solid var(--line-dark); background:#fff; color:var(--ink-dark); }
+#coach-game-submission-review { border:1px solid var(--ink); background:var(--ink); color:#fff; }
+
+/* MOBILE */
+@media (max-width:850px) {
+  .coach-game-submission-card { width:calc(100vw - 20px); }
+  .coach-submit-matchup { min-width:980px; }
+}
 
 /* ============================================================
    SUBMISSION MODAL
