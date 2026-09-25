@@ -931,6 +931,17 @@ function coachApiGetGameSubmissionOptionsRequest(accessCode){
   );
 }
 
+function coachApiSubmitGameSubmissionRequest(accessCode,payload){
+  return coachApiPlayerRequest(
+    'coachgamesubmit',
+    {
+      code:accessCode,
+      payload:JSON.stringify(payload)
+    },
+    'Unable to submit the game.'
+  );
+}
+
 function coachApiGetPlayerPurchaseOptionsRequest(accessCode) {
   return coachApiPlayerRequest('coachplayeroptions',{code:accessCode},'Unable to load Buy Player options.');
 }
