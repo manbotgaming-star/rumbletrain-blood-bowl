@@ -3586,7 +3586,6 @@ async function openCoachGameSubmissionPreview(launchButton){
     }
 
     closeButton.onclick=closeModal;
-    modal.onclick=function(event){ if(event.target===modal) closeModal(); };
     document.addEventListener('keydown',handleKey);
 
     modal.hidden=false;
