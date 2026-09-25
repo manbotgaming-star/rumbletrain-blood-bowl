@@ -3286,9 +3286,11 @@ async function openCoachGameSubmissionPreview(launchButton){
     const homeFactor=document.getElementById('coach-submit-home-factor');
     const awayFactor=document.getElementById('coach-submit-away-factor');
     const attendance=document.getElementById('coach-submit-fan-attendance');
-
+    
     const homeTeam=document.getElementById('coach-submit-home-team');
     const awayTeam=document.getElementById('coach-submit-away-team');
+    const homeIcon=document.getElementById('coach-submit-home-icon');
+    const awayIcon=document.getElementById('coach-submit-away-icon');
     const homeScore=document.getElementById('coach-submit-home-score');
     const awayScore=document.getElementById('coach-submit-away-score');
     const homeStalled=document.getElementById('coach-submit-home-stalled');
@@ -3311,6 +3313,22 @@ async function openCoachGameSubmissionPreview(launchButton){
 
     homeTeam.textContent=String(game.homeTeam||'HOME TEAM').toUpperCase();
     awayTeam.textContent=String(game.awayTeam||'AWAY TEAM').toUpperCase();
+
+    function setSubmitTeamIcon(img,url,altText){
+      if(!img) return;
+      if(url){
+        img.src=url;
+        img.alt=altText||'';
+        img.classList.remove('is-empty');
+      } else {
+        img.removeAttribute('src');
+        img.alt='';
+        img.classList.add('is-empty');
+      }
+    }
+
+    setSubmitTeamIcon(homeIcon,game.homeIconUrl||game.homeLogoUrl||'',String(game.homeTeam||'Home Team')+' icon');
+    setSubmitTeamIcon(awayIcon,game.awayIconUrl||game.awayLogoUrl||'',String(game.awayTeam||'Away Team')+' icon');
 
     homeDfBefore.textContent=displayValue(game.homeDfBefore);
     awayDfBefore.textContent=displayValue(game.awayDfBefore);
