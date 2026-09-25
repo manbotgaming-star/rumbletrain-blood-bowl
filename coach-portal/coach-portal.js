@@ -3423,8 +3423,7 @@ async function openCoachGameSubmissionPreview(launchButton){
 
     function createLastingSelect(){
       const select=document.createElement('select');
-      select.className='coach-submit-lasting-injury';
-      select.hidden=true;
+      select.className='coach-submit-lasting-injury is-hidden';
       select.innerHTML=
         '<option value="">Select Lasting Injury</option>'+
         '<option value="Head Injury">Head Injury</option>'+
@@ -3485,8 +3484,9 @@ async function openCoachGameSubmissionPreview(launchButton){
       const lastingSelect=createLastingSelect();
 
       injurySelect.onchange=function(){
-        lastingSelect.hidden=injurySelect.value!=='Lasting Injury';
-        if(injurySelect.value!=='Lasting Injury') lastingSelect.value='';
+        const showLasting=injurySelect.value==='Lasting Injury';
+        lastingSelect.classList.toggle('is-hidden',!showLasting);
+        if(!showLasting) lastingSelect.value='';
       };
 
       injury.appendChild(injurySelect);
