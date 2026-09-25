@@ -912,6 +912,17 @@ button {
   color: #811d1d;
 }
 
+/* ============================================================
+   RETIRED PLAYER
+   ============================================================ */
+
+.coach-player-retired {
+  background: #eeeeee !important;
+}
+
+.coach-player-retired td {
+  color: #777777;
+} 
 
 /* ============================================================
    SMALL UTILITY DETAILS
