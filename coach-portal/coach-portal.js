@@ -1414,6 +1414,8 @@ async function openCoachPlayerPurchase() {
     const canOpen=result.canBuy===true||canHireJourneyman;
 
     if(!canOpen) throw new Error(result.reason||'No player is currently available to purchase.');
+    
+    applyCoachBuyPlayerButtonState(result);
 
     showCoachPlayerPurchaseModal(accessCode,result);
   }
