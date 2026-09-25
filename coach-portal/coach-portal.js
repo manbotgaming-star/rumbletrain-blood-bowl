@@ -1477,35 +1477,44 @@ function showCoachPlayerPurchaseModal(accessCode,options){
 
   // ---------------------------------------------------
   // PLAYER NUMBER OPTIONS
-  // New Player = unreserved available numbers.
-  // Journeyman = fixed number already assigned to him.
+  // New Player = unreserved permanent numbers.
+  // Journeyman = legal permanent numbers for that JM.
   // ---------------------------------------------------
   function loadPlayerNumbers(){
     numberSelect.innerHTML='';
   
+    let available=numbers;
+    let preferredNumber=0;
+  
     if(typeSelect.value==='journeyman'){
       const selected=selectedJourneyman();
-      const number=selected?Number(selected.journeymanNumber):0;
   
-      if(Number.isInteger(number)&&number>=1&&number<=16){
-        const option=document.createElement('option');
-        option.value=String(number);
-        option.textContent='#'+number;
-        numberSelect.appendChild(option);
-      }
+      available=
+        selected&&Array.isArray(selected.availableNumbers)
+          ?selected.availableNumbers
+          :[];
   
-      numberSelect.disabled=true;
-      return;
+      preferredNumber=
+        selected
+          ?Number(selected.journeymanNumber)
+          :0;
     }
   
-    numberSelect.disabled=false;
-  
-    numbers.forEach(function(number){
+    available.forEach(function(number){
       const option=document.createElement('option');
       option.value=String(number);
       option.textContent='#'+number;
       numberSelect.appendChild(option);
     });
+  
+    numberSelect.disabled=false;
+  
+    if(
+      typeSelect.value==='journeyman' &&
+      available.includes(preferredNumber)
+    ){
+      numberSelect.value=String(preferredNumber);
+    }
   }
 
   function loadPurchaseType(){
@@ -1646,7 +1655,7 @@ if(typeSelect.value==='journeyman'){
   const selected=selectedJourneyman();
 
   if(!selected||!playerNumber){
-    message.textContent='Choose a Journeyman with a valid player number.';
+    message.textContent='Choose a Journeyman and an available player number.';
     refreshState();
     return;
   }
