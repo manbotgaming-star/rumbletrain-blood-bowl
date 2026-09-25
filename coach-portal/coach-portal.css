@@ -1958,3 +1958,65 @@ strong {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   POST-GAME SUBMISSION
+   ============================================================ */
+
+.coach-game-submit-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: var(--ink);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.coach-game-submit-button:hover:not(:disabled) { background: #1c5367; }
+.coach-game-submit-button:disabled { opacity: 0.55; cursor: wait; }
+
+.coach-game-submission-card {
+  width: min(820px, calc(100vw - 32px));
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.coach-game-submission-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.coach-game-submission-table th,
+.coach-game-submission-table td {
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.coach-game-submission-table th {
+  background: var(--ink);
+  color: #fff;
+}
+
+.coach-game-submission-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#coach-game-submission-close {
+  padding: 10px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: var(--ink);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
