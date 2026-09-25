@@ -920,6 +920,17 @@ function coachApiPlayerRequest(view,params,errorMessage) {
   });
 }
 
+// =====================================================
+// COACH GAME SUBMISSION OPTIONS
+// =====================================================
+function coachApiGetGameSubmissionOptionsRequest(accessCode){
+  return coachApiPlayerRequest(
+    'coachgamesubmissionoptions',
+    {code:accessCode},
+    'Unable to load post-game submission options.'
+  );
+}
+
 function coachApiGetPlayerPurchaseOptionsRequest(accessCode) {
   return coachApiPlayerRequest('coachplayeroptions',{code:accessCode},'Unable to load Buy Player options.');
 }
@@ -3181,82 +3192,31 @@ function renderCoachGames(
 
   games.forEach(
     function(game) {
+      const card = document.createElement('div');
+        card.className ='coach-game-card';
+        card.dataset.gameId=String(game.gameId||'');
+      const round = document.createElement('div');
+        round.className = 'coach-game-round';
+        round.textContent = game.round
+            ? 'Round ' + game.round
+            : game.gameId || 'Fixture';
+      const matchup = document.createElement('strong');
+      const home =  game.homeTeamName ||
+        displayTeamForGame(game.homeTeamId,team,coach);
+      const away =  game.awayTeamName ||
+        displayTeamForGame(game.awayTeamId,team,coach);
+      matchup.textContent = home + ' vs ' + away;
 
-      const card =
-        document.createElement(
-          'div'
-        );
+      const details = document.createElement('div');
 
-
-      card.className =
-        'coach-game-card';
-
-
-      const round =
-        document.createElement(
-          'div'
-        );
-
-
-      round.className =
-        'coach-game-round';
-
-
-      round.textContent =
-        game.round
-          ? 'Round ' + game.round
-          : game.gameId || 'Fixture';
-
-
-      const matchup =
-        document.createElement(
-          'strong'
-        );
-
-
-      const home =
-        game.homeTeamName ||
-        displayTeamForGame(
-          game.homeTeamId,
-          team,
-          coach
-        );
-      
-      
-      const away =
-        game.awayTeamName ||
-        displayTeamForGame(
-          game.awayTeamId,
-          team,
-          coach
-        );
-
-
-      matchup.textContent =
-        home +
-        ' vs ' +
-        away;
-
-
-      const details =
-        document.createElement(
-          'div'
-        );
-
-
-      details.className =
-        'coach-game-details';
-
+      details.className = 'coach-game-details';
 
       const detailParts =
         [];
 
 
       if (game.gameId) {
-
-        detailParts.push(
-          game.gameId
-        );
+        detailParts.push(game.gameId);
       }
 
 
