@@ -324,7 +324,7 @@
   </div>
 
 <!-- =====================================================
-     POST-GAME SUBMISSION PREVIEW
+     POST-GAME SUBMISSION
 ====================================================== -->
 
 <div id="coach-game-submission-modal" class="coach-purchase-modal" hidden>
@@ -334,22 +334,91 @@
 
     <p id="coach-game-submission-summary"></p>
 
+    <!-- =================================================
+         GAME RESULT
+    ================================================== -->
+    <div class="coach-game-submission-result-grid">
+
+      <label>
+        Your Score
+        <input id="coach-game-submission-team-score" type="number" min="0" max="99" step="1">
+      </label>
+
+      <label>
+        Opponent Score
+        <input id="coach-game-submission-opponent-score" type="number" min="0" max="99" step="1">
+      </label>
+
+      <label>
+        Your Team Stalled?
+        <select id="coach-game-submission-team-stalled">
+          <option value="">-</option>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </label>
+
+      <label>
+        Opponent Stalled?
+        <select id="coach-game-submission-opponent-stalled">
+          <option value="">-</option>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </label>
+
+      <label>
+        DF Roll
+        <input id="coach-game-submission-df-roll" type="number" min="1" max="6" step="1">
+      </label>
+
+    </div>
+
+    <!-- =================================================
+         PLAYER GAME STATS
+    ================================================== -->
     <div class="coach-table-wrap">
+
       <table class="coach-game-submission-table">
+
         <thead>
           <tr>
             <th>#</th>
             <th>Player</th>
             <th>Position</th>
+            <th>COMP</th>
+            <th>TTM</th>
+            <th>LAND</th>
+            <th>INT</th>
+            <th>TD</th>
+            <th>CAS</th>
+            <th>MVP</th>
+            <th>Injury / Result</th>
           </tr>
         </thead>
 
         <tbody id="coach-game-submission-players"></tbody>
+
       </table>
+
+    </div>
+
+    <!-- =================================================
+         COACH NOTES
+    ================================================== -->
+    <label class="coach-game-submission-notes-label" for="coach-game-submission-notes">
+      Coach Notes
+    </label>
+
+    <textarea id="coach-game-submission-notes" rows="3" maxlength="500"></textarea>
+
+    <div id="coach-game-submission-message" class="coach-game-submission-message">
+      Preview only — nothing will be submitted to the league yet.
     </div>
 
     <div class="coach-game-submission-actions">
       <button id="coach-game-submission-close" type="button">Close</button>
+      <button id="coach-game-submission-review" type="button">Review Entries</button>
     </div>
 
   </div>
