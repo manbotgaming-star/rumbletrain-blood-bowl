@@ -1985,7 +1985,7 @@ strong {
 .coach-submit-arrow { text-align:center; font-size:20px; font-weight:800; }
 
 /* HOME / AWAY SCORE */
-.coach-submit-matchup { margin:8px 0 14px; display:grid; grid-template-columns:auto 105px minmax(165px,1fr) 48px 26px 48px minmax(165px,1fr) 105px auto; gap:8px; align-items:center; }
+.coach-submit-matchup { margin:8px 0 14px; display:grid; grid-template-columns:auto 92px minmax(165px,1fr) 40px 48px 26px 48px 40px minmax(165px,1fr) 92px auto; gap:8px; align-items:center; }
 .coach-submit-side { font-size:18px; font-weight:800; }
 .coach-submit-team { font-size:17px; font-weight:800; text-align:center; }
 .coach-submit-vs { text-align:center; font-weight:800; }
@@ -1993,6 +1993,8 @@ strong {
 .coach-submit-stall { padding:4px 6px; border:1px solid var(--line-dark); border-radius:6px; text-align:center; }
 .coach-submit-stall span { display:block; font-size:9px; font-weight:800; }
 .coach-submit-stall select { width:72px; border:0; background:transparent; font-family:inherit; text-align:center; text-align-last:center; }
+.coach-submit-team-icon { width:32px; height:32px; object-fit:contain; justify-self:center; align-self:center; }
+.coach-submit-team-icon.is-empty { opacity:0; }
 
 /* PLAYER GAME STATS */
 .coach-game-submission-table { width:100%; min-width:1040px; border-collapse:collapse; margin:0; }
