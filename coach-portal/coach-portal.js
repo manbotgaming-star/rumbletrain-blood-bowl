@@ -3160,161 +3160,225 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
 // =====================================================
 // FIXTURES
 // =====================================================
+function renderCoachGames(games,team,coach){
+  const container=document.getElementById('coach-games');
+  if(!container) return;
 
-function renderCoachGames(
-  games,
-  team,
-  coach
-) {
+  container.innerHTML='';
 
-  const container =
-    document.getElementById(
-      'coach-games'
-    );
-
-
-  if (!container) {
+  if(!games.length){
+    container.textContent='No fixtures available.';
     return;
   }
 
+  games.forEach(function(game){
+    const card=document.createElement('div');
+    card.className='coach-game-card';
+    card.dataset.gameId=String(game.gameId||'');
 
-  container.innerHTML = '';
+    const round=document.createElement('div');
+    round.className='coach-game-round';
+    round.textContent=game.round?'Round '+game.round:(game.gameId||'Fixture');
 
+    const matchup=document.createElement('strong');
+    const home=game.homeTeamName||displayTeamForGame(game.homeTeamId,team,coach);
+    const away=game.awayTeamName||displayTeamForGame(game.awayTeamId,team,coach);
+    matchup.textContent=home+' vs '+away;
 
-  if (!games.length) {
+    const details=document.createElement('div');
+    details.className='coach-game-details';
 
-    container.textContent =
-      'No fixtures available.';
+    const detailParts=[];
 
-    return;
-  }
+    if(game.gameId) detailParts.push(game.gameId);
+    if(game.date) detailParts.push(game.date);
+    if(game.status) detailParts.push(game.status);
 
-
-  games.forEach(
-    function(game) {
-      const card = document.createElement('div');
-        card.className ='coach-game-card';
-        card.dataset.gameId=String(game.gameId||'');
-      const round = document.createElement('div');
-        round.className = 'coach-game-round';
-        round.textContent = game.round
-            ? 'Round ' + game.round
-            : game.gameId || 'Fixture';
-      const matchup = document.createElement('strong');
-      const home =  game.homeTeamName ||
-        displayTeamForGame(game.homeTeamId,team,coach);
-      const away =  game.awayTeamName ||
-        displayTeamForGame(game.awayTeamId,team,coach);
-      matchup.textContent = home + ' vs ' + away;
-
-      const details = document.createElement('div');
-
-      details.className = 'coach-game-details';
-
-      const detailParts =
-        [];
-
-
-      if (game.gameId) {
-        detailParts.push(game.gameId);
-      }
-
-
-      if (game.date) {
-
-        detailParts.push(
-          game.date
-        );
-      }
-
-
-      if (game.status) {
-
-        detailParts.push(
-          game.status
-        );
-      }
-
-
-      if (
-        game.homeScore !== '' &&
-        game.homeScore !== null &&
-        game.homeScore !== undefined &&
-        game.awayScore !== '' &&
-        game.awayScore !== null &&
-        game.awayScore !== undefined
-      ) {
-
-        detailParts.push(
-          'Score ' +
-          game.homeScore +
-          '-' +
-          game.awayScore
-        );
-      }
-
-
-      details.textContent =
-        detailParts.join(
-          ' | '
-        );
-
-
-      card.appendChild(
-        round
-      );
-
-      card.appendChild(
-        matchup
-      );
-
-      card.appendChild(
-        details
-      );
-
-
-      container.appendChild(
-        card
-      );
+    if(
+      game.homeScore!==''&&game.homeScore!==null&&game.homeScore!==undefined &&
+      game.awayScore!==''&&game.awayScore!==null&&game.awayScore!==undefined
+    ){
+      detailParts.push('Score '+game.homeScore+'-'+game.awayScore);
     }
-  );
+
+    details.textContent=detailParts.join(' | ');
+
+    card.appendChild(round);
+    card.appendChild(matchup);
+    card.appendChild(details);
+    container.appendChild(card);
+  });
+
+  // Check the server and add SUBMIT GAME only to the
+  // fixture currently eligible for post-game submission.
+  refreshCoachGameSubmissionButton();
 }
 
 
-function displayTeamForGame(
-  teamId,
-  team,
-  coach
-) {
+// =====================================================
+// POST-GAME SUBMISSION - AVAILABLE GAME BUTTON
+// =====================================================
+async function refreshCoachGameSubmissionButton(){
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+  if(!accessCode) return;
 
-  const id =
-    String(
-      teamId || ''
-    ).trim();
+  try{
+    const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
+
+    if(!result||result.ok!==true||result.canSubmit!==true||!result.game) return;
+
+    const cards=Array.from(document.querySelectorAll('.coach-game-card'));
+    const card=cards.find(function(item){
+      return item.dataset.gameId===String(result.game.gameId||'');
+    });
+
+    if(!card||card.querySelector('.coach-game-submit-button')) return;
+
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='coach-game-submit-button';
+    button.textContent='Submit Game';
+
+    button.onclick=function(){
+      openCoachGameSubmissionPreview(button);
+    };
+
+    card.appendChild(button);
+  }
+  catch(error){
+    console.error('Post-game submission availability check failed:',error);
+  }
+}
 
 
-  const ownId =
-    String(
-      team.teamId ||
-      coach.teamId ||
-      ''
-    ).trim();
+// =====================================================
+// POST-GAME SUBMISSION - READ ONLY PREVIEW
+// =====================================================
+async function openCoachGameSubmissionPreview(launchButton){
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
 
+  const modal=document.getElementById('coach-game-submission-modal');
+  const summary=document.getElementById('coach-game-submission-summary');
+  const body=document.getElementById('coach-game-submission-players');
+  const closeButton=document.getElementById('coach-game-submission-close');
 
-  if (
-    id &&
-    id === ownId
-  ) {
-
-    return (
-      team.teamName ||
-      coach.teamName ||
-      id
-    );
+  if(!accessCode){
+    alert('Your Coach Portal session has expired. Please log in again.');
+    return;
   }
 
+  if(!modal||!summary||!body||!closeButton){
+    alert('The Game Submission window could not be opened.');
+    return;
+  }
 
-  return id || '-';
+  if(launchButton){
+    launchButton.disabled=true;
+    launchButton.textContent='Loading...';
+  }
+
+  try{
+    const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
+
+    if(!result||result.ok!==true||!result.game){
+      throw new Error(
+        result&&result.error
+          ?result.error
+          :'Unable to load the game submission.'
+      );
+    }
+
+    if(result.canSubmit!==true){
+      throw new Error(
+        result.reason||'This game is not currently available for submission.'
+      );
+    }
+
+    const game=result.game;
+    const team=result.team||{};
+
+    const matchup=
+      String(game.side||'').toUpperCase()==='HOME'
+        ?String(team.teamName||'Team')+' vs '+String(game.opponentTeam||'Opponent')
+        :String(game.opponentTeam||'Opponent')+' vs '+String(team.teamName||'Team');
+
+    summary.innerHTML=
+      '<strong>Round '+escapePortalHtml(game.round)+'</strong> — '+
+      escapePortalHtml(matchup)+
+      '<br>'+
+      escapePortalHtml(game.gameId)+' | '+escapePortalHtml(game.side);
+
+    body.innerHTML='';
+
+    (result.players||[]).forEach(function(player){
+      const row=document.createElement('tr');
+
+      const number=document.createElement('td');
+      number.textContent=displayValue(player.playerNumber);
+
+      const name=document.createElement('td');
+      name.textContent=String(player.playerName||'')+(player.isJourneyman?' (JM)':'');
+
+      const position=document.createElement('td');
+      position.textContent=displayValue(player.position);
+
+      row.appendChild(number);
+      row.appendChild(name);
+      row.appendChild(position);
+
+      body.appendChild(row);
+    });
+
+    modal.hidden=false;
+
+    function closeModal(){
+      modal.hidden=true;
+      closeButton.onclick=null;
+      modal.onclick=null;
+      document.removeEventListener('keydown',handleKey);
+    }
+
+    function handleKey(event){
+      if(event.key==='Escape') closeModal();
+    }
+
+    closeButton.onclick=closeModal;
+
+    modal.onclick=function(event){
+      if(event.target===modal) closeModal();
+    };
+
+    document.addEventListener('keydown',handleKey);
+    closeButton.focus();
+  }
+  catch(error){
+    alert(
+      error&&error.message
+        ?error.message
+        :'Unable to load the game submission.'
+    );
+  }
+  finally{
+    if(launchButton){
+      launchButton.disabled=false;
+      launchButton.textContent='Submit Game';
+    }
+  }
+}
+
+
+// =====================================================
+// FIXTURE TEAM DISPLAY
+// =====================================================
+function displayTeamForGame(teamId,team,coach){
+  const id=String(teamId||'').trim();
+  const ownId=String(team.teamId||coach.teamId||'').trim();
+
+  if(id&&id===ownId){
+    return team.teamName||coach.teamName||id;
+  }
+
+  return id||'-';
 }
 
 // =====================================================
