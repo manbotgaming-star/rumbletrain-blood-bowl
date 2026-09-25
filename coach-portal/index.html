@@ -330,62 +330,135 @@
 <div id="coach-game-submission-modal" class="coach-purchase-modal" hidden>
   <div class="coach-purchase-modal-card coach-game-submission-card">
 
-    <h2>Submit Game</h2>
-
-    <p id="coach-game-submission-summary"></p>
+    <div class="coach-submit-header">
+      <h2>Submit Game</h2>
+      <div id="coach-game-submission-summary"></div>
+    </div>
 
     <!-- =================================================
-         GAME RESULT
+         PRE-GAME FANS
     ================================================== -->
-    <div class="coach-game-submission-result-grid">
+    <div class="coach-submit-section-title">PRE-GAME FANS</div>
 
-      <label>
-        Your Score
-        <input id="coach-game-submission-team-score" type="number" min="0" max="99" step="1">
-      </label>
+    <div class="coach-submit-fan-scroll">
+      <div class="coach-submit-fan-flow">
 
-      <label>
-        Opponent Score
-        <input id="coach-game-submission-opponent-score" type="number" min="0" max="99" step="1">
-      </label>
+        <div class="coach-submit-fan-box">
+          <span>DF BEFORE</span>
+          <strong id="coach-submit-home-df-before">-</strong>
+        </div>
 
-      <label>
-        Your Team Stalled?
-        <select id="coach-game-submission-team-stalled">
+        <div class="coach-submit-arrow">→</div>
+
+        <div class="coach-submit-fan-box">
+          <span>FAIR-WEATHER</span>
+          <small>D3 ROLL</small>
+          <select id="coach-submit-home-fair">
+            <option value="">-</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div class="coach-submit-arrow">→</div>
+
+        <div class="coach-submit-fan-box">
+          <span>FAN FACTOR</span>
+          <small>DF + D3</small>
+          <strong id="coach-submit-home-factor">-</strong>
+        </div>
+
+        <div class="coach-submit-arrow">→</div>
+
+        <div class="coach-submit-fan-box coach-submit-fan-total">
+          <span>TOTAL</span>
+          <small>FAN ATTENDANCE</small>
+          <strong id="coach-submit-fan-attendance">-</strong>
+        </div>
+
+        <div class="coach-submit-arrow">←</div>
+
+        <div class="coach-submit-fan-box">
+          <span>FAN FACTOR</span>
+          <small>DF + D3</small>
+          <strong id="coach-submit-away-factor">-</strong>
+        </div>
+
+        <div class="coach-submit-arrow">←</div>
+
+        <div class="coach-submit-fan-box">
+          <span>FAIR-WEATHER</span>
+          <small>D3 ROLL</small>
+          <select id="coach-submit-away-fair">
+            <option value="">-</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div class="coach-submit-arrow">←</div>
+
+        <div class="coach-submit-fan-box">
+          <span>DF BEFORE</span>
+          <strong id="coach-submit-away-df-before">-</strong>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================================================
+         HOME / AWAY SCORE
+    ================================================== -->
+    <div class="coach-submit-matchup">
+
+      <div class="coach-submit-side">HOME</div>
+
+      <div class="coach-submit-stall">
+        <span>STALLED?</span>
+        <select id="coach-submit-home-stalled">
           <option value="">-</option>
           <option value="No">No</option>
           <option value="Yes">Yes</option>
         </select>
-      </label>
+      </div>
 
-      <label>
-        Opponent Stalled?
-        <select id="coach-game-submission-opponent-stalled">
+      <div id="coach-submit-home-team" class="coach-submit-team"></div>
+
+      <input id="coach-submit-home-score" class="coach-submit-score" type="text" inputmode="numeric" maxlength="2">
+
+      <div class="coach-submit-vs">VS</div>
+
+      <input id="coach-submit-away-score" class="coach-submit-score" type="text" inputmode="numeric" maxlength="2">
+
+      <div id="coach-submit-away-team" class="coach-submit-team"></div>
+
+      <div class="coach-submit-stall">
+        <span>STALLED?</span>
+        <select id="coach-submit-away-stalled">
           <option value="">-</option>
           <option value="No">No</option>
           <option value="Yes">Yes</option>
         </select>
-      </label>
+      </div>
 
-      <label>
-        DF Roll
-        <input id="coach-game-submission-df-roll" type="number" min="1" max="6" step="1">
-      </label>
+      <div class="coach-submit-side">AWAY</div>
 
     </div>
 
     <!-- =================================================
          PLAYER GAME STATS
     ================================================== -->
+    <div class="coach-submit-section-title">PLAYER GAME STATS</div>
+
     <div class="coach-table-wrap">
-
       <table class="coach-game-submission-table">
-
         <thead>
           <tr>
             <th>#</th>
-            <th>Player</th>
-            <th>Position</th>
+            <th>PLAYER NAME</th>
+            <th>POSITION</th>
             <th>COMP</th>
             <th>TTM</th>
             <th>LAND</th>
@@ -393,23 +466,66 @@
             <th>TD</th>
             <th>CAS</th>
             <th>MVP</th>
-            <th>Injury / Result</th>
+            <th>INJURY / RESULT</th>
           </tr>
         </thead>
-
         <tbody id="coach-game-submission-players"></tbody>
-
       </table>
-
     </div>
+
+    <!-- =================================================
+         POST-GAME DEDICATED FANS
+    ================================================== -->
+    <div class="coach-submit-section-title">POST-GAME DEDICATED FANS</div>
+
+    <table class="coach-submit-post-df">
+      <thead>
+        <tr>
+          <th>TEAM</th>
+          <th>DF BEFORE</th>
+          <th>RESULT</th>
+          <th>D6 ROLL</th>
+          <th>DF CHANGE</th>
+          <th>DF AFTER</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="coach-submit-post-home-team"></td>
+          <td id="coach-submit-post-home-before">-</td>
+          <td id="coach-submit-post-home-result">-</td>
+          <td>
+            <select id="coach-submit-home-df-roll">
+              <option value="">-</option>
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+
+        <tr>
+          <td id="coach-submit-post-away-team"></td>
+          <td id="coach-submit-post-away-before">-</td>
+          <td id="coach-submit-post-away-result">-</td>
+          <td>
+            <select id="coach-submit-away-df-roll">
+              <option value="">-</option>
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- =================================================
          COACH NOTES
     ================================================== -->
-    <label class="coach-game-submission-notes-label" for="coach-game-submission-notes">
-      Coach Notes
-    </label>
-
+    <label class="coach-submit-notes-label" for="coach-game-submission-notes">COACH NOTES</label>
     <textarea id="coach-game-submission-notes" rows="3" maxlength="500"></textarea>
 
     <div id="coach-game-submission-message" class="coach-game-submission-message">
