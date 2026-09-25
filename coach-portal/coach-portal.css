@@ -2027,6 +2027,17 @@ strong {
   font-family:inherit;
 }
 
+.coach-game-submission-result-grid input[type="number"] {
+  text-align:center;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+
+.coach-game-submission-result-grid select {
+  text-align:center;
+  text-align-last:center;
+}
+
 #coach-game-submission-notes {
   box-sizing:border-box;
   resize:vertical;
@@ -2120,6 +2131,17 @@ strong {
   color:var(--ink-dark);
   font-family:inherit;
   text-align:center;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+
+/* Remove number input spinner arrows in Chrome / Edge / Safari */
+.coach-game-submission-stat::-webkit-inner-spin-button,
+.coach-game-submission-stat::-webkit-outer-spin-button,
+.coach-game-submission-result-grid input[type="number"]::-webkit-inner-spin-button,
+.coach-game-submission-result-grid input[type="number"]::-webkit-outer-spin-button {
+  margin:0;
+  -webkit-appearance:none;
 }
 
 .coach-game-submission-injury {
