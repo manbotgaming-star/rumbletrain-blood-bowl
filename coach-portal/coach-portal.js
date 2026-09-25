@@ -1467,20 +1467,45 @@ function showCoachPlayerPurchaseModal(accessCode,options){
 
   typeSelect.value=canBuyNew?'new':'journeyman';
 
-  numberSelect.innerHTML='';
-  numbers.forEach(function(number){
-    const option=document.createElement('option');
-    option.value=String(number);
-    option.textContent='#'+number;
-    numberSelect.appendChild(option);
-  });
-
   function selectedPosition(){
     return positions.find(item=>item.position===positionSelect.value)||null;
   }
 
   function selectedJourneyman(){
     return journeymen.find(item=>item.journeymanId===positionSelect.value)||null;
+  }
+
+  // ---------------------------------------------------
+  // PLAYER NUMBER OPTIONS
+  // New Player = unreserved available numbers.
+  // Journeyman = fixed number already assigned to him.
+  // ---------------------------------------------------
+  function loadPlayerNumbers(){
+    numberSelect.innerHTML='';
+  
+    if(typeSelect.value==='journeyman'){
+      const selected=selectedJourneyman();
+      const number=selected?Number(selected.journeymanNumber):0;
+  
+      if(Number.isInteger(number)&&number>=1&&number<=16){
+        const option=document.createElement('option');
+        option.value=String(number);
+        option.textContent='#'+number;
+        numberSelect.appendChild(option);
+      }
+  
+      numberSelect.disabled=true;
+      return;
+    }
+  
+    numberSelect.disabled=false;
+  
+    numbers.forEach(function(number){
+      const option=document.createElement('option');
+      option.value=String(number);
+      option.textContent='#'+number;
+      numberSelect.appendChild(option);
+    });
   }
 
   function loadPurchaseType(){
@@ -1526,6 +1551,7 @@ function showCoachPlayerPurchaseModal(accessCode,options){
       if(firstAffordable) positionSelect.value=firstAffordable.position;
     }
 
+    loadPlayerNumbers();
     refreshState();
   }
 
@@ -1574,6 +1600,7 @@ function showCoachPlayerPurchaseModal(accessCode,options){
       nameInput.value='';
     }
 
+    loadPlayerNumbers();
     refreshState();
   };
 
@@ -1619,7 +1646,7 @@ if(typeSelect.value==='journeyman'){
   const selected=selectedJourneyman();
 
   if(!selected||!playerNumber){
-    message.textContent='Choose a Journeyman and permanent player number.';
+    message.textContent='Choose a Journeyman with a valid player number.';
     refreshState();
     return;
   }
