@@ -2004,6 +2004,34 @@ strong {
   color: #fff;
 }
 
+/* Player name left / JM badge right */
+.coach-game-submission-player-cell {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.coach-game-submission-player-name {
+  flex:1;
+  min-width:0;
+  text-align:left;
+}
+
+.coach-game-submission-jm {
+  flex:0 0 auto;
+  min-width:24px;
+  padding:1px 5px;
+  border:1px solid var(--line-dark);
+  border-radius:999px;
+  background:#eef4f6;
+  color:var(--ink);
+  font-size:10px;
+  font-weight:800;
+  line-height:1.2;
+  text-align:center;
+}
+
 .coach-game-submission-actions {
   display: flex;
   justify-content: flex-end;
