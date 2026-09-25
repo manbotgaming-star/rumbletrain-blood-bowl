@@ -3252,103 +3252,191 @@ async function refreshCoachGameSubmissionButton(){
 
 
 // =====================================================
-// POST-GAME SUBMISSION - ENTRY FORM
-//
-// Frontend only.
-// Nothing is written to the league yet.
+// POST-GAME SUBMISSION - GAME DAY PACK ENTRY FORM
+// Frontend only. No league write yet.
 // =====================================================
 async function openCoachGameSubmissionPreview(launchButton){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
-
   const modal=document.getElementById('coach-game-submission-modal');
   const summary=document.getElementById('coach-game-submission-summary');
   const body=document.getElementById('coach-game-submission-players');
-
-  const teamScore=document.getElementById('coach-game-submission-team-score');
-  const opponentScore=document.getElementById('coach-game-submission-opponent-score');
-  const teamStalled=document.getElementById('coach-game-submission-team-stalled');
-  const opponentStalled=document.getElementById('coach-game-submission-opponent-stalled');
-  const dfRoll=document.getElementById('coach-game-submission-df-roll');
-  const notes=document.getElementById('coach-game-submission-notes');
-  const message=document.getElementById('coach-game-submission-message');
-
   const closeButton=document.getElementById('coach-game-submission-close');
   const reviewButton=document.getElementById('coach-game-submission-review');
+  const message=document.getElementById('coach-game-submission-message');
 
-  if(!accessCode){
-    alert('Your Coach Portal session has expired. Please log in again.');
-    return;
-  }
+  if(!accessCode){ alert('Your Coach Portal session has expired. Please log in again.'); return; }
+  if(!modal||!summary||!body||!closeButton||!reviewButton||!message){ alert('The Game Submission window could not be opened.'); return; }
 
-  if(!modal||!summary||!body||!teamScore||!opponentScore||!teamStalled||!opponentStalled||!dfRoll||!notes||!message||!closeButton||!reviewButton){
-    alert('The Game Submission window could not be opened.');
-    return;
-  }
-
-  if(launchButton){
-    launchButton.disabled=true;
-    launchButton.textContent='Loading...';
-  }
+  if(launchButton){ launchButton.disabled=true; launchButton.textContent='Loading...'; }
 
   try{
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
-
-    if(!result||result.ok!==true||!result.game){
-      throw new Error(result&&result.error?result.error:'Unable to load the game submission.');
-    }
-
-    if(result.canSubmit!==true){
-      throw new Error(result.reason||'This game is not currently available for submission.');
-    }
+    if(!result||result.ok!==true||!result.game) throw new Error(result&&result.error?result.error:'Unable to load the game submission.');
+    if(result.canSubmit!==true) throw new Error(result.reason||'This game is not currently available for submission.');
 
     const game=result.game;
-    const team=result.team||{};
 
     // =====================================================
-    // GAME HEADER
+    // DOM REFERENCES
     // =====================================================
-    const matchup=
-      String(game.side||'').toUpperCase()==='HOME'
-        ?String(team.teamName||'Team')+' vs '+String(game.opponentTeam||'Opponent')
-        :String(game.opponentTeam||'Opponent')+' vs '+String(team.teamName||'Team');
+    const homeDfBefore=document.getElementById('coach-submit-home-df-before');
+    const awayDfBefore=document.getElementById('coach-submit-away-df-before');
+    const homeFair=document.getElementById('coach-submit-home-fair');
+    const awayFair=document.getElementById('coach-submit-away-fair');
+    const homeFactor=document.getElementById('coach-submit-home-factor');
+    const awayFactor=document.getElementById('coach-submit-away-factor');
+    const attendance=document.getElementById('coach-submit-fan-attendance');
 
-    summary.innerHTML=
-      '<strong>Round '+escapePortalHtml(game.round)+'</strong> — '+escapePortalHtml(matchup)+
-      '<br>'+escapePortalHtml(game.gameId)+' | '+escapePortalHtml(game.side);
+    const homeTeam=document.getElementById('coach-submit-home-team');
+    const awayTeam=document.getElementById('coach-submit-away-team');
+    const homeScore=document.getElementById('coach-submit-home-score');
+    const awayScore=document.getElementById('coach-submit-away-score');
+    const homeStalled=document.getElementById('coach-submit-home-stalled');
+    const awayStalled=document.getElementById('coach-submit-away-stalled');
+
+    const postHomeTeam=document.getElementById('coach-submit-post-home-team');
+    const postAwayTeam=document.getElementById('coach-submit-post-away-team');
+    const postHomeBefore=document.getElementById('coach-submit-post-home-before');
+    const postAwayBefore=document.getElementById('coach-submit-post-away-before');
+    const postHomeResult=document.getElementById('coach-submit-post-home-result');
+    const postAwayResult=document.getElementById('coach-submit-post-away-result');
+    const homeDfRoll=document.getElementById('coach-submit-home-df-roll');
+    const awayDfRoll=document.getElementById('coach-submit-away-df-roll');
+    const notes=document.getElementById('coach-game-submission-notes');
 
     // =====================================================
-    // RESET FORM
+    // HEADER / GAME DATA
     // =====================================================
-    teamScore.value='';
-    opponentScore.value='';
-    teamStalled.value='';
-    opponentStalled.value='';
-    dfRoll.value='';
+    summary.textContent='GAME: '+game.gameId+'   ROUND: '+game.round+'   SUBMITTING AS: '+game.submittingSide;
+
+    homeTeam.textContent=String(game.homeTeam||'HOME TEAM').toUpperCase();
+    awayTeam.textContent=String(game.awayTeam||'AWAY TEAM').toUpperCase();
+
+    homeDfBefore.textContent=displayValue(game.homeDfBefore);
+    awayDfBefore.textContent=displayValue(game.awayDfBefore);
+
+    postHomeTeam.textContent=String(game.homeTeam||'');
+    postAwayTeam.textContent=String(game.awayTeam||'');
+    postHomeBefore.textContent=displayValue(game.homeDfBefore);
+    postAwayBefore.textContent=displayValue(game.awayDfBefore);
+
+    homeFair.value='';
+    awayFair.value='';
+    homeScore.value='';
+    awayScore.value='';
+    homeStalled.value='';
+    awayStalled.value='';
+    homeDfRoll.value='';
+    awayDfRoll.value='';
     notes.value='';
 
     message.className='coach-game-submission-message';
     message.textContent='Preview only — nothing will be submitted to the league yet.';
 
-    body.innerHTML='';
+    // =====================================================
+    // PRE-GAME FAN CALCULATION
+    // =====================================================
+    function updateFans(){
+      const homeRoll=homeFair.value===''?null:Number(homeFair.value);
+      const awayRoll=awayFair.value===''?null:Number(awayFair.value);
+
+      const homeValue=homeRoll===null?null:Number(game.homeDfBefore||0)+homeRoll;
+      const awayValue=awayRoll===null?null:Number(game.awayDfBefore||0)+awayRoll;
+
+      homeFactor.textContent=homeValue===null?'-':homeValue;
+      awayFactor.textContent=awayValue===null?'-':awayValue;
+      attendance.textContent=(homeValue===null||awayValue===null)?'-':homeValue+awayValue;
+    }
+
+    homeFair.onchange=updateFans;
+    awayFair.onchange=updateFans;
+    updateFans();
 
     // =====================================================
-    // PLAYER STAT ROWS
+    // SCORE / RESULT
     // =====================================================
+    function scoreValue(input){
+      const value=String(input.value||'').trim();
+      return /^\d+$/.test(value)?Number(value):null;
+    }
+
+    function updateResults(){
+      const home=scoreValue(homeScore);
+      const away=scoreValue(awayScore);
+
+      if(home===null||away===null){
+        postHomeResult.textContent='-';
+        postAwayResult.textContent='-';
+        homeDfRoll.disabled=false;
+        awayDfRoll.disabled=false;
+        return;
+      }
+
+      if(home===away){
+        postHomeResult.textContent='DRAW';
+        postAwayResult.textContent='DRAW';
+        homeDfRoll.value='';
+        awayDfRoll.value='';
+        homeDfRoll.disabled=true;
+        awayDfRoll.disabled=true;
+        return;
+      }
+
+      postHomeResult.textContent=home>away?'WIN':'LOSS';
+      postAwayResult.textContent=away>home?'WIN':'LOSS';
+      homeDfRoll.disabled=false;
+      awayDfRoll.disabled=false;
+    }
+
+    homeScore.oninput=updateResults;
+    awayScore.oninput=updateResults;
+    updateResults();
+
+    // =====================================================
+    // PLAYER STATS
+    // =====================================================
+    body.innerHTML='';
+
     function createStatInput(field,max){
       const input=document.createElement('input');
-      input.type='number';
-      input.min='0';
-      input.step='1';
-      input.value='';
+      input.type='text';
+      input.inputMode='numeric';
+      input.maxLength=2;
       input.className='coach-game-submission-stat';
       input.dataset.field=field;
-      if(max!==undefined) input.max=String(max);
+      input.dataset.max=max===undefined?'':String(max);
       return input;
+    }
+
+    function createInjurySelect(){
+      const select=document.createElement('select');
+      select.className='coach-submit-injury-result';
+      select.innerHTML=
+        '<option value="">-</option>'+
+        '<option value="Badly Hurt">Badly Hurt</option>'+
+        '<option value="Seriously Hurt">Seriously Hurt</option>'+
+        '<option value="Serious Injury">Serious Injury</option>'+
+        '<option value="Lasting Injury">Lasting Injury</option>'+
+        '<option value="Dead">Dead</option>';
+      return select;
+    }
+
+    function createLastingSelect(){
+      const select=document.createElement('select');
+      select.className='coach-submit-lasting-injury';
+      select.hidden=true;
+      select.innerHTML=
+        '<option value="">Select Lasting Injury</option>'+
+        '<option value="Head Injury">Head Injury</option>'+
+        '<option value="Smashed Knee">Smashed Knee</option>'+
+        '<option value="Broken Arm">Broken Arm</option>'+
+        '<option value="Dislocated Hip">Dislocated Hip</option>'+
+        '<option value="Broken Shoulder">Broken Shoulder</option>';
+      return select;
     }
 
     (result.players||[]).forEach(function(player){
       const row=document.createElement('tr');
-
       row.dataset.playerId=String(player.playerId||'');
       row.dataset.playerNumber=String(player.playerNumber||'');
       row.dataset.playerName=String(player.playerName||'');
@@ -3376,47 +3464,38 @@ async function openCoachGameSubmissionPreview(launchButton){
       const position=document.createElement('td');
       position.textContent=displayValue(player.position);
 
-      const comp=document.createElement('td');
-      comp.appendChild(createStatInput('comp'));
-
-      const ttm=document.createElement('td');
-      ttm.appendChild(createStatInput('ttm'));
-
-      const land=document.createElement('td');
-      land.appendChild(createStatInput('land'));
-
-      const interception=document.createElement('td');
-      interception.appendChild(createStatInput('int'));
-
-      const td=document.createElement('td');
-      td.appendChild(createStatInput('td'));
-
-      const cas=document.createElement('td');
-      cas.appendChild(createStatInput('cas'));
+      const fields=['comp','ttm','land','int','td','cas'];
+      const statCells=fields.map(function(field){
+        const cell=document.createElement('td');
+        cell.appendChild(createStatInput(field));
+        return cell;
+      });
 
       const mvp=document.createElement('td');
-      mvp.appendChild(createStatInput('mvp',1));
+      const mvpSelect=document.createElement('select');
+      mvpSelect.className='coach-game-submission-stat coach-submit-mvp';
+      mvpSelect.dataset.field='mvp';
+      mvpSelect.innerHTML='<option value="">-</option><option value="1">1</option>';
+      mvp.appendChild(mvpSelect);
 
       const injury=document.createElement('td');
+      injury.className='coach-submit-injury-cell';
 
-      const injuryInput=document.createElement('input');
-      injuryInput.type='text';
-      injuryInput.maxLength=80;
-      injuryInput.placeholder='Optional';
-      injuryInput.className='coach-game-submission-injury';
-      injuryInput.dataset.field='injuryResult';
+      const injurySelect=createInjurySelect();
+      const lastingSelect=createLastingSelect();
 
-      injury.appendChild(injuryInput);
+      injurySelect.onchange=function(){
+        lastingSelect.hidden=injurySelect.value!=='Lasting Injury';
+        if(injurySelect.value!=='Lasting Injury') lastingSelect.value='';
+      };
+
+      injury.appendChild(injurySelect);
+      injury.appendChild(lastingSelect);
 
       row.appendChild(number);
       row.appendChild(name);
       row.appendChild(position);
-      row.appendChild(comp);
-      row.appendChild(ttm);
-      row.appendChild(land);
-      row.appendChild(interception);
-      row.appendChild(td);
-      row.appendChild(cas);
+      statCells.forEach(function(cell){ row.appendChild(cell); });
       row.appendChild(mvp);
       row.appendChild(injury);
 
@@ -3424,39 +3503,66 @@ async function openCoachGameSubmissionPreview(launchButton){
     });
 
     // =====================================================
-    // LOCAL FORM REVIEW
-    //
-    // Validation only. No server write.
+    // LOCAL REVIEW ONLY
     // =====================================================
     reviewButton.onclick=function(){
       message.className='coach-game-submission-message';
 
-      if(teamScore.value===''||opponentScore.value===''){
+      const home=scoreValue(homeScore);
+      const away=scoreValue(awayScore);
+
+      if(home===null||away===null){
         message.classList.add('is-error');
-        message.textContent='Enter both final scores before reviewing the submission.';
+        message.textContent='Enter both final scores.';
         return;
       }
 
-      const numericInputs=Array.from(modal.querySelectorAll('input[type="number"]'));
+      if(!homeFair.value||!awayFair.value){
+        message.classList.add('is-error');
+        message.textContent='Enter both Fair-Weather D3 rolls.';
+        return;
+      }
 
-      const invalid=numericInputs.find(function(input){
-        if(input.value==='') return false;
+      if(!homeStalled.value||!awayStalled.value){
+        message.classList.add('is-error');
+        message.textContent='Select Stalled? for both teams.';
+        return;
+      }
 
-        const value=Number(input.value);
-        const min=input.min!==''?Number(input.min):null;
-        const max=input.max!==''?Number(input.max):null;
+      if(home!==away&&(!homeDfRoll.value||!awayDfRoll.value)){
+        message.classList.add('is-error');
+        message.textContent='Enter both Post-Game Dedicated Fans D6 rolls.';
+        return;
+      }
 
-        if(!Number.isInteger(value)) return true;
-        if(min!==null&&value<min) return true;
-        if(max!==null&&value>max) return true;
+      const statInputs=Array.from(body.querySelectorAll('input.coach-game-submission-stat'));
+      const invalidStat=statInputs.find(function(input){
+        const value=String(input.value||'').trim();
+        if(value==='') return false;
+        if(!/^\d+$/.test(value)) return true;
 
-        return false;
+        const max=input.dataset.max!==''?Number(input.dataset.max):null;
+        return max!==null&&Number(value)>max;
       });
 
-      if(invalid){
-        invalid.focus();
+      if(invalidStat){
+        invalidStat.focus();
         message.classList.add('is-error');
-        message.textContent='One or more number fields contain an invalid value.';
+        message.textContent='Player stat entries must be whole numbers.';
+        return;
+      }
+
+      const injuryCells=Array.from(body.querySelectorAll('.coach-submit-injury-cell'));
+      const missingLasting=injuryCells.find(function(cell){
+        const injury=cell.querySelector('.coach-submit-injury-result');
+        const lasting=cell.querySelector('.coach-submit-lasting-injury');
+        return injury&&lasting&&injury.value==='Lasting Injury'&&!lasting.value;
+      });
+
+      if(missingLasting){
+        missingLasting.querySelector('.coach-submit-lasting-injury').focus();
+        message.classList.add('is-error');
+        message.textContent='Select the specific Lasting Injury.';
         return;
       }
 
@@ -3465,7 +3571,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     };
 
     // =====================================================
-    // MODAL CLOSE
+    // CLOSE MODAL
     // =====================================================
     function closeModal(){
       modal.hidden=true;
@@ -3481,20 +3587,16 @@ async function openCoachGameSubmissionPreview(launchButton){
 
     closeButton.onclick=closeModal;
     modal.onclick=function(event){ if(event.target===modal) closeModal(); };
-
     document.addEventListener('keydown',handleKey);
 
     modal.hidden=false;
-    teamScore.focus();
+    homeFair.focus();
   }
   catch(error){
     alert(error&&error.message?error.message:'Unable to load the game submission.');
   }
   finally{
-    if(launchButton){
-      launchButton.disabled=false;
-      launchButton.textContent='Submit Game';
-    }
+    if(launchButton){ launchButton.disabled=false; launchButton.textContent='Submit Game'; }
   }
 }
 
