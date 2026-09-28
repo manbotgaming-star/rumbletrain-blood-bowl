@@ -1028,27 +1028,6 @@ function renderCoachPortal(data) {
   setText('coach-treasury',formatGold(team.treasury));
   setText('coach-rerolls',displayValue(team.rerolls));
   setText('coach-apothecary',displayValue(team.apothecary));
-
-  // =====================================================
-  // GAME DAY PACK - PENDING SUBMISSION STATE
-  // =====================================================
-  function setCoachGameDayPackPending(isPending,gameId){
-    const link=document.getElementById('coach-game-day-pack');
-    if(!link) return;
-  
-    link.classList.toggle('is-pending',!!isPending);
-  
-    if(isPending){
-      link.dataset.pendingText='PENDING OPPONENT SUBMISSION '+String(gameId||'');
-      link.setAttribute('aria-disabled','true');
-      link.setAttribute('tabindex','-1');
-    }
-    else{
-      delete link.dataset.pendingText;
-      link.removeAttribute('aria-disabled');
-      link.removeAttribute('tabindex');
-    }
-  }
   
   // ---------------------------------------------------
   // TEAM MANAGEMENT
@@ -1171,6 +1150,27 @@ body{display:flex;align-items:center;justify-content:center}
 
     setTimeout(function(){ packWindow.location.href = packUrl; },100);
   };
+}
+
+// =====================================================
+// GAME DAY PACK - PENDING SUBMISSION STATE
+// =====================================================
+function setCoachGameDayPackPending(isPending,gameId){
+  const link=document.getElementById('coach-game-day-pack');
+  if(!link) return;
+
+  link.classList.toggle('is-pending',!!isPending);
+
+  if(isPending){
+    link.dataset.pendingText='PENDING OPPONENT SUBMISSION '+String(gameId||'');
+    link.setAttribute('aria-disabled','true');
+    link.setAttribute('tabindex','-1');
+  }
+  else{
+    delete link.dataset.pendingText;
+    link.removeAttribute('aria-disabled');
+    link.removeAttribute('tabindex');
+  }
 }
 
 // =====================================================
