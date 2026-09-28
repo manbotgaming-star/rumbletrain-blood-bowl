@@ -4796,3 +4796,20 @@ function escapePortalHtml(value) {
       '&#039;'
     );
 }
+
+// ============================================================
+// COACH PORTAL — REPORT DYNAMIC HEIGHT TO EMBEDDED SITE
+// ============================================================
+function reportCoachPortalHeight(){
+  const height=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
+  window.parent.postMessage({type:'rtCoachPortalHeight',height:height},'*');
+}
+
+window.addEventListener('load',()=>{ reportCoachPortalHeight(); setTimeout(reportCoachPortalHeight,300); setTimeout(reportCoachPortalHeight,1000); });
+
+if('ResizeObserver' in window){
+  const portalHeightObserver=new ResizeObserver(()=>reportCoachPortalHeight());
+  portalHeightObserver.observe(document.body);
+}
+
+window.addEventListener('resize',reportCoachPortalHeight);
