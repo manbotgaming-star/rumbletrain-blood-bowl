@@ -755,7 +755,7 @@ function coachApiSubmitAdvancementRequest(
 }
 
 // =====================================================
-// COACH TEAM MANAGEMENT PURCHASE REQUEST
+// API - TEAM MANAGEMENT PURCHASE
 //
 // WRITES to TeamTransactions after server validation.
 // Uses JSONP because GitHub and Apps Script are
@@ -1030,7 +1030,7 @@ function renderCoachPortal(data) {
   setText('coach-apothecary',displayValue(team.apothecary));
   
   // ---------------------------------------------------
-  // TEAM MANAGEMENT
+  // RENDER TEAM MANAGEMENT SUMMARY
   // ---------------------------------------------------
 
   const currentPlayers=players.filter(function(player){
@@ -1174,7 +1174,7 @@ function setCoachGameDayPackPending(isPending,gameId){
 }
 
 // =====================================================
-// TEAM MANAGEMENT
+// TEAM MANAGEMENT - RENDER & PURCHASE ACTIONS
 // =====================================================
 
 function renderCoachManagement(team, management) {
@@ -4255,7 +4255,7 @@ function showCoachAdvancementSuccess(message) {
 }
 
 // =====================================================
-// TEAM MANAGEMENT SUCCESS MESSAGE
+// UI MESSAGE - TEAM MANAGEMENT PURCHASE SUCCESS
 // =====================================================
 
 function showCoachManagementSuccess(message) {
