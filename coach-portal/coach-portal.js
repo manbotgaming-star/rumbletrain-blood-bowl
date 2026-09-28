@@ -1173,6 +1173,15 @@ function setCoachGameDayPackState(state,gameId){
     return;
   }
 
+    if(state==='review'){
+    link.classList.add('is-pending');
+    link.dataset.pendingText='PENDING COMMISSIONER REVIEW';
+    link.dataset.pendingGameId=String(gameId||'');
+    link.setAttribute('aria-disabled','true');
+    link.setAttribute('tabindex','-1');
+    return;
+  }
+
   if(state==='pending'){
     link.classList.add('is-pending');
     link.dataset.pendingText='PENDING OPPONENT SUBMISSION';
@@ -3275,10 +3284,17 @@ function renderCoachGames(games,team,coach){
 // =====================================================
 // POST-GAME SUBMISSION - AVAILABLE GAME BUTTON
 // =====================================================
-function setCoachPendingGameNotice(show){
+function setCoachPendingGameNotice(show,isReview){
   const notice=document.querySelector('.coach-management-pending-game');
   if(!notice) return;
+
   notice.hidden=!show;
+
+  if(show){
+    notice.textContent=isReview
+      ?'Game winnings pending commissioner review.'
+      :'Game winnings pending opponent submission.';
+  }
 }
 
 async function refreshCoachGameSubmissionButton(){
@@ -3311,10 +3327,28 @@ async function refreshCoachGameSubmissionButton(){
       return;
     }
 
-    // Show Treasury notice only after this coach has
-    // already submitted the game and it is still pending.
-    setCoachPendingGameNotice(!!result.existingSubmission);
-    setCoachGameDayPackState(result.existingSubmission?'pending':'ready',result.game.gameId);
+    // ---------------------------------------------------
+    // PENDING / COMMISSIONER REVIEW STATE
+    // ---------------------------------------------------
+    const submission=result.existingSubmission||null;
+    const validationStatus=String(submission&&submission.validationStatus||'').trim();
+    const isReview=validationStatus==='Mismatch';
+    
+    setCoachPendingGameNotice(!!submission,isReview);
+    setCoachGameDayPackState(submission?(isReview?'review':'pending'):'ready',result.game.gameId);
+    
+    // Keep Commissioner Review warning visible until resolved.
+    const existingResult=document.querySelector('.coach-game-submission-result');
+    
+    if(isReview){
+      showCoachGameSubmissionResult({
+        validationStatus:'Mismatch',
+        mismatchFields:Array.isArray(submission.mismatchFields)?submission.mismatchFields:[]
+      },true);
+    }
+    else if(existingResult){
+      existingResult.remove();
+    }
 
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
@@ -4371,7 +4405,7 @@ function showCoachManagementSuccess(message) {
 // =====================================================
 // GAME SUBMISSION RESULT MESSAGE
 // =====================================================
-function showCoachGameSubmissionResult(submitted){
+function showCoachGameSubmissionResult(submitted,persistent=false){
   const container=document.getElementById('coach-games');
   if(!container) return;
 
@@ -4404,9 +4438,10 @@ function showCoachGameSubmissionResult(submitted){
   if(heading) heading.insertAdjacentElement('afterend',result);
   else panel.prepend(result);
 
-  setTimeout(function(){
-    if(result.parentNode) result.remove();
-  },8000);
+  if(!persistent){
+   setTimeout(function(){
+     if(result.parentNode) result.remove();
+   },8000);
 }
 
 // =====================================================
