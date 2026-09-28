@@ -28,6 +28,17 @@ const COACH_API_URL =
 const SESSION_KEY =
   'rumbleTrainCoachAccessCode';
 
+// =====================================================
+// ACCESS CODE URL CLEANUP
+// =====================================================
+
+function clearAccessCodeFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has('accessCode')) return;
+  url.searchParams.delete('accessCode');
+  history.replaceState(null,'',url.pathname + url.search + url.hash);
+}
+
 
 // =====================================================
 // STARTUP
@@ -41,6 +52,8 @@ document.addEventListener(
 
 function initCoachPortal() {
 
+  clearAccessCodeFromUrl();
+  
   const loginForm =
     document.getElementById(
       'coach-login-form'
