@@ -1876,22 +1876,12 @@ strong {
   gap: 8px;
 }
 
-#coach-game-day-pack {
-  display: block;
-  border: 1px solid rgba(255,255,255,0.58);
-  border-radius: 6px;
-  background: rgba(255,255,255,0.10);
-  color: #fff;
-  padding: 9px 15px;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  text-transform: uppercase;
-}
+/* ============================================================
+   TEAM HEADER LINKS
+   ============================================================ */
+#coach-game-day-pack,#coach-back-blood-bowl { display:block; border:1px solid rgba(255,255,255,.58); border-radius:6px; background:rgba(255,255,255,.10); color:#fff; padding:9px 15px; font-weight:700; text-align:center; text-decoration:none; text-transform:uppercase; }
 
-#coach-game-day-pack:hover {
-  background: rgba(255,255,255,0.20);
-}
+#coach-game-day-pack:hover,#coach-back-blood-bowl:hover { background:rgba(255,255,255,.20); }
 
 /* ============================================================
    GAME DAY PACK - STATUS CHECK
