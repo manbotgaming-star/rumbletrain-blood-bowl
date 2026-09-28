@@ -3294,9 +3294,18 @@ async function refreshCoachGameSubmissionButton(){
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
 
     // ---------------------------------------------------
+    // STATUS CHECK FAILED
+    // ---------------------------------------------------
+    if(!result||result.ok!==true){
+      setCoachPendingGameNotice(false);
+      setCoachGameDayPackState('unavailable');
+      return;
+    }
+    
+    // ---------------------------------------------------
     // NO CURRENT POST-GAME SUBMISSION
     // ---------------------------------------------------
-    if(!result||result.ok!==true||!result.game){
+    if(!result.game){
       setCoachPendingGameNotice(false);
       setCoachGameDayPackState('ready');
       return;
