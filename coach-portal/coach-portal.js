@@ -3677,12 +3677,16 @@ function openFinalGameReview(payload){
     meaningfulPlayers.forEach(function(player){
       const row=document.createElement('tr');
 
+      const sourceRow=Array.from(body.querySelectorAll('tr')).find(function(item){
+        return String(item.dataset.playerId||'')===String(player.playerId||'');
+      });
+      
       const number=document.createElement('td');
-      number.textContent=player.playerNumber;
-
+      number.textContent=sourceRow?String(sourceRow.dataset.playerNumber||''):'';
+      
       const name=document.createElement('td');
-      name.textContent=player.playerName;
-
+      name.textContent=sourceRow?String(sourceRow.dataset.playerName||''):'';
+      
       const resultCell=document.createElement('td');
 
       const parts=[];
