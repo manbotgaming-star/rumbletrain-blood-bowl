@@ -1104,16 +1104,19 @@ function renderCoachGameDayPackLink(team,coach,games) {
 
   const packUrl = COACH_API_URL + '?view=gameDayPack&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
 
-  link.href = packUrl;
-  link.hidden = false;
-
+  link.href=packUrl;
+  link.hidden=false;
+  
+  // Disabled until the submission-status check finishes.
+  setCoachGameDayPackState('checking');
+  
   link.onclick=function(event){
     event.preventDefault();
   
       // ---------------------------------------------------
       // DO NOT REOPEN A SUBMITTED GAME
       // ---------------------------------------------------
-      if(link.classList.contains('is-pending')) return;
+      if(link.getAttribute('aria-disabled')==='true') return;
     
       const packWindow=window.open('','_blank');
     
@@ -1153,26 +1156,41 @@ body{display:flex;align-items:center;justify-content:center}
 }
 
 // =====================================================
-// GAME DAY PACK - PENDING SUBMISSION STATE
+// GAME DAY PACK - BUTTON STATE
 // =====================================================
-function setCoachGameDayPackPending(isPending,gameId){
+function setCoachGameDayPackState(state,gameId){
   const link=document.getElementById('coach-game-day-pack');
   if(!link) return;
 
-  link.classList.toggle('is-pending',!!isPending);
+  link.classList.remove('is-checking','is-pending','is-unavailable');
+  delete link.dataset.pendingText;
+  delete link.dataset.pendingGameId;
 
-  if(isPending){
+  if(state==='checking'){
+    link.classList.add('is-checking');
+    link.setAttribute('aria-disabled','true');
+    link.setAttribute('tabindex','-1');
+    return;
+  }
+
+  if(state==='pending'){
+    link.classList.add('is-pending');
     link.dataset.pendingText='PENDING OPPONENT SUBMISSION';
     link.dataset.pendingGameId=String(gameId||'');
     link.setAttribute('aria-disabled','true');
     link.setAttribute('tabindex','-1');
+    return;
   }
-  else{
-    delete link.dataset.pendingText;
-    delete link.dataset.pendingGameId;
-    link.removeAttribute('aria-disabled');
-    link.removeAttribute('tabindex');
+
+  if(state==='unavailable'){
+    link.classList.add('is-unavailable');
+    link.setAttribute('aria-disabled','true');
+    link.setAttribute('tabindex','-1');
+    return;
   }
+
+  link.removeAttribute('aria-disabled');
+  link.removeAttribute('tabindex');
 }
 
 // =====================================================
@@ -3268,6 +3286,7 @@ async function refreshCoachGameSubmissionButton(){
 
   if(!accessCode){
     setCoachPendingGameNotice(false);
+    setCoachGameDayPackState('unavailable');
     return;
   }
 
@@ -3279,14 +3298,14 @@ async function refreshCoachGameSubmissionButton(){
     // ---------------------------------------------------
     if(!result||result.ok!==true||!result.game){
       setCoachPendingGameNotice(false);
-      setCoachGameDayPackPending(false,'');
+      setCoachGameDayPackState('ready');
       return;
     }
 
     // Show Treasury notice only after this coach has
     // already submitted the game and it is still pending.
     setCoachPendingGameNotice(!!result.existingSubmission);
-    setCoachGameDayPackPending(!!result.existingSubmission,result.game.gameId);
+    setCoachGameDayPackState(result.existingSubmission?'pending':'ready',result.game.gameId);
 
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
@@ -3329,6 +3348,8 @@ async function refreshCoachGameSubmissionButton(){
     button.remove();
   }
   catch(error){
+    setCoachPendingGameNotice(false);
+    setCoachGameDayPackState('unavailable');
     console.error('Post-game submission availability check failed:',error);
   }
 }
