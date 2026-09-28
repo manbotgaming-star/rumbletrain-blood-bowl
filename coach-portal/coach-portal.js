@@ -1028,6 +1028,27 @@ function renderCoachPortal(data) {
   setText('coach-treasury',formatGold(team.treasury));
   setText('coach-rerolls',displayValue(team.rerolls));
   setText('coach-apothecary',displayValue(team.apothecary));
+
+  // =====================================================
+  // GAME DAY PACK - PENDING SUBMISSION STATE
+  // =====================================================
+  function setCoachGameDayPackPending(isPending,gameId){
+    const link=document.getElementById('coach-game-day-pack');
+    if(!link) return;
+  
+    link.classList.toggle('is-pending',!!isPending);
+  
+    if(isPending){
+      link.dataset.pendingText='PENDING OPPONENT SUBMISSION '+String(gameId||'');
+      link.setAttribute('aria-disabled','true');
+      link.setAttribute('tabindex','-1');
+    }
+    else{
+      delete link.dataset.pendingText;
+      link.removeAttribute('aria-disabled');
+      link.removeAttribute('tabindex');
+    }
+  }
   
   // ---------------------------------------------------
   // TEAM MANAGEMENT
@@ -1107,14 +1128,20 @@ function renderCoachGameDayPackLink(team,coach,games) {
   link.href = packUrl;
   link.hidden = false;
 
-  link.onclick = function(event) {
+  link.onclick=function(event){
     event.preventDefault();
-
-    const packWindow = window.open('','_blank');
-    if (!packWindow) {
-      window.open(packUrl,'_blank');
-      return;
-    }
+  
+      // ---------------------------------------------------
+      // DO NOT REOPEN A SUBMITTED GAME
+      // ---------------------------------------------------
+      if(link.classList.contains('is-pending')) return;
+    
+      const packWindow=window.open('','_blank');
+    
+      if (!packWindow) {
+        window.open(packUrl,'_blank');
+        return;
+      }
 
     packWindow.document.open();
     packWindow.document.write(`<!DOCTYPE html>
@@ -3250,12 +3277,14 @@ async function refreshCoachGameSubmissionButton(){
     // ---------------------------------------------------
     if(!result||result.ok!==true||!result.game){
       setCoachPendingGameNotice(false);
+      setCoachGameDayPackPending(false,'');
       return;
     }
 
     // Show Treasury notice only after this coach has
     // already submitted the game and it is still pending.
     setCoachPendingGameNotice(!!result.existingSubmission);
+    setCoachGameDayPackPending(!!result.existingSubmission,result.game.gameId);
 
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
