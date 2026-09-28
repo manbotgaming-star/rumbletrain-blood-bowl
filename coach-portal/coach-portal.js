@@ -3228,14 +3228,34 @@ function renderCoachGames(games,team,coach){
 // =====================================================
 // POST-GAME SUBMISSION - AVAILABLE GAME BUTTON
 // =====================================================
+function setCoachPendingGameNotice(show){
+  const notice=document.querySelector('.coach-management-pending-game');
+  if(!notice) return;
+  notice.hidden=!show;
+}
+
 async function refreshCoachGameSubmissionButton(){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
-  if(!accessCode) return;
+
+  if(!accessCode){
+    setCoachPendingGameNotice(false);
+    return;
+  }
 
   try{
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
 
-    if(!result||result.ok!==true||!result.game) return;
+    // ---------------------------------------------------
+    // NO CURRENT POST-GAME SUBMISSION
+    // ---------------------------------------------------
+    if(!result||result.ok!==true||!result.game){
+      setCoachPendingGameNotice(false);
+      return;
+    }
+
+    // Show Treasury notice only after this coach has
+    // already submitted the game and it is still pending.
+    setCoachPendingGameNotice(!!result.existingSubmission);
 
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
@@ -3271,9 +3291,7 @@ async function refreshCoachGameSubmissionButton(){
       button.disabled=false;
       button.textContent='Submit Game';
       button.title='';
-      button.onclick=function(){
-        openCoachGameSubmissionPreview(button);
-      };
+      button.onclick=function(){ openCoachGameSubmissionPreview(button); };
       return;
     }
 
