@@ -3566,27 +3566,33 @@ function collectGameSubmissionPayload(){
       const value=String(input?input.value:'').trim();
       return value===''?0:Number(value);
     }
-
+  
     const injury=row.querySelector('.coach-submit-injury-result');
     const lasting=row.querySelector('.coach-submit-lasting-injury');
-
-    return {
-      playerId:String(row.dataset.playerId||''),
-      playerNumber:String(row.dataset.playerNumber||''),
-      playerName:String(row.dataset.playerName||''),
-      position:String(row.dataset.position||''),
-
+  
+    // Keep every player so Games Played still works,
+    // but only send entered results. The server already
+    // knows player number, name and position.
+    const entry={playerId:String(row.dataset.playerId||'')};
+  
+    const stats={
       comp:stat('comp'),
       ttm:stat('ttm'),
       land:stat('land'),
       int:stat('int'),
       td:stat('td'),
       cas:stat('cas'),
-      mvp:stat('mvp'),
-
-      injuryResult:injury?injury.value:'',
-      lastingInjury:lasting?lasting.value:''
+      mvp:stat('mvp')
     };
+  
+    Object.keys(stats).forEach(function(key){
+      if(stats[key]) entry[key]=stats[key];
+    });
+  
+    if(injury&&injury.value) entry.injuryResult=injury.value;
+    if(lasting&&lasting.value) entry.lastingInjury=lasting.value;
+  
+    return entry;
   });
 
   return {
