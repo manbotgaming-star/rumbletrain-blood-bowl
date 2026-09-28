@@ -3740,7 +3740,7 @@ function openFinalGameReview(payload){
       reviewModal.hidden=true;
       modal.hidden=true;
 
-      alert('Game submission received successfully.');
+      showCoachGameSubmissionResult(submitted);
 
       coachApiRequest(accessCode)
         .then(function(data){
@@ -4277,6 +4277,47 @@ function showCoachManagementSuccess(message) {
     }
 
   }, 5000);
+}
+
+// =====================================================
+// GAME SUBMISSION RESULT MESSAGE
+// =====================================================
+function showCoachGameSubmissionResult(submitted){
+  const container=document.getElementById('coach-games');
+  if(!container) return;
+
+  const panel=container.closest('.coach-panel');
+  if(!panel) return;
+
+  const existing=panel.querySelector('.coach-game-submission-result');
+  if(existing) existing.remove();
+
+  const status=String(submitted&&submitted.validationStatus||'').trim();
+  const fields=Array.isArray(submitted&&submitted.mismatchFields)?submitted.mismatchFields.filter(Boolean):[];
+
+  let title='Game Submitted';
+  let message='Your game submission has been recorded. The game will be validated when both coach submissions are available.';
+
+  if(status==='Matched'){
+    title='Match Verified';
+    message='Both coach submissions match. The game has been completed automatically.';
+  }
+  else if(status==='Mismatch'){
+    title='Commissioner Review Required';
+    message='The two coach submissions do not match'+(fields.length?': '+fields.join(', '):'.')+' The game remains pending for commissioner review.';
+  }
+
+  const result=document.createElement('div');
+  result.className='coach-management-success coach-game-submission-result';
+  result.innerHTML='<strong>'+escapePortalHtml(title)+'</strong><span>'+escapePortalHtml(message)+'</span>';
+
+  const heading=panel.querySelector('h2');
+  if(heading) heading.insertAdjacentElement('afterend',result);
+  else panel.prepend(result);
+
+  setTimeout(function(){
+    if(result.parentNode) result.remove();
+  },8000);
 }
 
 // =====================================================
