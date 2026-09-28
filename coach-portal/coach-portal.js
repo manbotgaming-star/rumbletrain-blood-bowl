@@ -1162,12 +1162,14 @@ function setCoachGameDayPackPending(isPending,gameId){
   link.classList.toggle('is-pending',!!isPending);
 
   if(isPending){
-    link.dataset.pendingText='PENDING OPPONENT SUBMISSION '+String(gameId||'');
+    link.dataset.pendingText='PENDING OPPONENT SUBMISSION';
+    link.dataset.pendingGameId=String(gameId||'');
     link.setAttribute('aria-disabled','true');
     link.setAttribute('tabindex','-1');
   }
   else{
     delete link.dataset.pendingText;
+    delete link.dataset.pendingGameId;
     link.removeAttribute('aria-disabled');
     link.removeAttribute('tabindex');
   }
