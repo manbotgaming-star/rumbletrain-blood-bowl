@@ -2050,6 +2050,12 @@ select.coach-game-submission-stat { width:42px; text-align-last:center; }
 .coach-submit-post-df td:first-child { text-align:left; font-weight:800; }
 .coach-submit-post-df select { min-width:58px; padding:4px; text-align:center; text-align-last:center; }
 
+/* APOTHECARY */
+.coach-submit-apothecary-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+.coach-submit-apothecary-row label{font-size:12px;font-weight:800}
+#coach-game-submission-apothecary{min-width:90px;padding:7px 8px;border:1px solid var(--line-dark);border-radius:5px;font-family:inherit}
+#coach-game-submission-apothecary-note{font-size:10px;color:var(--ink-muted)}
+
 /* NOTES / ACTIONS */
 .coach-submit-notes-label { display:block; margin-top:14px; font-size:12px; font-weight:800; }
 #coach-game-submission-notes { width:100%; box-sizing:border-box; margin-top:5px; padding:8px; border:1px solid var(--line-dark); border-radius:5px; resize:vertical; font-family:inherit; }
