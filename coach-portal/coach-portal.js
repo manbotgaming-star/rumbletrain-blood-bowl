@@ -3421,6 +3421,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     if(result.canSubmit!==true) throw new Error(result.reason||'This game is not currently available for submission.');
 
     const game=result.game;
+    const team=result.team||{};
 
     // =====================================================
     // DOM REFERENCES
@@ -3451,6 +3452,11 @@ async function openCoachGameSubmissionPreview(launchButton){
     const homeDfRoll=document.getElementById('coach-submit-home-df-roll');
     const awayDfRoll=document.getElementById('coach-submit-away-df-roll');
     const notes=document.getElementById('coach-game-submission-notes');
+
+    const apothecaryUsed=document.getElementById('coach-game-submission-apothecary');
+    const apothecaryNote=document.getElementById('coach-game-submission-apothecary-note');
+    
+    if(!apothecaryUsed||!apothecaryNote) throw new Error('The Apothecary game field could not be loaded.');
 
     // =====================================================
     // HEADER / GAME DATA
@@ -3667,6 +3673,16 @@ async function openCoachGameSubmissionPreview(launchButton){
     });
 
 // =====================================================
+// APOTHECARY
+// =====================================================
+const ownsApothecary=Number(team.apothecary||0)>0;
+
+apothecaryUsed.value='No';
+apothecaryUsed.disabled=!ownsApothecary;
+apothecaryNote.textContent=ownsApothecary?'Available this game':'No Apothecary rostered';
+
+    
+// =====================================================
 // BUILD SUBMISSION PAYLOAD
 // =====================================================
 function collectGameSubmissionPayload(){
@@ -3723,6 +3739,7 @@ function collectGameSubmissionPayload(){
     homeDfRoll:home===away?'':Number(homeDfRoll.value),
     awayDfRoll:home===away?'':Number(awayDfRoll.value),
 
+    apothecaryUsed:apothecaryUsed.value,
     coachNotes:String(notes.value||'').trim(),
     players:players
   };
@@ -3763,6 +3780,8 @@ function openFinalGameReview(payload){
     '<div class="coach-game-review-detail"><strong>Away Fan Factor</strong><span>'+escapePortalHtml(awayFan)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Fan Attendance</strong><span>'+escapePortalHtml(attendance)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Submitting Side</strong><span>'+escapePortalHtml(game.submittingSide||game.side||'')+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Apothecary Rostered</strong><span>'+(Number(team.apothecary||0)>0?'Yes':'No')+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>Apothecary Used?</strong><span>'+escapePortalHtml(payload.apothecaryUsed)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home Stalled?</strong><span>'+escapePortalHtml(payload.homeStalled)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away Stalled?</strong><span>'+escapePortalHtml(payload.awayStalled)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home DF Roll</strong><span>'+escapePortalHtml(payload.homeDfRoll===''?'-':payload.homeDfRoll)+'</span></div>'+
