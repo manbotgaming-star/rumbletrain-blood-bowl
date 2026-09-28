@@ -4439,9 +4439,10 @@ function showCoachGameSubmissionResult(submitted,persistent=false){
   else panel.prepend(result);
 
   if(!persistent){
-   setTimeout(function(){
-     if(result.parentNode) result.remove();
-   },8000);
+    setTimeout(function(){
+      if(result.parentNode) result.remove();
+    },8000);
+  }
 }
 
 // =====================================================
