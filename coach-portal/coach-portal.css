@@ -1889,7 +1889,8 @@ strong {
 #coach-game-day-pack.is-checking,#coach-game-day-pack.is-unavailable { position:relative; background:rgba(180,190,194,.18); border-color:rgba(255,255,255,.28); color:rgba(255,255,255,.35); cursor:wait; }
 #coach-game-day-pack.is-checking:hover,#coach-game-day-pack.is-unavailable:hover { background:rgba(180,190,194,.18); }
 #coach-game-day-pack.is-checking::after,#coach-game-day-pack.is-unavailable::after { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:9px; font-weight:800; letter-spacing:.3px; pointer-events:none; }
-#coach-game-day-pack.is-checking::after { content:'CHECKING GAME STATUS...'; color:var(--danger); }
+#coach-game-day-pack.is-checking { background:rgba(255,209,102,.12); border-color:rgba(255,209,102,.65); }
+#coach-game-day-pack.is-checking::after { content:'CHECKING GAME STATUS...'; color:#ffd166; font-size:10px; text-shadow:0 1px 2px rgba(0,0,0,.9); }
 #coach-game-day-pack.is-unavailable::after { content:'STATUS UNAVAILABLE'; color:#f4c1c1; }
 
 /* ============================================================
