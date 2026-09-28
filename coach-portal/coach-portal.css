@@ -1894,6 +1894,13 @@ strong {
 }
 
 /* ============================================================
+   GAME DAY PACK - PENDING OPPONENT SUBMISSION
+   ============================================================ */
+#coach-game-day-pack.is-pending { position:relative; background:rgba(180,190,194,.18); border-color:rgba(255,255,255,.28); color:rgba(255,255,255,.45); cursor:not-allowed; pointer-events:auto; }
+#coach-game-day-pack.is-pending:hover { background:rgba(180,190,194,.18); }
+#coach-game-day-pack.is-pending::after { content:attr(data-pending-text); position:absolute; left:-8%; top:50%; width:116%; padding:2px 0; transform:translateY(-50%) rotate(-6deg); background:rgba(255,245,245,.94); border-top:1px solid var(--danger); border-bottom:1px solid var(--danger); color:var(--danger); font-size:8px; font-weight:800; line-height:1.15; letter-spacing:.2px; text-align:center; white-space:nowrap; pointer-events:none; }
+
+/* ============================================================
    BUY PLAYER MODAL
    ============================================================ */
 
