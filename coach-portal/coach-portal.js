@@ -3466,10 +3466,23 @@ async function openCoachGameSubmissionPreview(launchButton){
     const awayDfRoll=document.getElementById('coach-submit-away-df-roll');
     const notes=document.getElementById('coach-game-submission-notes');
 
+    // =====================================================
+    // INDUCEMENTS
+    // =====================================================
+    const inducementBody=document.getElementById('coach-game-submission-inducements');
+    const inducementRole=document.getElementById('coach-submit-inducement-role');
+    const inducementDifference=document.getElementById('coach-submit-inducement-difference');
+    const inducementHighSpend=document.getElementById('coach-submit-inducement-high-spend');
+    const inducementPetty=document.getElementById('coach-submit-inducement-petty');
+    const inducementTreasury=document.getElementById('coach-submit-inducement-treasury');
+    const inducementTotal=document.getElementById('coach-submit-inducement-total');
+    const inducementMessage=document.getElementById('coach-submit-inducement-message');
+
     const apothecaryUsed=document.getElementById('coach-game-submission-apothecary');
     const apothecaryNote=document.getElementById('coach-game-submission-apothecary-note');
     
     if(!apothecaryUsed||!apothecaryNote) throw new Error('The Apothecary game field could not be loaded.');
+    if(!inducementBody||!inducementRole||!inducementDifference||!inducementHighSpend||!inducementPetty||!inducementTreasury||!inducementTotal||!inducementMessage) throw new Error('The Inducement game fields could not be loaded.');
 
     // =====================================================
     // HEADER / GAME DATA
@@ -3512,6 +3525,260 @@ async function openCoachGameSubmissionPreview(launchButton){
     homeDfRoll.value='';
     awayDfRoll.value='';
     notes.value='';
+
+        // =====================================================
+    // INDUCEMENTS
+    // =====================================================
+    const inducementRules=Array.isArray(result.inducementRules)?result.inducementRules:[];
+    const ctvRole=String(game.submittingCtvRole||'EQUAL').trim().toUpperCase();
+    const ctvDifference=Math.max(0,Number(game.ctvDifference)||0);
+    const treasuryAvailable=Math.max(0,Number(team.treasury)||0);
+    const lowerTreasuryMax=Math.min(50000,treasuryAvailable);
+
+    let inducementFundingState={valid:true,error:'',higherCtvTreasurySpent:0,pettyCashAvailable:0,pettyCashUsed:0,treasuryUsed:0,totalPurchased:0,purchases:[]};
+
+    function inducementInputValue(input){
+      const value=String(input&&input.value||'').replace(/,/g,'').trim();
+      return /^\d+$/.test(value)?Number(value):0;
+    }
+
+    function setInducementInput(input,value){
+      if(input) input.value=String(Math.max(0,Math.floor(Number(value)||0)));
+    }
+
+    inducementRole.textContent=ctvRole==='HIGHER'?'HIGHER CTV':ctvRole==='LOWER'?'LOWER CTV':'EQUAL CTV';
+    inducementDifference.textContent=formatGold(ctvDifference);
+    inducementBody.innerHTML='';
+
+    inducementRules.forEach(function(rule){
+      const cost=Math.max(0,Number(rule.cost)||0);
+      const maxQty=Math.max(1,Number(rule.maxQty)||1);
+      const row=document.createElement('tr');
+
+      row.dataset.inducement=String(rule.inducement||'');
+      row.dataset.cost=String(cost);
+
+      const name=document.createElement('td');
+      name.textContent=String(rule.inducement||'');
+      if(rule.notes) name.title=String(rule.notes);
+
+      const costCell=document.createElement('td');
+      costCell.textContent=formatGold(cost);
+
+      const maxCell=document.createElement('td');
+      maxCell.textContent=maxQty;
+
+      const qtyCell=document.createElement('td');
+      const qty=document.createElement('select');
+      qty.className='coach-submit-inducement-qty';
+
+      for(let i=0;i<=maxQty;i++){
+        const option=document.createElement('option');
+        option.value=String(i);
+        option.textContent=String(i);
+        qty.appendChild(option);
+      }
+
+      qty.disabled=ctvRole==='EQUAL';
+      qtyCell.appendChild(qty);
+
+      const totalCell=document.createElement('td');
+      totalCell.className='coach-submit-inducement-row-total';
+      totalCell.textContent='0';
+
+      const pettyCell=document.createElement('td');
+      pettyCell.className='coach-submit-inducement-row-petty';
+      pettyCell.textContent='0';
+
+      const treasuryCell=document.createElement('td');
+      treasuryCell.className='coach-submit-inducement-row-treasury';
+      treasuryCell.textContent='0';
+
+      const sourceCell=document.createElement('td');
+      sourceCell.className='coach-submit-inducement-row-source';
+      sourceCell.textContent='-';
+
+      row.appendChild(name);
+      row.appendChild(costCell);
+      row.appendChild(maxCell);
+      row.appendChild(qtyCell);
+      row.appendChild(totalCell);
+      row.appendChild(pettyCell);
+      row.appendChild(treasuryCell);
+      row.appendChild(sourceCell);
+
+      qty.onchange=updateInducementFunding;
+      inducementBody.appendChild(row);
+    });
+
+    if(!inducementRules.length){
+      const row=document.createElement('tr');
+      const cell=document.createElement('td');
+      cell.colSpan=8;
+      cell.textContent='No legal inducements are available for this team.';
+      row.appendChild(cell);
+      inducementBody.appendChild(row);
+    }
+
+    function updateInducementFunding(){
+      const rows=Array.from(inducementBody.querySelectorAll('tr[data-inducement]')).map(function(row){
+        const qty=row.querySelector('.coach-submit-inducement-qty');
+        const quantity=Number(qty?qty.value:0)||0;
+        const unitCost=Number(row.dataset.cost)||0;
+
+        return {
+          row:row,
+          inducement:String(row.dataset.inducement||''),
+          qty:quantity,
+          unitCost:unitCost,
+          totalCost:quantity*unitCost
+        };
+      });
+
+      const totalPurchased=rows.reduce(function(sum,item){ return sum+item.totalCost; },0);
+
+      let highSpend=0;
+      let pettyAvailable=0;
+      let pettyUsed=0;
+      let treasuryUsed=0;
+      let valid=true;
+      let error='';
+
+      if(ctvRole==='HIGHER'){
+        highSpend=totalPurchased;
+        treasuryUsed=totalPurchased;
+
+        setInducementInput(inducementHighSpend,highSpend);
+        setInducementInput(inducementTreasury,treasuryUsed);
+
+        inducementHighSpend.disabled=true;
+        inducementTreasury.disabled=true;
+
+        if(totalPurchased>treasuryAvailable){
+          valid=false;
+          error='Inducement purchases exceed this team\'s available Treasury.';
+        }
+      }
+      else if(ctvRole==='LOWER'){
+        inducementHighSpend.disabled=false;
+        inducementTreasury.disabled=false;
+
+        highSpend=inducementInputValue(inducementHighSpend);
+        pettyAvailable=ctvDifference+highSpend;
+
+        let enteredTreasury=inducementInputValue(inducementTreasury);
+        enteredTreasury=Math.min(enteredTreasury,lowerTreasuryMax,totalPurchased);
+
+        const requiredTreasury=Math.max(0,totalPurchased-pettyAvailable);
+
+        if(requiredTreasury<=lowerTreasuryMax&&enteredTreasury<requiredTreasury){
+          enteredTreasury=requiredTreasury;
+        }
+
+        setInducementInput(inducementTreasury,enteredTreasury);
+
+        treasuryUsed=enteredTreasury;
+        pettyUsed=Math.max(0,totalPurchased-treasuryUsed);
+
+        if(requiredTreasury>lowerTreasuryMax){
+          valid=false;
+          error='These inducements require more than the allowed 50,000 Treasury contribution.';
+        }
+        else if(pettyUsed>pettyAvailable){
+          valid=false;
+          error='These inducements exceed the available Petty Cash plus allowed Treasury.';
+        }
+      }
+      else{
+        setInducementInput(inducementHighSpend,0);
+        setInducementInput(inducementTreasury,0);
+
+        inducementHighSpend.disabled=true;
+        inducementTreasury.disabled=true;
+
+        if(totalPurchased>0){
+          valid=false;
+          error='CTV is equal. Treasury cannot be spent on Inducements.';
+        }
+      }
+
+      if(ctvRole==='HIGHER') pettyUsed=0;
+      if(ctvRole==='EQUAL'){ pettyAvailable=0; pettyUsed=0; treasuryUsed=0; highSpend=0; }
+
+      let pettyRemaining=pettyUsed;
+      const purchases=[];
+
+      rows.forEach(function(item){
+        let rowPetty=0;
+        let rowTreasury=0;
+
+        if(item.qty>0){
+          if(ctvRole==='LOWER'){
+            rowPetty=Math.min(item.totalCost,pettyRemaining);
+            pettyRemaining-=rowPetty;
+            rowTreasury=item.totalCost-rowPetty;
+          }
+          else if(ctvRole==='HIGHER'){
+            rowTreasury=item.totalCost;
+          }
+
+          const fundingSource=rowPetty>0&&rowTreasury>0?'Mixed':rowPetty>0?'Petty Cash':rowTreasury>0?'Treasury':'';
+
+          purchases.push({
+            inducement:item.inducement,
+            qty:item.qty,
+            unitCost:item.unitCost,
+            totalCost:item.totalCost,
+            pettyCashUsed:rowPetty,
+            treasuryUsed:rowTreasury,
+            fundingSource:fundingSource
+          });
+
+          item.row.querySelector('.coach-submit-inducement-row-source').textContent=fundingSource||'-';
+        }
+        else{
+          item.row.querySelector('.coach-submit-inducement-row-source').textContent='-';
+        }
+
+        item.row.querySelector('.coach-submit-inducement-row-total').textContent=formatGold(item.totalCost);
+        item.row.querySelector('.coach-submit-inducement-row-petty').textContent=formatGold(rowPetty);
+        item.row.querySelector('.coach-submit-inducement-row-treasury').textContent=formatGold(rowTreasury);
+      });
+
+      inducementPetty.textContent=formatGold(pettyAvailable);
+      inducementTotal.textContent=formatGold(totalPurchased);
+
+      inducementMessage.className='coach-game-submission-message';
+
+      if(!valid){
+        inducementMessage.classList.add('is-error');
+        inducementMessage.textContent=error;
+      }
+      else if(ctvRole==='LOWER'){
+        inducementMessage.textContent='Petty Cash used: '+formatGold(pettyUsed)+' | Treasury used: '+formatGold(treasuryUsed)+' | Treasury limit: '+formatGold(lowerTreasuryMax);
+      }
+      else if(ctvRole==='HIGHER'){
+        inducementMessage.textContent='Inducement spend comes from Treasury. Available Treasury: '+formatGold(treasuryAvailable);
+      }
+      else{
+        inducementMessage.textContent='CTV is equal. Neither team may spend Treasury on Inducements.';
+      }
+
+      inducementFundingState={
+        valid:valid,
+        error:error,
+        higherCtvTreasurySpent:highSpend,
+        pettyCashAvailable:pettyAvailable,
+        pettyCashUsed:pettyUsed,
+        treasuryUsed:treasuryUsed,
+        totalPurchased:totalPurchased,
+        purchases:purchases
+      };
+    }
+
+    inducementHighSpend.oninput=updateInducementFunding;
+    inducementTreasury.oninput=updateInducementFunding;
+    updateInducementFunding();
 
     message.className='coach-game-submission-message';
     message.textContent='Complete the Game Day Pack entries, then select Review Entries.';
@@ -3741,6 +4008,10 @@ function collectGameSubmissionPayload(){
   return {
     gameId:String(game.gameId||''),
 
+    higherCtvTreasurySpent:inducementFundingState.higherCtvTreasurySpent,
+    inducementTreasuryUsed:inducementFundingState.treasuryUsed,
+    inducements:inducementFundingState.purchases,
+
     homeFairWeather:Number(homeFair.value),
     awayFairWeather:Number(awayFair.value),
 
@@ -3772,8 +4043,9 @@ function openFinalGameReview(payload){
   const reviewMessage=document.getElementById('coach-game-review-message');
   const backButton=document.getElementById('coach-game-review-back');
   const submitButton=document.getElementById('coach-game-review-submit');
+  const reviewInducements=document.getElementById('coach-game-review-inducements');
 
-  if(!reviewModal||!reviewMatch||!reviewDetails||!reviewPlayers||!reviewNotes||!reviewMessage||!backButton||!submitButton){
+  if(!reviewModal||!reviewMatch||!reviewDetails||!reviewInducements||!reviewPlayers||!reviewNotes||!reviewMessage||!backButton||!submitButton){
     alert('The Final Review window could not be opened.');
     return;
   }
@@ -3800,6 +4072,37 @@ function openFinalGameReview(payload){
     '<div class="coach-game-review-detail"><strong>Away Stalled?</strong><span>'+escapePortalHtml(payload.awayStalled)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home DF Roll</strong><span>'+escapePortalHtml(payload.homeDfRoll===''?'-':payload.homeDfRoll)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away DF Roll</strong><span>'+escapePortalHtml(payload.awayDfRoll===''?'-':payload.awayDfRoll)+'</span></div>';
+
+  // =====================================================
+  // INDUCEMENTS REVIEW
+  // =====================================================
+  reviewInducements.innerHTML='';
+
+  const reviewPurchases=Array.isArray(payload.inducements)?payload.inducements:[];
+
+  if(!reviewPurchases.length){
+    const row=document.createElement('tr');
+    const cell=document.createElement('td');
+
+    cell.colSpan=6;
+    cell.textContent='No inducements purchased.';
+
+    row.appendChild(cell);
+    reviewInducements.appendChild(row);
+  }
+  else{
+    reviewPurchases.forEach(function(item){
+      const row=document.createElement('tr');
+
+      [item.inducement,item.qty,formatGold(item.totalCost),formatGold(item.pettyCashUsed),formatGold(item.treasuryUsed),item.fundingSource].forEach(function(value){
+        const cell=document.createElement('td');
+        cell.textContent=displayValue(value);
+        row.appendChild(cell);
+      });
+
+      reviewInducements.appendChild(row);
+    });
+  }
 
   reviewPlayers.innerHTML='';
 
@@ -3923,6 +4226,15 @@ function openFinalGameReview(payload){
 // =====================================================
 reviewButton.onclick=function(){
   message.className='coach-game-submission-message';
+
+  updateInducementFunding();
+
+  if(!inducementFundingState.valid){
+    message.classList.add('is-error');
+    message.textContent=inducementFundingState.error||'Check the Inducement purchases and funding.';
+    inducementBody.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
 
   const home=scoreValue(homeScore);
   const away=scoreValue(awayScore);
