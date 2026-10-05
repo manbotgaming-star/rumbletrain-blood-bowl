@@ -4072,6 +4072,9 @@ function openFinalGameReview(payload){
   const homeFan=Number(game.homeDfBefore||0)+Number(payload.homeFairWeather||0);
   const awayFan=Number(game.awayDfBefore||0)+Number(payload.awayFairWeather||0);
   const attendance=homeFan+awayFan;
+  
+  const submittingDfRoll=submittingIsHome?payload.homeDfRoll:payload.awayDfRoll;
+  const submittingDfTeam=submittingIsHome?game.homeTeam:game.awayTeam;
 
   reviewMatch.textContent=
     String(game.homeTeam||'HOME')+'  '+payload.homeScore+
@@ -4089,7 +4092,7 @@ function openFinalGameReview(payload){
     '<div class="coach-game-review-detail"><strong>Apothecary Used?</strong><span>'+escapePortalHtml(payload.apothecaryUsed)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home Stalled?</strong><span>'+escapePortalHtml(payload.homeStalled)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away Stalled?</strong><span>'+escapePortalHtml(payload.awayStalled)+'</span></div>'+
-    '<div class="coach-game-review-detail"><strong>'+escapePortalHtml(submittingDfTeam)+' DF Roll</strong><span>'+escapePortalHtml(submittingDfRoll===''?'-':submittingDfRoll)+'</span></div>'+
+    '<div class="coach-game-review-detail"><strong>'+escapePortalHtml(submittingDfTeam)+' DF Roll</strong><span>'+escapePortalHtml(submittingDfRoll===''?'-':submittingDfRoll)+'</span></div>';
 
   // =====================================================
   // INDUCEMENTS REVIEW
