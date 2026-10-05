@@ -452,6 +452,50 @@
     </div>
 
     <!-- =================================================
+    INDUCEMENTS PURCHASED
+    ================================================== -->
+    <div class="coach-submit-section-title">INDUCEMENTS PURCHASED</div>
+
+    <div class="coach-submit-inducement-summary">
+      <div><span>CTV ROLE</span><strong id="coach-submit-inducement-role">-</strong></div>
+      <div><span>CTV DIFFERENCE</span><strong id="coach-submit-inducement-difference">-</strong></div>
+
+      <div>
+        <span>HIGHER TEAM TREASURY SPENT</span>
+        <input id="coach-submit-inducement-high-spend" type="text" inputmode="numeric" maxlength="7" value="0">
+      </div>
+
+      <div><span>PETTY CASH AVAILABLE</span><strong id="coach-submit-inducement-petty">-</strong></div>
+
+      <div>
+        <span>YOUR TREASURY USED</span>
+        <input id="coach-submit-inducement-treasury" type="text" inputmode="numeric" maxlength="7" value="0">
+      </div>
+
+      <div><span>TOTAL PURCHASED</span><strong id="coach-submit-inducement-total">0</strong></div>
+    </div>
+
+    <div class="coach-table-wrap">
+      <table class="coach-submit-inducement-table">
+        <thead>
+          <tr>
+            <th>INDUCEMENT</th>
+            <th>COST</th>
+            <th>MAX</th>
+            <th>QTY</th>
+            <th>TOTAL</th>
+            <th>PETTY CASH</th>
+            <th>TREASURY</th>
+            <th>FUNDING</th>
+          </tr>
+        </thead>
+        <tbody id="coach-game-submission-inducements"></tbody>
+      </table>
+    </div>
+
+    <div id="coach-submit-inducement-message" class="coach-game-submission-message"></div>
+
+    <!-- =================================================
          PLAYER GAME STATS
     ================================================== -->
     <div class="coach-submit-section-title">PLAYER GAME STATS</div>
@@ -572,8 +616,31 @@
       <h3>Match Details</h3>
       <div id="coach-game-review-details" class="coach-game-review-details"></div>
     </div>
-
-    <div class="coach-game-review-section">
+<!-- =================================================
+    INDUCEMENTS REVIEW
+================================================== -->
+      <div class="coach-game-review-section">
+          <h3>Inducements Purchased</h3>
+    
+          <div class="coach-table-wrap">
+            <table class="coach-game-review-table">
+              <thead>
+                <tr>
+                  <th>Inducement</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                  <th>Petty Cash</th>
+                  <th>Treasury</th>
+                  <th>Funding</th>
+                </tr>
+              </thead>
+              <tbody id="coach-game-review-inducements"></tbody>
+            </table>
+          </div>
+        </div>
+    
+   <div class="coach-game-review-section">
+      
       <h3>Player Entries</h3>
 
       <div class="coach-table-wrap">
