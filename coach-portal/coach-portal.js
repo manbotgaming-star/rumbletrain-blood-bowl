@@ -3646,7 +3646,7 @@ async function openCoachGameSubmissionPreview(launchButton){
       const position=document.createElement('td');
       position.textContent=displayValue(player.position);
 
-      const fields=['comp','ttm','land','int','td','cas'];
+      const fields=['comp','ttm','land','int','td','cas','kills'];
       const statCells=fields.map(function(field){
         const cell=document.createElement('td');
         cell.appendChild(createStatInput(field));
@@ -3724,6 +3724,7 @@ function collectGameSubmissionPayload(){
       int:stat('int'),
       td:stat('td'),
       cas:stat('cas'),
+      kills:stat('kills'),
       mvp:stat('mvp')
     };
   
@@ -3804,7 +3805,7 @@ function openFinalGameReview(payload){
 
   const meaningfulPlayers=payload.players.filter(function(player){
     return Number(player.comp)||Number(player.ttm)||Number(player.land)||Number(player.int)||
-           Number(player.td)||Number(player.cas)||Number(player.mvp)||
+           Number(player.td)||Number(player.cas)||Number(player.kills)||Number(player.mvp)||
            String(player.injuryResult||'').trim();
   });
 
@@ -3842,6 +3843,7 @@ function openFinalGameReview(payload){
       if(player.int) parts.push('INT '+player.int);
       if(player.td) parts.push('TD '+player.td);
       if(player.cas) parts.push('CAS '+player.cas);
+      if(player.kills) parts.push('KILLS '+player.kills);
       if(player.mvp) parts.push('MVP '+player.mvp);
 
       if(player.injuryResult){
