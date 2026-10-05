@@ -2017,11 +2017,11 @@ strong {
 .coach-submit-team-icon.is-empty { opacity:0; }
 
 /* PLAYER GAME STATS */
-.coach-game-submission-table { width:100%; min-width:1040px; border-collapse:collapse; margin:0; }
+.coach-game-submission-table { width:100%; min-width:1090px; border-collapse:collapse; margin:0; }
 .coach-game-submission-table th,.coach-game-submission-table td { padding:5px 6px; border:1px solid var(--line); vertical-align:middle; }
 .coach-game-submission-table th { background:var(--ink); color:#fff; font-size:10px; text-align:center; white-space:nowrap; }
 .coach-game-submission-table td { text-align:center; }
-.coach-game-submission-table th:nth-child(2),.coach-game-submission-table th:nth-child(3),.coach-game-submission-table th:nth-child(11),.coach-game-submission-table td:nth-child(2),.coach-game-submission-table td:nth-child(3),.coach-game-submission-table td:nth-child(11) { text-align:left; }
+.coach-game-submission-table th:nth-child(2),.coach-game-submission-table th:nth-child(3),.coach-game-submission-table th:nth-child(12),.coach-game-submission-table td:nth-child(2),.coach-game-submission-table td:nth-child(3),.coach-game-submission-table td:nth-child(12) { text-align:left; }
 
 .coach-game-submission-player-cell { position:relative; text-align:left !important; }
 .coach-game-submission-player-name { display:block; padding-right:32px; text-align:left; }
