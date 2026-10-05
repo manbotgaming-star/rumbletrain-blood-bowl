@@ -3437,6 +3437,11 @@ async function openCoachGameSubmissionPreview(launchButton){
     const team=result.team||{};
 
     // =====================================================
+    // SUBMITTING SIDE
+    // =====================================================
+    const submittingIsHome=String(game.submittingSide||game.side||'').trim().toUpperCase()==='HOME';
+
+    // =====================================================
     // DOM REFERENCES
     // =====================================================
     const homeDfBefore=document.getElementById('coach-submit-home-df-before');
@@ -3515,6 +3520,15 @@ async function openCoachGameSubmissionPreview(launchButton){
     postAwayTeam.textContent=String(game.awayTeam||'');
     postHomeBefore.textContent=displayValue(game.homeDfBefore);
     postAwayBefore.textContent=displayValue(game.awayDfBefore);
+
+    // =====================================================
+    // POST-GAME DF — COACH SUBMITS OWN TEAM ONLY
+    // =====================================================
+    const postHomeRow=homeDfRoll.closest('tr');
+    const postAwayRow=awayDfRoll.closest('tr');
+    
+    if(postHomeRow) postHomeRow.hidden=!submittingIsHome;
+    if(postAwayRow) postAwayRow.hidden=submittingIsHome;
 
     homeFair.value='';
     awayFair.value='';
@@ -3813,29 +3827,34 @@ async function openCoachGameSubmissionPreview(launchButton){
     function updateResults(){
       const home=scoreValue(homeScore);
       const away=scoreValue(awayScore);
-
+    
+      function enableSubmittingDfRoll(enabled){
+        homeDfRoll.disabled=!submittingIsHome||!enabled;
+        awayDfRoll.disabled=submittingIsHome||!enabled;
+    
+        if(submittingIsHome) awayDfRoll.value='';
+        else homeDfRoll.value='';
+      }
+    
       if(home===null||away===null){
         postHomeResult.textContent='-';
         postAwayResult.textContent='-';
-        homeDfRoll.disabled=false;
-        awayDfRoll.disabled=false;
+        enableSubmittingDfRoll(true);
         return;
       }
-
+    
       if(home===away){
         postHomeResult.textContent='DRAW';
         postAwayResult.textContent='DRAW';
         homeDfRoll.value='';
         awayDfRoll.value='';
-        homeDfRoll.disabled=true;
-        awayDfRoll.disabled=true;
+        enableSubmittingDfRoll(false);
         return;
       }
-
+    
       postHomeResult.textContent=home>away?'WIN':'LOSS';
       postAwayResult.textContent=away>home?'WIN':'LOSS';
-      homeDfRoll.disabled=false;
-      awayDfRoll.disabled=false;
+      enableSubmittingDfRoll(true);
     }
 
     homeScore.oninput=updateResults;
@@ -4021,8 +4040,8 @@ function collectGameSubmissionPayload(){
     homeStalled:homeStalled.value,
     awayStalled:awayStalled.value,
 
-    homeDfRoll:home===away?'':Number(homeDfRoll.value),
-    awayDfRoll:home===away?'':Number(awayDfRoll.value),
+    homeDfRoll:home===away?'':(submittingIsHome?Number(homeDfRoll.value):''),
+    awayDfRoll:home===away?'':(!submittingIsHome?Number(awayDfRoll.value):''),
 
     apothecaryUsed:apothecaryUsed.value,
     coachNotes:String(notes.value||'').trim(),
@@ -4070,8 +4089,7 @@ function openFinalGameReview(payload){
     '<div class="coach-game-review-detail"><strong>Apothecary Used?</strong><span>'+escapePortalHtml(payload.apothecaryUsed)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home Stalled?</strong><span>'+escapePortalHtml(payload.homeStalled)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away Stalled?</strong><span>'+escapePortalHtml(payload.awayStalled)+'</span></div>'+
-    '<div class="coach-game-review-detail"><strong>Home DF Roll</strong><span>'+escapePortalHtml(payload.homeDfRoll===''?'-':payload.homeDfRoll)+'</span></div>'+
-    '<div class="coach-game-review-detail"><strong>Away DF Roll</strong><span>'+escapePortalHtml(payload.awayDfRoll===''?'-':payload.awayDfRoll)+'</span></div>';
+    '<div class="coach-game-review-detail"><strong>'+escapePortalHtml(submittingDfTeam)+' DF Roll</strong><span>'+escapePortalHtml(submittingDfRoll===''?'-':submittingDfRoll)+'</span></div>'+
 
   // =====================================================
   // INDUCEMENTS REVIEW
@@ -4257,9 +4275,11 @@ reviewButton.onclick=function(){
     return;
   }
 
-  if(home!==away&&(!homeDfRoll.value||!awayDfRoll.value)){
+  const submittingDfRoll=submittingIsHome?homeDfRoll:awayDfRoll;
+
+  if(home!==away&&!submittingDfRoll.value){
     message.classList.add('is-error');
-    message.textContent='Enter both Post-Game Dedicated Fans D6 rolls.';
+    message.textContent='Enter your Post-Game Dedicated Fans D6 roll.';
     return;
   }
 
