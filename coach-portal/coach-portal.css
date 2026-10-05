@@ -2019,9 +2019,9 @@ strong {
 /* =========================================================
    INDUCEMENTS
    ========================================================= */
-.coach-submit-inducement-summary { max-width:520px; margin:2px 0 10px; display:grid; gap:5px; }
-.coach-submit-inducement-summary > div { display:grid; grid-template-columns:220px minmax(90px,140px); gap:12px; align-items:center; }
-.coach-submit-inducement-summary span { font-weight:700; white-space:nowrap; }
+.coach-submit-inducement-summary { max-width:540px; margin:2px 0 10px; display:grid; gap:5px; }
+.coach-submit-inducement-summary > div { display:grid; grid-template-columns:290px 130px; column-gap:18px; align-items:center; }
+.coach-submit-inducement-summary span { font-weight:700; }
 .coach-submit-inducement-summary strong { min-width:90px; }
 .coach-submit-inducement-summary input { width:100%; box-sizing:border-box; padding:4px 6px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
 
