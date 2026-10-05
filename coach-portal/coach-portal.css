@@ -2016,6 +2016,22 @@ strong {
 .coach-submit-team-icon { width:32px; height:32px; object-fit:contain; justify-self:center; align-self:center; }
 .coach-submit-team-icon.is-empty { opacity:0; }
 
+/* =========================================================
+   INDUCEMENTS
+   ========================================================= */
+.coach-submit-inducement-summary { max-width:520px; margin:2px 0 10px; display:grid; gap:5px; }
+.coach-submit-inducement-summary > div { display:grid; grid-template-columns:220px minmax(90px,140px); gap:12px; align-items:center; }
+.coach-submit-inducement-summary span { font-weight:700; white-space:nowrap; }
+.coach-submit-inducement-summary strong { min-width:90px; }
+.coach-submit-inducement-summary input { width:100%; box-sizing:border-box; padding:4px 6px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
+
+.coach-submit-inducement-table { width:100%; min-width:760px; border-collapse:collapse; margin:2px 0 0; }
+.coach-submit-inducement-table th,.coach-submit-inducement-table td { padding:4px 7px; border:1px solid var(--line); vertical-align:middle; white-space:nowrap; }
+.coach-submit-inducement-table th { background:var(--ink); color:#fff; font-size:11px; text-align:center; }
+.coach-submit-inducement-table th:first-child,.coach-submit-inducement-table td:first-child { text-align:left; }
+.coach-submit-inducement-table td:not(:first-child) { text-align:center; }
+.coach-submit-inducement-qty { width:52px; padding:3px; font-family:inherit; text-align:center; text-align-last:center; }
+
 /* PLAYER GAME STATS */
 .coach-game-submission-table { width:100%; min-width:1090px; border-collapse:collapse; margin:0; }
 .coach-game-submission-table th,.coach-game-submission-table td { padding:5px 6px; border:1px solid var(--line); vertical-align:middle; }
