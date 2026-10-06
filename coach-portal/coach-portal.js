@@ -4220,9 +4220,23 @@ function openFinalGameReview(payload){
 
       reviewModal.hidden=true;
       modal.hidden=true;
-
+      
+      // =====================================================
+      // IMMEDIATELY LOCK THE SUBMITTED FIXTURE
+      // Do not make the coach wait for the portal refresh.
+      // =====================================================
+      if(launchButton){
+        launchButton.disabled=true;
+        launchButton.textContent='Game Submitted';
+        launchButton.title='This game has already been submitted.';
+        launchButton.onclick=null;
+      }
+      
+      setCoachPendingGameNotice(true,false);
+      setCoachGameDayPackState('pending',game.gameId);
       showCoachGameSubmissionResult(submitted);
-
+      
+      // Refresh the full portal in the background.
       coachApiRequest(accessCode)
         .then(function(data){
           if(data&&data.ok===true) renderCoachPortal(data);
