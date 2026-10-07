@@ -53,7 +53,7 @@ function loadTeamRoster(teamId){
     showRosterError('Unable to connect to the league roster feed.');
   };
 
-  script.src=TEAM_ROSTER_API_URL+'?view=teamroster&team='+encodeURIComponent(teamId)+'&callback='+encodeURIComponent(callbackName);
+  script.src=TEAM_ROSTER_API_URL+'?view=teamroster&teamId='+encodeURIComponent(teamId)+'&callback='+encodeURIComponent(callbackName);
   document.body.appendChild(script);
 }
 
