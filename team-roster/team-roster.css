@@ -1,1 +1,312 @@
 /* Spectator Team Roster Styles */
+/* =========================================================
+   SPECTATOR TEAM ROSTER
+   ========================================================= */
+
+* { box-sizing:border-box; }
+
+html, body { margin:0; padding:0; min-height:100%; }
+
+body {
+  background:#eef2f3;
+  color:#17333e;
+  font-family:"Graduate",Georgia,serif;
+  font-size:13px;
+}
+
+[hidden] { display:none !important; }
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.roster-page {
+  width:min(1100px,calc(100% - 28px));
+  margin:32px auto 60px;
+  padding:14px;
+  background:#dfe6e8;
+}
+
+
+/* =========================================================
+   LOADING / ERROR
+   ========================================================= */
+
+.status-message {
+  padding:22px;
+  background:#fff;
+  border:1px solid #aab8bd;
+  border-left:4px solid #123f4d;
+  border-radius:8px;
+  text-align:center;
+  text-transform:uppercase;
+}
+
+.error-message {
+  color:#b22727;
+  border-left-color:#b22727;
+}
+
+
+/* =========================================================
+   TEAM HEADER
+   ========================================================= */
+
+.team-header {
+  min-height:190px;
+  display:grid;
+  grid-template-columns:170px 1fr 180px;
+  align-items:center;
+  gap:22px;
+  padding:24px 28px;
+  margin-bottom:18px;
+  color:#fff;
+  border-radius:12px;
+  border:1px solid #0d3441;
+  background-color:#123f4d;
+  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 2px,transparent 2px,transparent 7px);
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+
+.team-header-logo {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:130px;
+}
+
+.team-header-logo img {
+  display:block;
+  max-width:150px;
+  max-height:140px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+}
+
+.team-header-details h1 {
+  margin:0 0 5px;
+  font-size:38px;
+  line-height:1;
+  letter-spacing:1px;
+  color:#fff;
+  text-transform:uppercase;
+}
+
+.team-race {
+  margin-bottom:6px;
+  font-size:17px;
+  color:#dce8eb;
+  text-transform:uppercase;
+}
+
+.team-coach {
+  font-size:14px;
+  color:#fff;
+  text-transform:uppercase;
+}
+
+.team-header-meta {
+  align-self:end;
+  padding-bottom:6px;
+  font-size:12px;
+  line-height:1.8;
+  text-align:left;
+  text-transform:uppercase;
+  color:#fff;
+}
+
+.team-header-meta strong { margin-right:5px; }
+
+
+/* =========================================================
+   SECTION PANELS
+   ========================================================= */
+
+.roster-section {
+  margin-top:18px;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #aebcc1;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.07);
+}
+
+.roster-section h2 {
+  margin:0;
+  padding:11px 16px;
+  background:#155263;
+  color:#fff;
+  font-size:19px;
+  line-height:1;
+  letter-spacing:.4px;
+}
+
+
+/* =========================================================
+   TEAM MANAGEMENT
+   ========================================================= */
+
+.management-grid {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+}
+
+.management-stat {
+  min-height:94px;
+  padding:14px 12px;
+  border-right:1px solid #ccd5d8;
+}
+
+.management-stat:last-child { border-right:0; }
+
+.management-stat span {
+  display:block;
+  margin-bottom:8px;
+  font-size:10px;
+  color:#60747c;
+  text-transform:uppercase;
+}
+
+.management-stat strong {
+  display:block;
+  font-size:18px;
+  color:#17333e;
+}
+
+
+/* =========================================================
+   ROSTER TABLE
+   ========================================================= */
+
+.roster-table-wrap {
+  width:100%;
+  overflow-x:auto;
+}
+
+.roster-table {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+  background:#fff;
+}
+
+.roster-table th {
+  padding:9px 8px;
+  background:#214c59;
+  color:#fff;
+  border-right:1px solid #849ca4;
+  font-size:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+.roster-table th:last-child { border-right:0; }
+
+.roster-table td {
+  padding:8px;
+  border-right:1px solid #d6dde0;
+  border-bottom:1px solid #d6dde0;
+  vertical-align:middle;
+  color:#17333e;
+}
+
+.roster-table td:last-child { border-right:0; }
+
+.roster-table tbody tr:nth-child(even) { background:#f2f5f6; }
+
+.roster-table tbody tr:hover { background:#e8eff1; }
+
+.roster-table th:nth-child(1),
+.roster-table td:nth-child(1) { width:40px; text-align:center; }
+
+.roster-table th:nth-child(4),
+.roster-table th:nth-child(5),
+.roster-table th:nth-child(6),
+.roster-table th:nth-child(7),
+.roster-table th:nth-child(8),
+.roster-table th:nth-child(10),
+.roster-table td:nth-child(4),
+.roster-table td:nth-child(5),
+.roster-table td:nth-child(6),
+.roster-table td:nth-child(7),
+.roster-table td:nth-child(8),
+.roster-table td:nth-child(10) {
+  width:44px;
+  text-align:center;
+}
+
+.roster-table th:nth-child(11),
+.roster-table td:nth-child(11) {
+  width:85px;
+  text-align:right;
+  white-space:nowrap;
+}
+
+.roster-table th:nth-child(12),
+.roster-table td:nth-child(12) {
+  width:78px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+
+/* =========================================================
+   PLAYER STATUS
+   ========================================================= */
+
+.status-active { color:#17333e; }
+
+.status-mng {
+  color:#b06b00 !important;
+  font-weight:bold;
+}
+
+.status-dead {
+  color:#b22727 !important;
+  font-weight:bold;
+}
+
+.status-retired {
+  color:#777 !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width:900px) {
+  .team-header { grid-template-columns:130px 1fr; }
+  .team-header-logo img { max-width:120px; max-height:120px; }
+  .team-header-meta { grid-column:1 / -1; display:flex; gap:18px; padding:0; }
+  .team-header-details h1 { font-size:30px; }
+
+  .management-grid { grid-template-columns:repeat(4,1fr); }
+  .management-stat { border-bottom:1px solid #ccd5d8; }
+}
+
+@media (max-width:600px) {
+  .roster-page { width:100%; margin:0; padding:8px; }
+
+  .team-header {
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:18px;
+    text-align:center;
+  }
+
+  .team-header-logo { min-height:auto; }
+  .team-header-details h1 { font-size:27px; }
+  .team-header-meta { grid-column:auto; justify-content:center; text-align:center; }
+
+  .management-grid { grid-template-columns:repeat(2,1fr); }
+
+  .management-stat {
+    min-height:76px;
+    border-right:1px solid #ccd5d8;
+  }
+
+  .roster-section h2 { font-size:17px; }
+}
