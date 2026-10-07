@@ -210,3 +210,19 @@ function escapeHtml(value){
 function escapeAttr(value){
   return escapeHtml(value);
 }
+
+// =========================================================
+// TELL PARENT PAGE OUR HEIGHT
+// =========================================================
+function sendRosterHeight(){
+  const height=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
+  window.parent.postMessage({type:'rumbleRosterHeight',height:height},'*');
+}
+
+window.addEventListener('load',sendRosterHeight);
+window.addEventListener('resize',sendRosterHeight);
+
+if('ResizeObserver' in window){
+  const rosterHeightObserver=new ResizeObserver(function(){ sendRosterHeight(); });
+  rosterHeightObserver.observe(document.documentElement);
+}
