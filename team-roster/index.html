@@ -1,1 +1,113 @@
 <!-- Spectator Team Roster -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Roster | Rumble Train Blood Bowl</title>
+
+  <!-- =========================
+       FONTS / STYLES
+       ========================= -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="team-roster.css?v=1">
+</head>
+
+<body>
+
+  <!-- =========================
+       SPECTATOR TEAM ROSTER
+       ========================= -->
+  <main class="roster-page">
+
+    <div id="loading-state" class="status-message">Loading team roster...</div>
+
+    <div id="error-state" class="status-message error-message" hidden>
+      Team roster could not be loaded.
+    </div>
+
+    <div id="team-content" hidden>
+
+      <!-- =========================
+           TEAM HEADER
+           ========================= -->
+      <section class="team-header">
+        <div class="team-header-logo">
+          <img id="team-logo" src="" alt="">
+        </div>
+
+        <div class="team-header-details">
+          <h1 id="team-name">Team Name</h1>
+          <div id="team-race" class="team-race">Race</div>
+          <div class="team-coach">Coach: <span id="team-coach">-</span></div>
+        </div>
+
+        <div class="team-header-meta">
+          <div><strong id="team-id">-</strong> TEAM ID</div>
+          <div><strong id="season-id">-</strong> SEASON</div>
+        </div>
+      </section>
+
+
+      <!-- =========================
+           TEAM MANAGEMENT
+           ========================= -->
+      <section class="roster-section">
+        <h2>TEAM MANAGEMENT</h2>
+
+        <div class="management-grid">
+          <div class="management-stat"><span>TREASURY</span><strong id="team-treasury">0</strong></div>
+          <div class="management-stat"><span>PLAYERS</span><strong id="team-players">0</strong></div>
+          <div class="management-stat"><span>RE-ROLLS</span><strong id="team-rerolls">0</strong></div>
+          <div class="management-stat"><span>APOTHECARY</span><strong id="team-apothecary">0</strong></div>
+          <div class="management-stat"><span>ASSISTANT COACHES</span><strong id="team-assistant-coaches">0</strong></div>
+          <div class="management-stat"><span>CHEERLEADERS</span><strong id="team-cheerleaders">0</strong></div>
+          <div class="management-stat"><span>DEDICATED FANS</span><strong id="team-dedicated-fans">0</strong></div>
+        </div>
+      </section>
+
+
+      <!-- =========================
+           TEAM ROSTER
+           ========================= -->
+      <section class="roster-section">
+        <h2>TEAM ROSTER</h2>
+
+        <div class="roster-table-wrap">
+          <table class="roster-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>PLAYER</th>
+                <th>POSITION</th>
+                <th>MA</th>
+                <th>ST</th>
+                <th>AG</th>
+                <th>PA</th>
+                <th>AV</th>
+                <th>SKILLS</th>
+                <th>SPP</th>
+                <th>VALUE</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+
+            <tbody id="roster-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       SCRIPT
+       ========================= -->
+  <script src="team-roster.js?v=1"></script>
+
+</body>
+</html>
