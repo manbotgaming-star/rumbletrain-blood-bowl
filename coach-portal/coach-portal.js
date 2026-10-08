@@ -1516,6 +1516,284 @@ async function refreshCoachRaiseDeadButtonState(){
 }
 
 // =====================================================
+// RAISE THE DEAD MODAL
+// =====================================================
+
+async function openCoachRaiseDead(){
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+  const launchButton=document.getElementById('coach-management-raise-dead');
+
+  if(!accessCode){
+    alert('Your Coach Portal session has expired. Please log in again.');
+    return;
+  }
+
+  if(launchButton){
+    launchButton.disabled=true;
+    launchButton.innerHTML='<span>Loading...</span><strong>Please wait</strong>';
+  }
+
+  try{
+    const [raiseOptions,playerOptions]=await Promise.all([
+      coachApiGetRaiseDeadOptionsRequest(accessCode),
+      coachApiGetPlayerPurchaseOptionsRequest(accessCode)
+    ]);
+
+    if(!raiseOptions||raiseOptions.ok!==true) throw new Error(raiseOptions&&raiseOptions.error?raiseOptions.error:'Unable to load Raise the Dead options.');
+    if(raiseOptions.available!==true) throw new Error(raiseOptions.reason||'Raise the Dead is not currently available.');
+    if(!playerOptions||playerOptions.ok!==true) throw new Error(playerOptions&&playerOptions.error?playerOptions.error:'Unable to load the current roster.');
+
+    showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions);
+  }
+  catch(error){
+    alert(error&&error.message?error.message:'Unable to load Raise the Dead.');
+    refreshCoachRaiseDeadButtonState();
+  }
+}
+
+// =====================================================
+// RAISE THE DEAD - DISPLAY / SUBMIT
+// =====================================================
+
+function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
+  const modal=document.getElementById('coach-raise-dead-modal');
+  const gameSelect=document.getElementById('coach-raise-dead-game');
+  const opponentText=document.getElementById('coach-raise-dead-opponent');
+  const positionSelect=document.getElementById('coach-raise-dead-position');
+  const numberSelect=document.getElementById('coach-raise-dead-number');
+  const nameInput=document.getElementById('coach-raise-dead-name');
+  const randomButton=document.getElementById('coach-raise-dead-random-name');
+  const valueText=document.getElementById('coach-raise-dead-value');
+  const message=document.getElementById('coach-raise-dead-message');
+  const cancelButton=document.getElementById('coach-raise-dead-cancel');
+  const confirmButton=document.getElementById('coach-raise-dead-confirm');
+
+  if(!modal||!gameSelect||!opponentText||!positionSelect||!numberSelect||!nameInput||!randomButton||!valueText||!message||!cancelButton||!confirmButton){
+    alert('The Raise the Dead window could not be opened.');
+    return;
+  }
+
+  const games=Array.isArray(raiseOptions.games)?raiseOptions.games:[];
+  const raisePositions=Array.isArray(raiseOptions.positions)?raiseOptions.positions:[];
+  const legalPositions=Array.isArray(playerOptions.positions)?playerOptions.positions:[];
+  const numbers=Array.isArray(playerOptions.availableNumbers)?playerOptions.availableNumbers:[];
+
+  // ---------------------------------------------------
+  // ONLY KEEP RAISED POSITIONS STILL LEGAL ON THE ROSTER
+  // ---------------------------------------------------
+  const positions=raisePositions.filter(function(item){
+    return legalPositions.some(function(legal){
+      return String(legal.position||'')===String(item.position||'');
+    });
+  });
+
+  if(!games.length||!positions.length||!numbers.length){
+    alert('No legal Raise the Dead option is currently available.');
+    refreshCoachRaiseDeadButtonState();
+    return;
+  }
+
+  // ---------------------------------------------------
+  // LOAD GAMES
+  // ---------------------------------------------------
+  gameSelect.innerHTML='';
+
+  games.forEach(function(game){
+    const option=document.createElement('option');
+    option.value=String(game.gameId||'');
+    option.textContent='Round '+(game.round||'-')+' — '+(game.opponentTeam||game.opponentTeamId||'Opponent')+' — '+(game.kills||0)+' Kill'+(Number(game.kills)===1?'':'s');
+    gameSelect.appendChild(option);
+  });
+
+  // ---------------------------------------------------
+  // LOAD POSITIONS
+  // ---------------------------------------------------
+  positionSelect.innerHTML='';
+
+  positions.forEach(function(item){
+    const option=document.createElement('option');
+    option.value=String(item.position||'');
+    option.textContent=(item.position||'Lineman')+' — '+formatGold(item.cost);
+    positionSelect.appendChild(option);
+  });
+
+  // ---------------------------------------------------
+  // LOAD AVAILABLE NUMBERS
+  // ---------------------------------------------------
+  numberSelect.innerHTML='';
+
+  numbers.forEach(function(number){
+    const option=document.createElement('option');
+    option.value=String(number);
+    option.textContent='#'+number;
+    numberSelect.appendChild(option);
+  });
+
+  // ---------------------------------------------------
+  // CURRENT SELECTION
+  // ---------------------------------------------------
+  function selectedGame(){
+    return games.find(item=>String(item.gameId||'')===gameSelect.value)||null;
+  }
+
+  function selectedPosition(){
+    return positions.find(item=>String(item.position||'')===positionSelect.value)||null;
+  }
+
+  function refreshState(){
+    const game=selectedGame();
+    const position=selectedPosition();
+    const playerName=String(nameInput.value||'').trim();
+
+    opponentText.textContent=game?(game.opponentTeam||game.opponentTeamId||'-'):'-';
+    valueText.textContent=position?formatGold(position.cost):'-';
+
+    randomButton.disabled=!position;
+    confirmButton.disabled=!game||!position||!numberSelect.value||!playerName;
+  }
+
+  // ---------------------------------------------------
+  // RANDOM NAME
+  // ---------------------------------------------------
+  randomButton.onclick=async function(){
+    const position=selectedPosition();
+    if(!position) return;
+
+    randomButton.disabled=true;
+    randomButton.textContent='Generating...';
+    message.textContent='';
+
+    try{
+      const result=await coachApiGeneratePlayerNameRequest(accessCode,position.position);
+
+      if(!result||result.ok!==true||!result.name){
+        throw new Error(result&&result.error?result.error:'Unable to generate a player name.');
+      }
+
+      nameInput.value=result.name;
+      refreshState();
+      nameInput.focus();
+    }
+    catch(error){
+      message.textContent=error&&error.message?error.message:'Unable to generate a player name.';
+    }
+    finally{
+      randomButton.textContent='Random Name';
+      refreshState();
+    }
+  };
+
+  // ---------------------------------------------------
+  // CLOSE
+  // Do NOT close from an outside click.
+  // ---------------------------------------------------
+  function closeModal(){
+    modal.hidden=true;
+    cancelButton.onclick=null;
+    confirmButton.onclick=null;
+    randomButton.onclick=null;
+    gameSelect.onchange=null;
+    positionSelect.onchange=null;
+    numberSelect.onchange=null;
+    nameInput.oninput=null;
+    document.removeEventListener('keydown',handleKey);
+  }
+
+  function handleKey(event){
+    if(event.key==='Escape') closeModal();
+  }
+
+  // ---------------------------------------------------
+  // FIELD CHANGES
+  // ---------------------------------------------------
+  gameSelect.onchange=refreshState;
+
+  positionSelect.onchange=function(){
+    nameInput.value='';
+    message.textContent='';
+    refreshState();
+  };
+
+  numberSelect.onchange=refreshState;
+  nameInput.oninput=refreshState;
+  cancelButton.onclick=closeModal;
+
+  // ---------------------------------------------------
+  // SUBMIT
+  // ---------------------------------------------------
+  confirmButton.onclick=async function(){
+    const game=selectedGame();
+    const position=selectedPosition();
+    const playerNumber=Number(numberSelect.value);
+    const playerName=String(nameInput.value||'').trim();
+
+    if(!game||!position||!playerNumber||!playerName){
+      message.textContent='Choose a game, position, player number and player name.';
+      refreshState();
+      return;
+    }
+
+    confirmButton.disabled=true;
+    cancelButton.disabled=true;
+    randomButton.disabled=true;
+    message.textContent='Raising player...';
+
+    try{
+      const result=await coachApiSubmitRaiseDeadRequest(
+        accessCode,
+        game.gameId,
+        position.position,
+        playerNumber,
+        playerName
+      );
+
+      if(!result||result.ok!==true||result.submitted!==true||result.raised!==true){
+        throw new Error(
+          result&&result.reason?result.reason:
+          result&&result.error?result.error:
+          'The player could not be raised.'
+        );
+      }
+
+      closeModal();
+
+      // Refresh the full Portal so roster, CTV, player count
+      // and Raise the Dead availability all update together.
+      const refreshed=await coachApiRequest(accessCode);
+
+      if(refreshed&&refreshed.ok===true){
+        renderCoachPortal(refreshed);
+      }
+
+      showCoachManagementSuccess(
+        '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' raised from the dead.'
+      );
+    }
+    catch(error){
+      message.textContent=error&&error.message?error.message:'Raise the Dead failed.';
+      cancelButton.disabled=false;
+      refreshState();
+    }
+  };
+
+  // ---------------------------------------------------
+  // OPEN
+  // ---------------------------------------------------
+  nameInput.value='';
+  message.textContent='';
+  cancelButton.disabled=false;
+  confirmButton.disabled=true;
+
+  document.addEventListener('keydown',handleKey);
+
+  modal.hidden=false;
+  refreshState();
+
+  // Generate an initial name automatically.
+  randomButton.click();
+}
+
+// =====================================================
 // BUY PLAYER MODAL
 // =====================================================
 
