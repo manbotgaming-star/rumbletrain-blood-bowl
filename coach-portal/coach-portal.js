@@ -972,6 +972,24 @@ function coachApiSubmitPlayerPurchaseRequest(accessCode,position,playerNumber,pl
   },'Unable to submit the player purchase.');
 }
 
+// =====================================================
+// RAISE THE DEAD REQUESTS
+// =====================================================
+
+function coachApiGetRaiseDeadOptionsRequest(accessCode){
+  return coachApiPlayerRequest('coachraisedeadoptions',{code:accessCode},'Unable to load Raise the Dead options.');
+}
+
+function coachApiSubmitRaiseDeadRequest(accessCode,gameId,position,playerNumber,playerName){
+  return coachApiPlayerRequest('coachraisedead',{
+    code:accessCode,
+    gameId:gameId,
+    position:position,
+    number:playerNumber,
+    name:playerName
+  },'Unable to submit Raise the Dead.');
+}
+
 function coachApiSubmitJourneymanHireRequest(accessCode,journeymanId,playerNumber){
   return coachApiPlayerRequest('coachhirejourneyman',{
     code:accessCode,
@@ -1271,6 +1289,18 @@ function renderCoachManagement(team, management) {
     refreshCoachBuyPlayerButtonState();
   }
 
+  // ---------------------------------------------------
+  // RAISE THE DEAD
+  // ---------------------------------------------------
+  const raiseDeadButton=document.getElementById('coach-management-raise-dead');
+  
+  if(raiseDeadButton){
+    raiseDeadButton.hidden=true;
+    raiseDeadButton.disabled=true;
+    raiseDeadButton.onclick=null;
+    refreshCoachRaiseDeadButtonState();
+  }
+
   const options = [
     {
       key: 'reroll',
@@ -1445,6 +1475,44 @@ function renderCoachManagement(team, management) {
         });
     };
   });
+}
+
+// =====================================================
+// RAISE THE DEAD - BUTTON STATE
+// =====================================================
+
+function applyCoachRaiseDeadButtonState(result){
+  const button=document.getElementById('coach-management-raise-dead');
+  if(!button) return;
+
+  const available=result&&result.ok===true&&result.available===true;
+
+  button.hidden=!available;
+  button.disabled=!available;
+  button.title=result&&(result.reason||result.error)?(result.reason||result.error):'';
+  button.innerHTML='<span>Raise the Dead</span><strong>Available</strong>';
+  button.onclick=available?openCoachRaiseDead:null;
+}
+
+async function refreshCoachRaiseDeadButtonState(){
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+  const button=document.getElementById('coach-management-raise-dead');
+
+  if(!button||!accessCode) return;
+
+  button.hidden=true;
+  button.disabled=true;
+
+  try{
+    const result=await coachApiGetRaiseDeadOptionsRequest(accessCode);
+    applyCoachRaiseDeadButtonState(result);
+  }
+  catch(error){
+    button.hidden=true;
+    button.disabled=true;
+    button.onclick=null;
+    console.error('Raise the Dead availability check failed:',error);
+  }
 }
 
 // =====================================================
