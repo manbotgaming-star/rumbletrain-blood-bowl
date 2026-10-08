@@ -201,6 +201,11 @@
               <span>Buy Player</span>
               <strong>Select</strong>
             </button>
+          
+            <button id="coach-management-raise-dead" class="coach-management-action" type="button" hidden disabled>
+              <span>Raise the Dead</span>
+              <strong>Available</strong>
+            </button>
           </div>
 
           <div>
@@ -756,6 +761,56 @@
     <div class="coach-purchase-modal-actions">
       <button id="coach-player-cancel" type="button">Cancel</button>
       <button id="coach-player-confirm" type="button">Buy Player</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     RAISE THE DEAD
+====================================================== -->
+
+<div id="coach-raise-dead-modal" class="coach-purchase-modal" hidden>
+  <div class="coach-purchase-modal-card coach-player-modal-card">
+
+    <h2>Raise the Dead</h2>
+
+    <label for="coach-raise-dead-game">Qualifying Game</label>
+    <select id="coach-raise-dead-game"></select>
+
+    <div class="coach-player-cost">
+      Opponent:
+      <strong id="coach-raise-dead-opponent">-</strong>
+    </div>
+
+    <label for="coach-raise-dead-position">Position</label>
+    <select id="coach-raise-dead-position"></select>
+
+    <label for="coach-raise-dead-number">Player #</label>
+    <select id="coach-raise-dead-number"></select>
+
+    <label for="coach-raise-dead-name">Player Name</label>
+
+    <div class="coach-player-name-row">
+      <input id="coach-raise-dead-name" type="text" maxlength="60" autocomplete="off">
+      <button id="coach-raise-dead-random-name" type="button">Random Name</button>
+    </div>
+
+    <div class="coach-player-cost">
+      Treasury Cost:
+      <strong>0</strong>
+    </div>
+
+    <div class="coach-player-cost">
+      Player Value:
+      <strong id="coach-raise-dead-value">-</strong>
+    </div>
+
+    <div id="coach-raise-dead-message" class="coach-player-message"></div>
+
+    <div class="coach-purchase-modal-actions">
+      <button id="coach-raise-dead-cancel" type="button">Cancel</button>
+      <button id="coach-raise-dead-confirm" type="button">Raise the Dead</button>
     </div>
 
   </div>
