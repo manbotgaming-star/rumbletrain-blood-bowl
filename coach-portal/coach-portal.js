@@ -1544,6 +1544,7 @@ async function openCoachRaiseDead(){
     if(!playerOptions||playerOptions.ok!==true) throw new Error(playerOptions&&playerOptions.error?playerOptions.error:'Unable to load the current roster.');
 
     showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions);
+    applyCoachRaiseDeadButtonState(raiseOptions);
   }
   catch(error){
     alert(error&&error.message?error.message:'Unable to load Raise the Dead.');
