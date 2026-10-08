@@ -133,6 +133,19 @@ function renderTeamRoster(data){
       </div>
     </section>
   `;
+
+  // =========================================================
+  // UPDATE PARENT FRAME AFTER ROSTER RENDERS
+  // =========================================================
+  requestAnimationFrame(function(){
+    requestAnimationFrame(sendRosterHeight);
+  });
+
+  app.querySelectorAll('img').forEach(function(img){
+    if(!img.complete) img.addEventListener('load',sendRosterHeight,{once:true});
+  });
+
+  setTimeout(sendRosterHeight,300);
 }
 
 
@@ -215,7 +228,15 @@ function escapeAttr(value){
 // TELL PARENT PAGE OUR HEIGHT
 // =========================================================
 function sendRosterHeight(){
-  const height=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
+  const app=document.querySelector('.roster-page');
+
+  const height=Math.ceil(Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    app?app.scrollHeight:0,
+    app?app.offsetHeight:0
+  ));
+
   window.parent.postMessage({type:'rumbleRosterHeight',height:height},'*');
 }
 
@@ -223,6 +244,12 @@ window.addEventListener('load',sendRosterHeight);
 window.addEventListener('resize',sendRosterHeight);
 
 if('ResizeObserver' in window){
-  const rosterHeightObserver=new ResizeObserver(function(){ sendRosterHeight(); });
-  rosterHeightObserver.observe(document.documentElement);
+  const rosterHeightObserver=new ResizeObserver(function(){
+    sendRosterHeight();
+  });
+
+  rosterHeightObserver.observe(document.body);
+
+  const rosterPage=document.querySelector('.roster-page');
+  if(rosterPage) rosterHeightObserver.observe(rosterPage);
 }
