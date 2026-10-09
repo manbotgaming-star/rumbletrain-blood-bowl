@@ -1484,20 +1484,27 @@ function applyCoachRaiseDeadButtonState(result){
   const button=document.getElementById('coach-management-raise-dead');
   if(!button) return;
 
-  const available=result&&result.ok===true&&result.available===true;
-  const pending=result&&result.ok===true&&result.pending===true;
+  const hasRule=result&&result.ok===true&&result.hasMastersOfUndeath===true;
+  const available=hasRule&&result.available===true;
+  const pending=hasRule&&result.pending===true;
+  const kills=Number(result&&result.kills)||0;
+
+  if(!hasRule){
+    button.hidden=true; button.disabled=true; button.onclick=null;
+    return;
+  }
+
+  button.hidden=false;
 
   if(available){
-    button.hidden=false;
     button.disabled=false;
-    button.title='';
+    button.title='Raise the Dead available.';
     button.innerHTML='<span>Raise the Dead</span><strong>Available</strong>';
     button.onclick=openCoachRaiseDead;
     return;
   }
 
   if(pending){
-    button.hidden=false;
     button.disabled=true;
     button.title=result.reason||'Pending Opponent Submission.';
     button.innerHTML='<span>Raise the Dead</span><strong>Pending Opponent</strong>';
@@ -1505,9 +1512,9 @@ function applyCoachRaiseDeadButtonState(result){
     return;
   }
 
-  button.hidden=true;
   button.disabled=true;
-  button.title=result&&(result.reason||result.error)?(result.reason||result.error):'';
+  button.title=result.reason||'No eligible opposing dead player.';
+  button.innerHTML='<span>Raise the Dead</span><strong>'+kills+' Kill'+(kills===1?'':'s')+' — No Eligible Dead</strong>';
   button.onclick=null;
 }
 
