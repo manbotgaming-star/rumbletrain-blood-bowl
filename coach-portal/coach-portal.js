@@ -1518,22 +1518,31 @@ function applyCoachRaiseDeadButtonState(result){
   button.onclick=null;
 }
 
+// =====================================================
+// REFRESH RAISE THE DEAD BUTTON STATE
+// =====================================================
 async function refreshCoachRaiseDeadButtonState(){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const button=document.getElementById('coach-management-raise-dead');
 
   if(!button||!accessCode) return;
 
-  button.hidden=true;
+  // Show the control while checking, similar to Buy Player.
+  button.hidden=false;
   button.disabled=true;
+  button.title='Checking Raise the Dead availability...';
+  button.innerHTML='<span>Raise the Dead</span><strong>Checking...</strong>';
+  button.onclick=null;
 
   try{
     const result=await coachApiGetRaiseDeadOptionsRequest(accessCode);
     applyCoachRaiseDeadButtonState(result);
   }
   catch(error){
-    button.hidden=true;
+    button.hidden=false;
     button.disabled=true;
+    button.title=error&&error.message?error.message:'Unable to check Raise the Dead availability.';
+    button.innerHTML='<span>Raise the Dead</span><strong>Unavailable</strong>';
     button.onclick=null;
     console.error('Raise the Dead availability check failed:',error);
   }
