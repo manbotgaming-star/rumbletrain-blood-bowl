@@ -1478,20 +1478,37 @@ function renderCoachManagement(team, management) {
 }
 
 // =====================================================
-// RAISE THE DEAD - BUTTON STATE
+// RAISE THE DEAD BUTTON STATE
 // =====================================================
-
 function applyCoachRaiseDeadButtonState(result){
   const button=document.getElementById('coach-management-raise-dead');
   if(!button) return;
 
   const available=result&&result.ok===true&&result.available===true;
+  const pending=result&&result.ok===true&&result.pending===true;
 
-  button.hidden=!available;
-  button.disabled=!available;
+  if(available){
+    button.hidden=false;
+    button.disabled=false;
+    button.title='';
+    button.innerHTML='<span>Raise the Dead</span><strong>Available</strong>';
+    button.onclick=openCoachRaiseDead;
+    return;
+  }
+
+  if(pending){
+    button.hidden=false;
+    button.disabled=true;
+    button.title=result.reason||'Pending Opponent Submission.';
+    button.innerHTML='<span>Raise the Dead</span><strong>Pending Opponent</strong>';
+    button.onclick=null;
+    return;
+  }
+
+  button.hidden=true;
+  button.disabled=true;
   button.title=result&&(result.reason||result.error)?(result.reason||result.error):'';
-  button.innerHTML='<span>Raise the Dead</span><strong>Available</strong>';
-  button.onclick=available?openCoachRaiseDead:null;
+  button.onclick=null;
 }
 
 async function refreshCoachRaiseDeadButtonState(){
