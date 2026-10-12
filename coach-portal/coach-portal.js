@@ -3850,6 +3850,10 @@ async function openCoachGameSubmissionPreview(launchButton){
     const postAwayResult=document.getElementById('coach-submit-post-away-result');
     const homeDfRoll=document.getElementById('coach-submit-home-df-roll');
     const awayDfRoll=document.getElementById('coach-submit-away-df-roll');
+    const postHomeChange=document.getElementById('coach-submit-post-home-change');
+    const postAwayChange=document.getElementById('coach-submit-post-away-change');
+    const postHomeAfter=document.getElementById('coach-submit-post-home-after');
+    const postAwayAfter=document.getElementById('coach-submit-post-away-after');
     const notes=document.getElementById('coach-game-submission-notes');
 
     // =====================================================
@@ -4205,6 +4209,9 @@ async function openCoachGameSubmissionPreview(launchButton){
       return /^\d+$/.test(value)?Number(value):null;
     }
 
+    // =====================================================
+    // SCORE / RESULT + DEDICATED FANS PREVIEW
+    // =====================================================
     function updateResults(){
       const home=scoreValue(homeScore);
       const away=scoreValue(awayScore);
@@ -4212,34 +4219,65 @@ async function openCoachGameSubmissionPreview(launchButton){
       function enableSubmittingDfRoll(enabled){
         homeDfRoll.disabled=!submittingIsHome||!enabled;
         awayDfRoll.disabled=submittingIsHome||!enabled;
+        if(submittingIsHome) awayDfRoll.value=''; else homeDfRoll.value='';
+      }
     
-        if(submittingIsHome) awayDfRoll.value='';
-        else homeDfRoll.value='';
+      function previewDf(before,result,roll,changeEl,afterEl){
+        if(!changeEl||!afterEl) return;
+    
+        if(result==='DRAW'){
+          changeEl.textContent='0';
+          afterEl.textContent=String(before);
+          return;
+        }
+    
+        if(!roll){
+          changeEl.textContent='—';
+          afterEl.textContent='—';
+          return;
+        }
+    
+        let change=0;
+        if(result==='WIN'&&roll>=before) change=1;
+        if(result==='LOSS'&&roll<=before) change=-1;
+    
+        const after=Math.max(1,Math.min(7,before+change));
+        changeEl.textContent=change>0?'+1':String(change);
+        afterEl.textContent=String(after);
       }
     
       if(home===null||away===null){
-        postHomeResult.textContent='-';
-        postAwayResult.textContent='-';
+        postHomeResult.textContent='-'; postAwayResult.textContent='-';
+        postHomeChange.textContent='—'; postAwayChange.textContent='—';
+        postHomeAfter.textContent='—'; postAwayAfter.textContent='—';
         enableSubmittingDfRoll(true);
         return;
       }
     
       if(home===away){
-        postHomeResult.textContent='DRAW';
-        postAwayResult.textContent='DRAW';
-        homeDfRoll.value='';
-        awayDfRoll.value='';
+        postHomeResult.textContent='DRAW'; postAwayResult.textContent='DRAW';
+        homeDfRoll.value=''; awayDfRoll.value='';
         enableSubmittingDfRoll(false);
+        previewDf(Number(game.homeDfBefore)||0,'DRAW',0,postHomeChange,postHomeAfter);
+        previewDf(Number(game.awayDfBefore)||0,'DRAW',0,postAwayChange,postAwayAfter);
         return;
       }
     
-      postHomeResult.textContent=home>away?'WIN':'LOSS';
-      postAwayResult.textContent=away>home?'WIN':'LOSS';
+      const homeResult=home>away?'WIN':'LOSS';
+      const awayResult=away>home?'WIN':'LOSS';
+    
+      postHomeResult.textContent=homeResult;
+      postAwayResult.textContent=awayResult;
       enableSubmittingDfRoll(true);
+    
+      previewDf(Number(game.homeDfBefore)||0,homeResult,Number(homeDfRoll.value)||0,postHomeChange,postHomeAfter);
+      previewDf(Number(game.awayDfBefore)||0,awayResult,Number(awayDfRoll.value)||0,postAwayChange,postAwayAfter);
     }
 
     homeScore.oninput=updateResults;
     awayScore.oninput=updateResults;
+    homeDfRoll.onchange=updateResults;
+    awayDfRoll.onchange=updateResults;
     updateResults();
 
     // =====================================================
