@@ -2145,3 +2145,12 @@ select.coach-game-submission-stat { width:42px; text-align-last:center; }
   .coach-game-review-details { grid-template-columns:1fr; }
   .coach-game-review-detail:nth-child(odd) { border-right:0; }
 }
+
+/* =====================================================
+   GAME SUBMISSION - DYNAMIC HEIGHT
+   Let the embedded Coach Portal grow instead of scrolling
+   inside the submission card.
+   ===================================================== */
+#coach-game-submission-modal{position:absolute;top:0;left:0;width:100%;min-height:100%;height:auto;align-items:flex-start;padding:24px 12px;}
+#coach-game-submission-modal .coach-game-submission-card{max-height:none;height:auto;overflow:visible;margin:0 auto;}
+
