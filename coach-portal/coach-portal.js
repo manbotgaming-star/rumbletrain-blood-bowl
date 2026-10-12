@@ -1723,6 +1723,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // ---------------------------------------------------
   function closeModal(){
     modal.hidden=true;
+    reportCoachPortalHeight();
     cancelButton.onclick=null;
     confirmButton.onclick=null;
     randomButton.onclick=null;
@@ -4743,6 +4744,8 @@ reviewButton.onclick=function(){
     document.addEventListener('keydown',handleKey);
 
     modal.hidden=false;
+    reportCoachPortalHeight();
+    setTimeout(reportCoachPortalHeight,50);
     homeFair.focus();
   }
   catch(error){
