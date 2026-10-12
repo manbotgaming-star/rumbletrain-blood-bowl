@@ -1723,7 +1723,6 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // ---------------------------------------------------
   function closeModal(){
     modal.hidden=true;
-    reportCoachPortalHeight();
     cancelButton.onclick=null;
     confirmButton.onclick=null;
     randomButton.onclick=null;
@@ -4768,6 +4767,7 @@ reviewButton.onclick=function(){
     // =====================================================
     function closeModal(){
       modal.hidden=true;
+      reportCoachPortalHeight();
       closeButton.onclick=null;
       reviewButton.onclick=null;
       modal.onclick=null;
