@@ -889,7 +889,7 @@ function coachApiSubmitRerollPurchaseRequest(accessCode) {
 // COACH BUY PLAYER REQUESTS
 // =====================================================
 
-function coachApiPlayerRequest(view,params,errorMessage) {
+function coachApiPlayerRequest(view,params,errorMessage,timeoutMs=45000) {
   return new Promise(function(resolve,reject) {
     const callbackName = 'rumbleCoachPlayerCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
     const script = document.createElement('script');
@@ -906,7 +906,7 @@ function coachApiPlayerRequest(view,params,errorMessage) {
       finished = true;
       cleanup();
       reject(new Error(errorMessage || 'Coach Player request timed out.'));
-    },45000);
+    },timeoutMs);
 
     window[callbackName] = function(data) {
       if (finished) return;
@@ -944,15 +944,15 @@ function coachApiGetGameSubmissionOptionsRequest(accessCode){
   );
 }
 
+// =====================================================
+// GAME SUBMISSION
+// Allow extra time for stats, injuries and inducements.
+// =====================================================
 function coachApiSubmitGameSubmissionRequest(accessCode,payload){
-  return coachApiPlayerRequest(
-    'coachgamesubmit',
-    {
-      code:accessCode,
-      payload:JSON.stringify(payload)
-    },
-    'Unable to submit the game.'
-  );
+  return coachApiPlayerRequest('coachgamesubmit',{
+    code:accessCode,
+    payload:JSON.stringify(payload)
+  },'Unable to submit the game.',120000);
 }
 
 function coachApiGetPlayerPurchaseOptionsRequest(accessCode) {
