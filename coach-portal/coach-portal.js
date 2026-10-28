@@ -1122,8 +1122,8 @@ function renderCoachGameDayPackLink(team,coach,games) {
   const seasonId = String(coach.seasonId || team.seasonId || '').trim();
 
   const hasUpcomingGame = Array.isArray(games) && games.some(function(game) {
-    const status = String(game.status || '').trim().toLowerCase();
-    return status !== '' && status !== 'completed';
+    const status=String(game.status||'').trim().toLowerCase();
+    return game.isBye!==true && status!=='' && status!=='completed';
   });
 
   if (!teamId || !seasonId || !hasUpcomingGame) {
@@ -3635,6 +3635,31 @@ function renderCoachGames(games,team,coach){
     const card=document.createElement('div');
     card.className='coach-game-card';
     card.dataset.gameId=String(game.gameId||'');
+
+    
+    // =====================================================
+    // BYE ROUND - DISPLAY ONLY
+    // =====================================================
+    if(game.isBye===true){
+      const round=document.createElement('div');
+      round.className='coach-game-round';
+      round.textContent='Round '+game.round;
+
+      const matchup=document.createElement('strong');
+      matchup.textContent='BYE WEEK';
+
+      const details=document.createElement('div');
+      details.className='coach-game-details';
+      details.textContent='No game this round';
+
+      card.classList.add('coach-game-bye');
+      card.appendChild(round);
+      card.appendChild(matchup);
+      card.appendChild(details);
+      container.appendChild(card);
+      return;
+    }
+
 
     const round=document.createElement('div');
     round.className='coach-game-round';
