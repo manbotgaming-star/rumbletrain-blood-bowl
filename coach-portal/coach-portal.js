@@ -1280,17 +1280,19 @@ function renderCoachManagement(team, management) {
   setText('coach-rerolls', displayValue(team.rerolls));
   setText('coach-apothecary', displayValue(team.apothecary));
 
-    // ---------------------------------------------------
-    // BUY PLAYER - LOAD OPTIONS ONLY WHEN CLICKED
-    // ---------------------------------------------------
-    const buyPlayerButton=document.getElementById('coach-management-buy-player');
-  
-    if(buyPlayerButton){
-      buyPlayerButton.disabled=false;
-      buyPlayerButton.title='Load current player purchase options.';
-      buyPlayerButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
-      buyPlayerButton.onclick=openCoachPlayerPurchase;
-    }
+      // ---------------------------------------------------
+      // BUY PLAYER - USE EXISTING MANAGEMENT DATA
+      // ---------------------------------------------------
+      const buyPlayerButton=document.getElementById('coach-management-buy-player');
+      const playerCount=Number(document.getElementById('coach-management-players')?.textContent)||0;
+      const canAttemptPurchase=Number(team.treasury)>0&&playerCount<16;
+    
+      if(buyPlayerButton){
+        buyPlayerButton.disabled=!canAttemptPurchase;
+        buyPlayerButton.title=canAttemptPurchase?'Load current player purchase options.':'No funds available or roster is full.';
+        buyPlayerButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
+        buyPlayerButton.onclick=canAttemptPurchase?openCoachPlayerPurchase:null;
+      }
   
     // ---------------------------------------------------
     // RAISE THE DEAD - ONLY CHECK ROSTERS WITH THE RULE
