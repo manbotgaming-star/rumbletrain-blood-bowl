@@ -1280,26 +1280,32 @@ function renderCoachManagement(team, management) {
   setText('coach-rerolls', displayValue(team.rerolls));
   setText('coach-apothecary', displayValue(team.apothecary));
 
-  const buyPlayerButton = document.getElementById('coach-management-buy-player');
-  if (buyPlayerButton) {
-    buyPlayerButton.disabled = true;
-    buyPlayerButton.title = 'Checking player purchase availability...';
-    buyPlayerButton.innerHTML = '<span>Buy Player</span><strong>Checking...</strong>';
-    buyPlayerButton.onclick = openCoachPlayerPurchase;
-    refreshCoachBuyPlayerButtonState();
-  }
-
-  // ---------------------------------------------------
-  // RAISE THE DEAD
-  // ---------------------------------------------------
-  const raiseDeadButton=document.getElementById('coach-management-raise-dead');
+    // ---------------------------------------------------
+    // BUY PLAYER - LOAD OPTIONS ONLY WHEN CLICKED
+    // ---------------------------------------------------
+    const buyPlayerButton=document.getElementById('coach-management-buy-player');
   
-  if(raiseDeadButton){
-    raiseDeadButton.hidden=true;
-    raiseDeadButton.disabled=true;
-    raiseDeadButton.onclick=null;
-    refreshCoachRaiseDeadButtonState();
-  }
+    if(buyPlayerButton){
+      buyPlayerButton.disabled=false;
+      buyPlayerButton.title='Load current player purchase options.';
+      buyPlayerButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
+      buyPlayerButton.onclick=openCoachPlayerPurchase;
+    }
+  
+    // ---------------------------------------------------
+    // RAISE THE DEAD - ONLY CHECK ROSTERS WITH THE RULE
+    // ---------------------------------------------------
+    const raiseDeadButton=document.getElementById('coach-management-raise-dead');
+    const specialRules=management.details&&Array.isArray(management.details.specialRules)?management.details.specialRules:[];
+    const hasMastersOfUndeath=specialRules.some(rule=>String(rule||'').trim().toLowerCase()==='masters of undeath');
+  
+    if(raiseDeadButton){
+      raiseDeadButton.hidden=!hasMastersOfUndeath;
+      raiseDeadButton.disabled=true;
+      raiseDeadButton.onclick=null;
+  
+      if(hasMastersOfUndeath) refreshCoachRaiseDeadButtonState();
+    }
 
   const options = [
     {
