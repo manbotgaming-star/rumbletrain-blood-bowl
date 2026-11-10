@@ -933,6 +933,9 @@ function coachApiPlayerRequest(view,params,errorMessage,timeoutMs=45000) {
   });
 }
 
+let coachGameSubmissionCache=null;
+const COACH_GAME_CACHE_MS=5*60*1000;
+
 // =====================================================
 // COACH GAME SUBMISSION OPTIONS
 // =====================================================
@@ -3735,6 +3738,13 @@ async function refreshCoachGameSubmissionButton(){
   try{
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
 
+    coachGameSubmissionCache=result&&result.ok===true&&result.game&&result.canSubmit===true
+      ?{accessCode:accessCode,loadedAt:Date.now(),data:result}
+      :null;
+    
+    console.log('Star Players returned by API:',
+      (result&&result.inducementRules||[]).filter(r=>String(r.inducement||'').includes('Star')));
+
     // ---------------------------------------------------
     // STATUS CHECK FAILED
     // ---------------------------------------------------
@@ -3841,8 +3851,18 @@ async function openCoachGameSubmissionPreview(launchButton){
 
   if(launchButton){ launchButton.disabled=true; launchButton.textContent='Loading...'; }
 
+  
   try{
-    const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
+    const cached=coachGameSubmissionCache;
+    const useCache=cached&&cached.accessCode===accessCode&&
+      Date.now()-cached.loadedAt<COACH_GAME_CACHE_MS;
+  
+    const result=useCache
+      ?cached.data
+      :await coachApiGetGameSubmissionOptionsRequest(accessCode);
+  
+    console.log('Submit Game data source:',useCache?'CACHE':'SERVER');
+  
     if(!result||result.ok!==true||!result.game) throw new Error(result&&result.error?result.error:'Unable to load the game submission.');
     if(result.canSubmit!==true) throw new Error(result.reason||'This game is not currently available for submission.');
 
@@ -4716,6 +4736,7 @@ function openFinalGameReview(payload){
 
       reviewModal.hidden=true;
       modal.hidden=true;
+      coachGameSubmissionCache=null;
       
       // =====================================================
       // IMMEDIATELY LOCK THE SUBMITTED FIXTURE
