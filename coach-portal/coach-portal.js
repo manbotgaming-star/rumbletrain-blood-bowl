@@ -3984,17 +3984,19 @@ async function openCoachGameSubmissionPreview(launchButton){
     inducementRules.forEach(function(rule){
       const cost=Math.max(0,Number(rule.cost)||0);
       const maxQty=Math.max(1,Number(rule.maxQty)||1);
+      const variableCost=rule.variableCost===true&&rule.inducement==='Star Players';
       const row=document.createElement('tr');
 
       row.dataset.inducement=String(rule.inducement||'');
       row.dataset.cost=String(cost);
+      row.dataset.variableCost=variableCost?'true':'false';
 
       const name=document.createElement('td');
       name.textContent=String(rule.inducement||'');
       if(rule.notes) name.title=String(rule.notes);
 
       const costCell=document.createElement('td');
-      costCell.textContent=formatGold(cost);
+      costCell.textContent=variableCost?'Variable':formatGold(cost);
 
       const maxCell=document.createElement('td');
       maxCell.textContent=maxQty;
@@ -4015,7 +4017,21 @@ async function openCoachGameSubmissionPreview(launchButton){
 
       const totalCell=document.createElement('td');
       totalCell.className='coach-submit-inducement-row-total';
-      totalCell.textContent='0';
+      
+      if(variableCost){
+        const input=document.createElement('input');
+        input.type='text';
+        input.inputMode='numeric';
+        input.maxLength=7;
+        input.placeholder='Total GP';
+        input.className='coach-submit-inducement-variable-cost';
+        input.disabled=true;
+        input.oninput=updateInducementFunding;
+        totalCell.appendChild(input);
+      }
+      else{
+        totalCell.textContent='0';
+      }
 
       const pettyCell=document.createElement('td');
       pettyCell.className='coach-submit-inducement-row-petty';
@@ -4038,7 +4054,14 @@ async function openCoachGameSubmissionPreview(launchButton){
       row.appendChild(treasuryCell);
       row.appendChild(sourceCell);
 
-      qty.onchange=updateInducementFunding;
+      qty.onchange=function(){
+        const input=row.querySelector('.coach-submit-inducement-variable-cost');
+        if(input){
+          input.disabled=ctvRole==='EQUAL'||Number(qty.value)===0;
+          if(input.disabled) input.value='';
+        }
+        updateInducementFunding();
+      };
       inducementBody.appendChild(row);
     });
 
@@ -4053,17 +4076,24 @@ async function openCoachGameSubmissionPreview(launchButton){
 
     function updateInducementFunding(){
       const rows=Array.from(inducementBody.querySelectorAll('tr[data-inducement]')).map(function(row){
-        const qty=row.querySelector('.coach-submit-inducement-qty');
-        const quantity=Number(qty?qty.value:0)||0;
-        const unitCost=Number(row.dataset.cost)||0;
-
-        return {
-          row:row,
-          inducement:String(row.dataset.inducement||''),
-          qty:quantity,
-          unitCost:unitCost,
-          totalCost:quantity*unitCost
-        };
+        
+      const qty=row.querySelector('.coach-submit-inducement-qty');
+      const quantity=Number(qty?qty.value:0)||0;
+      const variableCost=row.dataset.variableCost==='true';
+      const unitCost=variableCost?0:Number(row.dataset.cost)||0;
+      const costInput=row.querySelector('.coach-submit-inducement-variable-cost');
+      const costText=costInput?String(costInput.value||'').replace(/,/g,'').trim():'';
+      const totalCost=variableCost?(quantity>0?Number(costText)||0:0):quantity*unitCost;
+      
+      return {
+        row:row,
+        inducement:String(row.dataset.inducement||''),
+        qty:quantity,
+        unitCost:unitCost,
+        totalCost:totalCost,
+        variableCost:variableCost,
+        costText:costText
+      };
       });
 
       const totalPurchased=rows.reduce(function(sum,item){ return sum+item.totalCost; },0);
@@ -4074,6 +4104,14 @@ async function openCoachGameSubmissionPreview(launchButton){
       let treasuryUsed=0;
       let valid=true;
       let error='';
+
+      const invalidVariable=rows.find(function(item){
+        if(!item.variableCost||item.qty===0) return false;
+        return !/^\d+$/.test(item.costText) ||
+          item.totalCost<5000 ||
+          item.totalCost>9999999 ||
+          item.totalCost%5000!==0;
+      });
 
       if(ctvRole==='HIGHER'){
         highSpend=totalPurchased;
@@ -4171,7 +4209,9 @@ async function openCoachGameSubmissionPreview(launchButton){
           item.row.querySelector('.coach-submit-inducement-row-source').textContent='-';
         }
 
-        item.row.querySelector('.coach-submit-inducement-row-total').textContent=formatGold(item.totalCost);
+        if(!item.variableCost){
+          item.row.querySelector('.coach-submit-inducement-row-total').textContent=formatGold(item.totalCost);
+        }
         item.row.querySelector('.coach-submit-inducement-row-petty').textContent=formatGold(rowPetty);
         item.row.querySelector('.coach-submit-inducement-row-treasury').textContent=formatGold(rowTreasury);
       });
@@ -4181,6 +4221,11 @@ async function openCoachGameSubmissionPreview(launchButton){
 
       inducementMessage.className='coach-game-submission-message';
 
+      if(invalidVariable){
+        valid=false;
+        error='Enter a valid Star Player total cost in multiples of 5,000 GP.';
+      }
+      
       if(!valid){
         inducementMessage.classList.add('is-error');
         inducementMessage.textContent=error;
