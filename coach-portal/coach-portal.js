@@ -5078,28 +5078,22 @@ function renderCoachRoster(players){
 // =====================================================
 
 function logoutCoach() {
-
-  sessionStorage.removeItem(
-    SESSION_KEY
-  );
-
+  coachGameSubmissionCache=null;
+  sessionStorage.removeItem(SESSION_KEY);
 
   const input =
     document.getElementById(
       'coach-access-code'
     );
 
-
   if (input) {
     input.value = '';
   }
-
 
   clearLoginMessage();
 
   showLogin();
 }
-
 
 // =====================================================
 // VIEW HELPERS
