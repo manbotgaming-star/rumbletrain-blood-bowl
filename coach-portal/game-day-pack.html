@@ -1300,8 +1300,8 @@
         // ---------------------------------------------------
         // OPEN PRINT PREVIEW AUTOMATICALLY
         // ---------------------------------------------------
-        // Request print preview once the complete roster and fonts are ready.
-        setTimeout(openGameDayPackPrint,300);
+        // Request print preview after the Game Day Pack is populated.
+        openGameDayPackPrint();
       }
       catch (err) {
         showError(err && err.message ? err.message : String(err));
@@ -1336,19 +1336,19 @@
     }
     document.addEventListener('DOMContentLoaded',loadGameDayPack);
 
+    
     // =====================================================
-    // PRINT GAME DAY PACK - SAME WINDOW
+    // PRINT GAME DAY PACK - AUTOMATIC / MANUAL
     // =====================================================
     function openGameDayPackPrint(){
       const pack=document.getElementById('pack-content');
       if(!pack||pack.style.display==='none') return;
       const fonts=document.fonts?document.fonts.ready:Promise.resolve();
       fonts.then(function(){
-        requestAnimationFrame(function(){
-          setTimeout(function(){ window.focus(); window.print(); },250);
-        });
-      });
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ window.focus(); window.print(); }); });
+      }).catch(function(){ window.print(); });
     }
+
 
     // Manual print remains available if the dialog is closed.
     document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
