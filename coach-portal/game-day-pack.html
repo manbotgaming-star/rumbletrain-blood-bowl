@@ -1336,19 +1336,14 @@
     }
     document.addEventListener('DOMContentLoaded',loadGameDayPack);
 
-    
     // =====================================================
     // PRINT GAME DAY PACK - AUTOMATIC / MANUAL
     // =====================================================
     function openGameDayPackPrint(){
       const pack=document.getElementById('pack-content');
       if(!pack||pack.style.display==='none') return;
-      const fonts=document.fonts?document.fonts.ready:Promise.resolve();
-      fonts.then(function(){
-        requestAnimationFrame(function(){ requestAnimationFrame(function(){ window.focus(); window.print(); }); });
-      }).catch(function(){ window.print(); });
+      window.print();
     }
-
 
     // Manual print remains available if the dialog is closed.
     document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
