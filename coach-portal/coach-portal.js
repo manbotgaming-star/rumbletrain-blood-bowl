@@ -1,3 +1,284 @@
+
+
+Pasted text(20261111-095303).txt
+Document
+ok lets update teh GameDayPack.html
+
+I've reviewed your GameDayPack.html and WebApp.gs. We can make the first change entirely inside GameDayPack.html, without touching the roster calculations or moving anything to GitHub.
+
+We'll keep your existing Preparing Game Day Pack loading screen in coach-portal.js.
+
+The new behaviour will be:
+
+Coach clicks GAME DAY PACK.
+
+The loading screen and spinner appear as normal.
+
+Apps Script retrieves the current roster and game information.
+
+The completed pack opens and automatically requests the browser's print preview.
+
+We'll also retain the Print button as a fallback, so coaches can print again if they close the print dialog.
+
+Step 1 — Update the Print function
+In Google Apps Script, open GameDayPack.html.
+
+Go to the very bottom and find:
+
+// =====================================================
+// PRINT GAME DAY PACK
+// =====================================================
+
+Replace that entire section, including its existing click handler, but leave the final </script>, </body> and </html> tags untouched.
+
+
+    // =====================================================
+    // PRINT GAME DAY PACK - SAME WINDOW
+    // =====================================================
+    function openGameDayPackPrint(){
+      const pack=document.getElementById('pack-content');
+      if(!pack||pack.style.display==='none') return;
+
+      const fonts=document.fonts?document.fonts.ready:Promise.resolve();
+      fonts.then(function(){
+        requestAnimationFrame(function(){
+          setTimeout(function(){ window.focus(); window.print(); },250);
+        });
+      });
+    }
+
+    // Manual print remains available if the dialog is closed.
+    document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
+
+This removes the code that creates a second browser window and copies the Game Day Pack into it.
+
+Step 2 — Automatically request print preview
+Still in GameDayPack.html, locate:
+
+document.getElementById('pack-content').style.display = 'block';
+
+This is near the bottom of renderGameDayPack().
+
+Immediately underneath that line, add:
+
+
+        // ---------------------------------------------------
+        // OPEN PRINT PREVIEW AUTOMATICALLY
+        // ---------------------------------------------------
+        setTimeout(openGameDayPackPrint,300);
+
+Do not change the existing DOMContentLoaded listener or any other part of renderGameDayPack().
+
+Step 3 — Save and deploy
+Save GameDayPack.html in Google Apps Script.
+
+Go to Deploy → Manage deployments.
+
+Edit your existing web app deployment, select New version, and deploy.
+
+Return to the Coach Portal and press Ctrl + F5.
+
+Log in as CAR and click GAME DAY PACK.
+
+The browser should now request print preview after the pack is fully populated and the Graduate font has loaded.
+
+Because Google Apps Script displays HTML inside a sandboxed frame, browsers can differ in how they handle automatic printing. If Chrome doesn't open the print dialog, the normal Game Day Pack should remain available with its Print button. That would tell us we need to adjust the window-opening approach rather than the league calculations.
+
+No GitHub update is needed for these two changes.
+
+This should eliminate the extra window-generation step, though it won't yet speed up the Google Sheets data retrieval. Once we've confirmed the print behaviour works, we can optimize that separately in WebApp.gs.
+
+User attachment
+
+Pasted text(20261111-100109).txt
+Document
+
+Pasted text (2)(20261111-100116).txt
+Document
+
+Pasted text (3)(20261111-100124).txt
+Document
+Clicking Game Day Pack button looks to still resolve to the same pre print page.
+
+Worked for 23s
+I can see the problem. Your screenshot shows that the Game Day Pack is still opening in its normal view, with the PRINT GAME DAY PACK button at the top.
+
+I've checked your three updated files, and you implemented the changes correctly. The automatic print call is present in GameDayPack.html, exactly where we intended.
+
+Why it isn't working
+The issue is Google's Apps Script HTML sandbox.
+
+Although the Game Day Pack appears as a normal browser page, Google serves its HTML inside a restricted frame. Chrome can block an automatic window.print() request from that frame, especially when it runs after a timer rather than a direct button click.
+
+That means the approach I suggested wasn't reliable for your setup. Increasing the delay won't necessarily fix it.
+
+What I recommend instead
+Rather than keep trying to force automatic printing from Apps Script, I recommend the following architecture:
+
+Coach Portal — GitHub
+
+Coach clicks Game Day Pack
+
+Preparing Game Day Pack
+
+Keep the existing loading spinner
+
+Google Apps Script
+
+Retrieve roster, CTV, Journeymen and game data
+
+Printable Game Day Pack — GitHub
+
+Show the print-ready pages directly, with a Print button
+
+This would give us more control over the browser and remove the Google Apps Script presentation page altogether. It also separates the visual template from the spreadsheet calculations, making future styling changes easier.
+
+However, moving the template requires a new data endpoint and changes to how the printable page receives its data. It won't automatically make the spreadsheet calculations faster; we'd optimize those separately.
+
+For now
+I recommend not making any further changes to GameDayPack.html yet. The pack is displaying correctly, and we should preserve that working version while we prepare the GitHub approach.
+
+We now have the three files needed to plan that migration: GameDayPack.html, WebApp.gs, and coach-portal.js.
+
+The next development step would be to create a dedicated, read-only Game Day Pack data endpoint in WebApp.gs, then connect a GitHub-hosted printable template to it. That gives us a more reliable foundation for the loading and printing experience you want.
+
+ok lets get started with that, while we are rebuilding it combine the optimization into this work as weel.
+
+Worked for 2m 32s
+I've put together the first GitHub Game Day Pack rebuild, including the loading optimizations. I've used your latest uploaded versions of GameDayPack.html, WebApp.gs and coach-portal.js as the starting point.
+
+Complete update package
+
+Three replacement files and installation instructions
+
+Ready
+Download GAME-DAY-PACK-UPDATE.zip
+
+What's changing
+Feature
+
+New behaviour
+
+Loading spinner
+
+Kept
+
+Intermediate Apps Script page
+
+Removed from the normal workflow
+
+Printable Game Day Pack
+
+Hosted on GitHub
+
+Live roster and game data
+
+Still supplied by Apps Script
+
+Print preview
+
+Automatically requested, with a manual Print button as fallback
+
+Teams sheet reads
+
+Reduced from two to one per pack request
+
+LeaguePlayers sheet reads
+
+Reduced from two to one per pack request
+
+Printable layout
+
+All four existing pages retained
+
+The backend optimization avoids repeatedly reading the same Teams and LeaguePlayers sheets for both teams. It doesn't yet optimize every spreadsheet operation, so we'll need to test the actual loading improvement.
+
+Installation
+Update Google Apps Script first
+
+Open your BloodBowlLeagueScript project and replace the entire existing WebApp.gs with the supplied file.
+
+Download WebApp.gs
+
+Save, then use Deploy → Manage deployments → Edit → New version → Deploy. Keep your existing deployment URL.
+
+Add the new GitHub printable page
+
+In your GitHub repository, navigate to the coach-portal folder and add a new file named exactly:
+
+game-day-pack.html
+
+Download game-day-pack.html
+
+Commit the new file.
+
+Update the Coach Portal JavaScript
+
+Replace your existing GitHub coach-portal/coach-portal.js with the supplied version. Keep the filename unchanged.
+
+Download coach-portal.js
+
+Commit the change.
+
+Test the Game Day Pack
+
+Open the Coach Portal, press Ctrl + F5, sign in as CAR and select GAME DAY PACK.
+
+You should see the preparation spinner, followed by the new GitHub-hosted printable pack. Chrome may open print preview automatically; if it blocks the request, the printable pack and Print button will remain available.
+
+I've checked the new JavaScript syntax and the presence of the four page sections. I haven't been able to execute a live request against your Google Sheets, so the deployment test is still important.
+
+One thing to check carefully: the printable pack should still show the same players, Current Team Value, inducements and Journeymen as before. We're optimizing how data is retrieved, not changing how those values are calculated.
+
+Once this version is working, we can measure the remaining Apps Script loading time and target any further bottlenecks without rebuilding the interface again.
+
+
+game-day-pack.html
+HTML
+
+coach-portal.js
+Code
+
+Pasted text(20261111-101012).txt
+Document
+I need the actual game-day-pack.html code as the link you gave is just trying to execute.  and the coach-portal.js is not loading for me to copy it.
+
+Worked for 17s
+The problem is that clicking an .html file can make the browser try to run it instead of showing its source code. The .js file is also quite large, which can make it awkward to open and copy.
+
+I've created plain-text copies of both files. They contain the complete code, unchanged, and are intended for opening in Notepad or copying into GitHub.
+
+1. Game Day Pack HTML
+
+Complete code — approximately 57 KB
+
+Open game-day-pack-COPY.txt
+
+2. Coach Portal JavaScript
+
+Complete code — approximately 147 KB
+
+Open coach-portal-COPY.txt
+
+Exactly what to do in GitHub
+For game-day-pack.html: Navigate to your coach-portal folder, select Add file → Create new file, name it game-day-pack.html, then paste the complete contents of the first text file and commit.
+
+For coach-portal.js: Open your existing coach-portal.js, click Edit, select all its contents with Ctrl + A, paste the complete contents of the second text file, and commit.
+
+Do not rename either GitHub file to .txt. Those extensions are only for making the code easier to access and copy.
+
+Important: These are the same code versions from the update package, not newly modified versions. Once both are committed and your updated WebApp.gs is deployed, we can test the rebuilt Game Day Pack.
+
+
+game-day-pack-COPY.txt
+Document
+
+coach-portal-COPY.txt
+Document
+
+
+
+
 // =====================================================
 // RUMBLE TRAIN - COACH PORTAL
 // GitHub Front End
@@ -1136,7 +1417,7 @@ function renderCoachGameDayPackLink(team,coach,games) {
     return;
   }
 
-  const packUrl = COACH_API_URL + '?view=gameDayPack&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
+  const packUrl='https://manbotgaming-star.github.io/rumbletrain-blood-bowl/coach-portal/game-day-pack.html?teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
 
   link.href=packUrl;
   link.hidden=false;
