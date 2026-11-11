@@ -594,7 +594,10 @@
   </div>
   <div id="pack-content" style="display:none;">
     <div class="toolbar">
-      <button type="button" id="print-game-day-pack">PRINT GAME DAY PACK</button>
+      <!-- =====================================================
+           GAME DAY PACK - DIRECT PRINT BUTTON
+           ===================================================== -->
+      <button type="button" id="print-game-day-pack" onclick="window.print()">PRINT GAME DAY PACK</button>
     </div>
     <!-- =====================================================
          PAGE 1
@@ -1344,9 +1347,6 @@
       if(!pack||pack.style.display==='none') return;
       window.print();
     }
-
-    // Manual print remains available if the dialog is closed.
-    document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
   </script>
 </body>
 </html>
