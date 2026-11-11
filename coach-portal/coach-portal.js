@@ -569,9 +569,9 @@ function renderCoachGameDayPackLink(team,coach,games) {
     return;
   }
   // ---------------------------------------------------
-  // GAME DAY PACK - RUMBLETRAIN CUSTOM DOMAIN
+  // GAME DAY PACK - EXISTING GITHUB HOSTING
   // ---------------------------------------------------
-  const packUrl='https://pack.rumbletrain.com/coach-portal/game-day-pack.html?teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
+  const packUrl='https://manbotgaming-star.github.io/rumbletrain-blood-bowl/coach-portal/game-day-pack.html?teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
   link.href=packUrl;
   link.hidden=false;
 
