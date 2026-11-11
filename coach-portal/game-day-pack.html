@@ -1,284 +1,3 @@
-
-
-Pasted text(20261111-095303).txt
-Document
-ok lets update teh GameDayPack.html
-
-I've reviewed your GameDayPack.html and WebApp.gs. We can make the first change entirely inside GameDayPack.html, without touching the roster calculations or moving anything to GitHub.
-
-We'll keep your existing Preparing Game Day Pack loading screen in coach-portal.js.
-
-The new behaviour will be:
-
-Coach clicks GAME DAY PACK.
-
-The loading screen and spinner appear as normal.
-
-Apps Script retrieves the current roster and game information.
-
-The completed pack opens and automatically requests the browser's print preview.
-
-We'll also retain the Print button as a fallback, so coaches can print again if they close the print dialog.
-
-Step 1 — Update the Print function
-In Google Apps Script, open GameDayPack.html.
-
-Go to the very bottom and find:
-
-// =====================================================
-// PRINT GAME DAY PACK
-// =====================================================
-
-Replace that entire section, including its existing click handler, but leave the final </script>, </body> and </html> tags untouched.
-
-
-    // =====================================================
-    // PRINT GAME DAY PACK - SAME WINDOW
-    // =====================================================
-    function openGameDayPackPrint(){
-      const pack=document.getElementById('pack-content');
-      if(!pack||pack.style.display==='none') return;
-
-      const fonts=document.fonts?document.fonts.ready:Promise.resolve();
-      fonts.then(function(){
-        requestAnimationFrame(function(){
-          setTimeout(function(){ window.focus(); window.print(); },250);
-        });
-      });
-    }
-
-    // Manual print remains available if the dialog is closed.
-    document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
-
-This removes the code that creates a second browser window and copies the Game Day Pack into it.
-
-Step 2 — Automatically request print preview
-Still in GameDayPack.html, locate:
-
-document.getElementById('pack-content').style.display = 'block';
-
-This is near the bottom of renderGameDayPack().
-
-Immediately underneath that line, add:
-
-
-        // ---------------------------------------------------
-        // OPEN PRINT PREVIEW AUTOMATICALLY
-        // ---------------------------------------------------
-        setTimeout(openGameDayPackPrint,300);
-
-Do not change the existing DOMContentLoaded listener or any other part of renderGameDayPack().
-
-Step 3 — Save and deploy
-Save GameDayPack.html in Google Apps Script.
-
-Go to Deploy → Manage deployments.
-
-Edit your existing web app deployment, select New version, and deploy.
-
-Return to the Coach Portal and press Ctrl + F5.
-
-Log in as CAR and click GAME DAY PACK.
-
-The browser should now request print preview after the pack is fully populated and the Graduate font has loaded.
-
-Because Google Apps Script displays HTML inside a sandboxed frame, browsers can differ in how they handle automatic printing. If Chrome doesn't open the print dialog, the normal Game Day Pack should remain available with its Print button. That would tell us we need to adjust the window-opening approach rather than the league calculations.
-
-No GitHub update is needed for these two changes.
-
-This should eliminate the extra window-generation step, though it won't yet speed up the Google Sheets data retrieval. Once we've confirmed the print behaviour works, we can optimize that separately in WebApp.gs.
-
-User attachment
-
-Pasted text(20261111-100109).txt
-Document
-
-Pasted text (2)(20261111-100116).txt
-Document
-
-Pasted text (3)(20261111-100124).txt
-Document
-Clicking Game Day Pack button looks to still resolve to the same pre print page.
-
-Worked for 23s
-I can see the problem. Your screenshot shows that the Game Day Pack is still opening in its normal view, with the PRINT GAME DAY PACK button at the top.
-
-I've checked your three updated files, and you implemented the changes correctly. The automatic print call is present in GameDayPack.html, exactly where we intended.
-
-Why it isn't working
-The issue is Google's Apps Script HTML sandbox.
-
-Although the Game Day Pack appears as a normal browser page, Google serves its HTML inside a restricted frame. Chrome can block an automatic window.print() request from that frame, especially when it runs after a timer rather than a direct button click.
-
-That means the approach I suggested wasn't reliable for your setup. Increasing the delay won't necessarily fix it.
-
-What I recommend instead
-Rather than keep trying to force automatic printing from Apps Script, I recommend the following architecture:
-
-Coach Portal — GitHub
-
-Coach clicks Game Day Pack
-
-Preparing Game Day Pack
-
-Keep the existing loading spinner
-
-Google Apps Script
-
-Retrieve roster, CTV, Journeymen and game data
-
-Printable Game Day Pack — GitHub
-
-Show the print-ready pages directly, with a Print button
-
-This would give us more control over the browser and remove the Google Apps Script presentation page altogether. It also separates the visual template from the spreadsheet calculations, making future styling changes easier.
-
-However, moving the template requires a new data endpoint and changes to how the printable page receives its data. It won't automatically make the spreadsheet calculations faster; we'd optimize those separately.
-
-For now
-I recommend not making any further changes to GameDayPack.html yet. The pack is displaying correctly, and we should preserve that working version while we prepare the GitHub approach.
-
-We now have the three files needed to plan that migration: GameDayPack.html, WebApp.gs, and coach-portal.js.
-
-The next development step would be to create a dedicated, read-only Game Day Pack data endpoint in WebApp.gs, then connect a GitHub-hosted printable template to it. That gives us a more reliable foundation for the loading and printing experience you want.
-
-ok lets get started with that, while we are rebuilding it combine the optimization into this work as weel.
-
-Worked for 2m 32s
-I've put together the first GitHub Game Day Pack rebuild, including the loading optimizations. I've used your latest uploaded versions of GameDayPack.html, WebApp.gs and coach-portal.js as the starting point.
-
-Complete update package
-
-Three replacement files and installation instructions
-
-Ready
-Download GAME-DAY-PACK-UPDATE.zip
-
-What's changing
-Feature
-
-New behaviour
-
-Loading spinner
-
-Kept
-
-Intermediate Apps Script page
-
-Removed from the normal workflow
-
-Printable Game Day Pack
-
-Hosted on GitHub
-
-Live roster and game data
-
-Still supplied by Apps Script
-
-Print preview
-
-Automatically requested, with a manual Print button as fallback
-
-Teams sheet reads
-
-Reduced from two to one per pack request
-
-LeaguePlayers sheet reads
-
-Reduced from two to one per pack request
-
-Printable layout
-
-All four existing pages retained
-
-The backend optimization avoids repeatedly reading the same Teams and LeaguePlayers sheets for both teams. It doesn't yet optimize every spreadsheet operation, so we'll need to test the actual loading improvement.
-
-Installation
-Update Google Apps Script first
-
-Open your BloodBowlLeagueScript project and replace the entire existing WebApp.gs with the supplied file.
-
-Download WebApp.gs
-
-Save, then use Deploy → Manage deployments → Edit → New version → Deploy. Keep your existing deployment URL.
-
-Add the new GitHub printable page
-
-In your GitHub repository, navigate to the coach-portal folder and add a new file named exactly:
-
-game-day-pack.html
-
-Download game-day-pack.html
-
-Commit the new file.
-
-Update the Coach Portal JavaScript
-
-Replace your existing GitHub coach-portal/coach-portal.js with the supplied version. Keep the filename unchanged.
-
-Download coach-portal.js
-
-Commit the change.
-
-Test the Game Day Pack
-
-Open the Coach Portal, press Ctrl + F5, sign in as CAR and select GAME DAY PACK.
-
-You should see the preparation spinner, followed by the new GitHub-hosted printable pack. Chrome may open print preview automatically; if it blocks the request, the printable pack and Print button will remain available.
-
-I've checked the new JavaScript syntax and the presence of the four page sections. I haven't been able to execute a live request against your Google Sheets, so the deployment test is still important.
-
-One thing to check carefully: the printable pack should still show the same players, Current Team Value, inducements and Journeymen as before. We're optimizing how data is retrieved, not changing how those values are calculated.
-
-Once this version is working, we can measure the remaining Apps Script loading time and target any further bottlenecks without rebuilding the interface again.
-
-
-game-day-pack.html
-HTML
-
-coach-portal.js
-Code
-
-Pasted text(20261111-101012).txt
-Document
-I need the actual game-day-pack.html code as the link you gave is just trying to execute.  and the coach-portal.js is not loading for me to copy it.
-
-Worked for 17s
-The problem is that clicking an .html file can make the browser try to run it instead of showing its source code. The .js file is also quite large, which can make it awkward to open and copy.
-
-I've created plain-text copies of both files. They contain the complete code, unchanged, and are intended for opening in Notepad or copying into GitHub.
-
-1. Game Day Pack HTML
-
-Complete code — approximately 57 KB
-
-Open game-day-pack-COPY.txt
-
-2. Coach Portal JavaScript
-
-Complete code — approximately 147 KB
-
-Open coach-portal-COPY.txt
-
-Exactly what to do in GitHub
-For game-day-pack.html: Navigate to your coach-portal folder, select Add file → Create new file, name it game-day-pack.html, then paste the complete contents of the first text file and commit.
-
-For coach-portal.js: Open your existing coach-portal.js, click Edit, select all its contents with Ctrl + A, paste the complete contents of the second text file, and commit.
-
-Do not rename either GitHub file to .txt. Those extensions are only for making the code easier to access and copy.
-
-Important: These are the same code versions from the update package, not newly modified versions. Once both are committed and your updated WebApp.gs is deployed, we can test the rebuilt Game Day Pack.
-
-
-game-day-pack-COPY.txt
-Document
-
-coach-portal-COPY.txt
-Document
-
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -291,59 +10,38 @@ Document
   <style>
     @keyframes gameday-spin {to{transform:rotate(360deg)}}
     /* =======================================================
-       BASE
-       ======================================================= */
+    BASE
+    ======================================================= */
     * {
-      box-sizing: border-box;
+    box-sizing: border-box;
     }
     html,
     body {
-      margin: 0;
-      padding: 0;
-      background: #e9edef;
-      color: #123f50;
-      font-family: 'Graduate', Arial, sans-serif;
+      margin: 0;padding: 0;background: #e9edef;color: #123f50;font-family: 'Graduate', Arial, sans-serif;
     }
     body {
       padding: 18px;
     }
     .toolbar {
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto 12px auto;
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
+      width: 100%;max-width: 1120px;margin: 0 auto 12px auto;display: flex;justify-content: flex-end;gap: 8px;
     }
     .toolbar button {
-      font-family: 'Graduate', Arial, sans-serif;
-      font-size: 12px;
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      padding: 8px 16px;
-      background: #123f50;
-      color: #fff;
-      cursor: pointer;
+      font-family: 'Graduate', Arial, sans-serif;font-size: 12px;border: 1px solid #123f50;border-radius: 7px;padding: 8px 16px;
+      background: #123f50;color: #fff;cursor: pointer;
     }
     .toolbar button:hover {
       opacity: .9;
     }
     .page {
-      width: 1120px;
-      min-height: 760px;
-      margin: 0 auto 18px auto;
-      padding: 18px 22px;
-      background: #fff;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, .16);
-      page-break-after: always;
-      overflow: hidden;
+      width: 1120px;min-height: 760px;margin: 0 auto 18px auto;padding: 18px 22px;background: #fff;box-shadow: 0 2px 12px rgba(0, 0, 0, .16);
+      page-break-after: always;overflow: hidden;
     }
     .page:last-of-type {
       page-break-after: auto;
     }
     /* =======================================================
-       TYPOGRAPHY
-       ======================================================= */
+    TYPOGRAPHY
+    ======================================================= */
     h1,
     h2,
     h3,
@@ -358,16 +56,10 @@ Document
       font-family: 'Graduate', Arial, sans-serif;
     }
     h1 {
-      margin: 0;
-      font-size: 30px;
-      line-height: 1.05;
-      letter-spacing: 1px;
+      margin: 0;font-size: 30px;line-height: 1.05;letter-spacing: 1px;
     }
     h2 {
-      margin: 12px 0 6px 0;
-      font-size: 17px;
-      font-weight: normal;
-      letter-spacing: .5px;
+      margin: 12px 0 6px 0;font-size: 17px;font-weight: normal;letter-spacing: .5px;
     }
     .small {
       font-size: 8px;
@@ -379,115 +71,76 @@ Document
       text-align: center;
     }
     /* =======================================================
-       PAGE 1 HEADER
-       ======================================================= */
+    PAGE 1 HEADER
+    ======================================================= */
     .team-subtitle {
-      margin-top: 5px;
-      font-size: 10px;
+      margin-top: 5px;font-size: 10px;
     }
     .team-subtitle strong {
       margin-right: 4px;
     }
     .game-meta {
-      display: grid;
-      grid-template-columns: 1.1fr 1.05fr .75fr .85fr;
-      gap: 7px;
-      margin-top: 11px;
+      display: grid;grid-template-columns: 1.1fr 1.05fr .75fr .85fr;gap: 7px;margin-top: 11px;
     }
     .meta-box {
-      min-height: 46px;
-      border: 1px solid #91a3aa;
-      border-radius: 7px;
-      padding: 7px 9px;
+      min-height: 46px;border: 1px solid #91a3aa;border-radius: 7px;padding: 7px 9px;
       background: linear-gradient(
-        to bottom,
-        #fafbfb,
-        #f2f5f6
-      );
+      to bottom,
+      #fafbfb,
+      #f2f5f6);
     }
     .meta-label {
-      font-size: 7px;
-      color: #53666e;
-      margin-bottom: 5px;
+      font-size: 7px;color: #53666e;margin-bottom: 5px;
     }
     .meta-value {
-      font-size: 11px;
-      color: #000;
+      font-size: 11px;color: #000;
     }
     /* =======================================================
-       TEAM DETAILS
-       ======================================================= */
+    TEAM DETAILS
+    ======================================================= */
     .section-title {
-      margin-top: 11px;
-      margin-bottom: 5px;
-      font-size: 16px;
+      margin-top: 11px;margin-bottom: 5px;font-size: 16px;
     }
     .team-details {
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      padding: 7px;
+      border: 1px solid #123f50;border-radius: 7px;padding: 7px;
     }
     .extras-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
+      display: grid;grid-template-columns: repeat(6, 1fr);gap: 6px;
     }
     .extra-box {
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      min-height: 54px;
-      padding: 7px 4px;
-      text-align: center;
+      border: 1px solid #123f50;border-radius: 7px;min-height: 54px;padding: 7px 4px;text-align: center;
       background: linear-gradient(
-        to bottom,
-        #fafbfb 0%,
-        #f0f3f4 100%
-      );
+      to bottom,
+      #fafbfb 0%,
+      #f0f3f4 100%);
     }
     .extra-label {
-      font-size: 7px;
-      color: #53666e;
-      margin-bottom: 4px;
+      font-size: 7px;color: #53666e;margin-bottom: 4px;
     }
     .extra-value {
-      font-size: 14px;
-      color: #000;
+      font-size: 14px;color: #000;
     }
     /* =======================================================
-       TABLES
-       ======================================================= */
+    TABLES
+    ======================================================= */
     table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
+      width: 100%;border-collapse: collapse;table-layout: fixed;
     }
     th {
-      background: #123f50;
-      color: #fff;
-      border: 1px solid #123f50;
-      padding: 4px 4px;
-      font-size: 7px;
-      line-height: 1.15;
-      text-align: center;
+      background: #123f50;color: #fff;border: 1px solid #123f50;padding: 4px 4px;font-size: 7px;line-height: 1.15;text-align: center;
     }
     td {
-      border: 1px solid #a5b0b5;
-      padding: 4px 5px;
-      font-size: 7.2px;
-      line-height: 1.2;
-      color: #000;
-      vertical-align: middle;
+      border: 1px solid #a5b0b5;padding: 4px 5px;font-size: 7.2px;line-height: 1.2;color: #000;vertical-align: middle;
     }
     .num {
       text-align: center;
     }
     .currency {
-      text-align: right;
-      white-space: nowrap;
+      text-align: right;white-space: nowrap;
     }
     /* =======================================================
-       GAME DAY ROSTER
-       ======================================================= */
+    GAME DAY ROSTER
+    ======================================================= */
     .roster-table th:nth-child(1),
     .roster-table td:nth-child(1) {
       width: 34px;
@@ -510,8 +163,7 @@ Document
     .roster-table td:nth-child(7),
     .roster-table th:nth-child(8),
     .roster-table td:nth-child(8) {
-      width: 42px;
-      text-align: center;
+      width: 42px;text-align: center;
     }
     /* SKILLS / TRAITS */
     .roster-table th:nth-child(9),
@@ -521,14 +173,12 @@ Document
     /* CAREER SPP */
     .roster-table th:nth-child(10),
     .roster-table td:nth-child(10) {
-      width: 52px;
-      text-align: center;
+      width: 52px;text-align: center;
     }
     /* AVAILABLE SPP */
     .roster-table th:nth-child(11),
     .roster-table td:nth-child(11) {
-      width: 58px;
-      text-align: center;
+      width: 58px;text-align: center;
     }
     /* VALUE */
     .roster-table th:nth-child(12),
@@ -538,59 +188,41 @@ Document
     /* Smaller headings for the two SPP columns */
     .roster-table th:nth-child(10),
     .roster-table th:nth-child(11) {
-      font-size: 6px;
-      line-height: 1.05;
+      font-size: 6px;line-height: 1.05;
     }
     /* =======================================================
-       UNAVAILABLE / JOURNEYMEN
-       ======================================================= */
+    UNAVAILABLE / JOURNEYMEN
+    ======================================================= */
     .availability-row {
-      display: grid;
-      grid-template-columns: 1fr 190px;
-      gap: 7px;
-      margin-top: 7px;
+      display: grid;grid-template-columns: 1fr 190px;gap: 7px;margin-top: 7px;
     }
     .availability-card,
     .journeyman-card {
-      border: 1px solid #123f50;
-      border-radius: 7px;
+      border: 1px solid #123f50;border-radius: 7px;
       background: linear-gradient(
-        to bottom,
-        #fafbfb,
-        #f1f4f5
-      );
-      overflow: hidden;
+      to bottom,
+      #fafbfb,
+      #f1f4f5);overflow: hidden;
     }
     .availability-card-title,
     .journeyman-title {
-      padding: 5px 7px;
-      font-size: 9px;
-      border-bottom: 1px solid #a5b0b5;
+      padding: 5px 7px;font-size: 9px;border-bottom: 1px solid #a5b0b5;
     }
     .unavailable-table td {
       height: 20px;
     }
     .none-message {
-      padding: 9px;
-      color: #65767d;
-      font-size: 8px;
+      padding: 9px;color: #65767d;font-size: 8px;
     }
     .journeyman-value {
-      min-height: 45px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: #000;
+      min-height: 45px;display: flex;align-items: center;justify-content: center;font-size: 24px;color: #000;
     }
     .gameday-note {
-      margin-top: 5px;
-      font-size: 6.5px;
-      color: #66767c;
+      margin-top: 5px;font-size: 6.5px;color: #66767c;
     }
     /* =======================================================
-      SWARMING
-      ======================================================= */
+    SWARMING
+    ======================================================= */
     .swarming-card{margin:6px 0 5px;border:1px solid #123f50;border-radius:7px;padding:5px 7px;background:linear-gradient(to bottom,#fafbfb,#f1f4f5);}
     .swarming-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;}
     .swarming-title{font-size:9px;font-weight:bold;color:#123f50;white-space:nowrap;}
@@ -601,94 +233,57 @@ Document
     .swarming-drive strong{display:block;font-size:6.2px;color:#123f50;margin-bottom:3px;}
     .swarm-write{display:inline-block;width:24px;height:15px;border:1px solid #8fa0a7;border-radius:2px;background:#fff;vertical-align:middle;margin:0 2px;}
     /* =======================================================
-      BRIBERY AND CORRUPTION
-      ======================================================= */
+    BRIBERY AND CORRUPTION
+    ======================================================= */
     .special-rule-card{margin:5px 0;border:1px solid #123f50;border-radius:7px;padding:5px 7px;background:linear-gradient(to bottom,#fafbfb,#f1f4f5);display:flex;align-items:center;gap:12px;}
     .special-rule-title{font-size:8px;font-weight:bold;color:#123f50;white-space:nowrap;}
     .special-rule-text{font-size:5.8px;line-height:1.2;color:#000;flex:1;}
     .special-rule-track{font-size:6px;color:#000;white-space:nowrap;}
     .special-rule-write{display:inline-block;width:24px;height:15px;border:1px solid #8fa0a7;border-radius:2px;background:#fff;vertical-align:middle;margin-left:3px;}
     /* =======================================================
-       PAGE 2 - INDUCEMENTS
-       ======================================================= */
+    PAGE 2 - INDUCEMENTS
+    ======================================================= */
     .inducement-ctv-grid {
-      display: grid;
-      grid-template-columns: 1fr 55px 1fr;
-      gap: 10px;
-      align-items: stretch;
-      margin-top: 14px;
+      display: grid;grid-template-columns: 1fr 55px 1fr;gap: 10px;align-items: stretch;margin-top: 14px;
     }
     .inducement-ctv-card {
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      padding: 12px;
-      text-align: center;
-      background: linear-gradient(to bottom, #fafbfb, #f2f5f6);
+      border: 1px solid #123f50;border-radius: 7px;padding: 12px;text-align: center;background: linear-gradient(to bottom, #fafbfb, #f2f5f6);
     }
     .inducement-team {
-      font-size: 14px;
-      font-weight: bold;
-      color: #123f50;
+      font-size: 14px;font-weight: bold;color: #123f50;
     }
     .inducement-label {
-      margin-top: 6px;
-      font-size: 7px;
-      color: #53666e;
+      margin-top: 6px;font-size: 7px;color: #53666e;
     }
     .inducement-value {
-      margin-top: 4px;
-      font-size: 22px;
-      color: #000;
+      margin-top: 4px;font-size: 22px;color: #000;
     }
     .inducement-vs {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: bold;
+      display: flex;align-items: center;justify-content: center;font-size: 16px;font-weight: bold;
     }
     .inducement-rules {
-      margin-top: 12px;
-      border: 1px solid #9caeb5;
-      border-radius: 7px;
-      padding: 8px 10px;
-      font-size: 7px;
-      line-height: 1.55;
-      color: #000;
+      margin-top: 12px;border: 1px solid #9caeb5;border-radius: 7px;padding: 8px 10px;font-size: 7px;line-height: 1.55;color: #000;
       background: #f7f9f9;
     }
     .inducement-calc{margin-top:12px;}
     .inducement-calc td{height:28px;text-align:center;padding:0;}
     .inducement-purchases{margin-top:12px;}
     .inducement-purchases td{height:27px;}
-
     .inducement-input{
-      width:100%;
-      height:28px;
-      border:0;
-      outline:0;
-      background:transparent;
-      text-align:center;
-      font-family:'Graduate',Arial,sans-serif;
-      font-size:7.2px;
-      color:#000;
+      width:100%;height:28px;border:0;outline:0;background:transparent;text-align:center;font-family:'Graduate',Arial,sans-serif;
+      font-size:7.2px;color:#000;
     }
-
     .inducement-input:disabled{
-      background:#f2f5f6;
-      color:#65767d;
+      background:#f2f5f6;color:#65767d;
     }
     /* =======================================================
-      PAGE 2 HEADER / WEATHER
-      ======================================================= */
+    PAGE 2 HEADER / WEATHER
+    ======================================================= */
     .page2-header {
-      display: block;
-      margin-bottom: 5px;
+      display: block;margin-bottom: 5px;
     }
     .page2-ctv {
-      margin-top: 5px;
-      font-size: 10px;
-      color: #123f50;
+      margin-top: 5px;font-size: 10px;color: #123f50;
     }
     .page2-ctv span {
       color: #000;
@@ -697,31 +292,22 @@ Document
       min-width: 0;
     }
     .weather-card {
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      overflow: hidden;
+      border: 1px solid #123f50;border-radius: 7px;overflow: hidden;
       background: linear-gradient(
-        to bottom,
-        #fafbfb,
-        #f2f5f6
-      );
+      to bottom,
+      #fafbfb,
+      #f2f5f6);
     }
     .weather-title {
-      padding: 5px 7px;
-      font-size: 9px;
-      text-align: center;
-      border-bottom: 1px solid #9caeb5;
+      padding: 5px 7px;font-size: 9px;text-align: center;border-bottom: 1px solid #9caeb5;
     }
     .weather-table th,
     .weather-table td {
-      padding: 3px 5px;
-      font-size: 5.8px;
-      line-height: 1.25;
+      padding: 3px 5px;font-size: 5.8px;line-height: 1.25;
     }
     .weather-table th:nth-child(1),
     .weather-table td:nth-child(1) {
-      width: 42px;
-      text-align: center;
+      width: 42px;text-align: center;
     }
     .weather-table th:nth-child(2),
     .weather-table td:nth-child(2) {
@@ -731,362 +317,231 @@ Document
       font-size: 5.5px;
     }
     /* =======================================================
-       PAGE 2 - COMPACT PRE-GAME FANS
-       ======================================================= */
+    PAGE 2 - COMPACT PRE-GAME FANS
+    ======================================================= */
     .pregame-flow {
       display: grid;
       grid-template-columns:
-        minmax(0, 1fr)
-        14px
-        minmax(0, 1fr)
-        14px
-        minmax(0, 1fr)
-        14px
-        minmax(0, 1.15fr)
-        14px
-        minmax(0, 1fr)
-        14px
-        minmax(0, 1fr)
-        14px
-        minmax(0, 1fr);
-      align-items: stretch;
-      gap: 3px;
-      margin-bottom: 7px;
+      minmax(0, 1fr)
+      14px
+      minmax(0, 1fr)
+      14px
+      minmax(0, 1fr)
+      14px
+      minmax(0, 1.15fr)
+      14px
+      minmax(0, 1fr)
+      14px
+      minmax(0, 1fr)
+      14pxminmax(0, 1fr);align-items: stretch;gap: 3px;margin-bottom: 7px;
     }
     .fan-flow-box {
-      min-width: 0;
-      min-height: 48px;
-      border: 1px solid #9caeb5;
-      border-radius: 7px;
-      padding: 4px 5px;
-      text-align: center;
+      min-width: 0;min-height: 48px;border: 1px solid #9caeb5;border-radius: 7px;padding: 4px 5px;text-align: center;
       background: linear-gradient(
-        to bottom,
-        #fbfcfc,
-        #f3f5f6
-      );
+      to bottom,
+      #fbfcfc,
+      #f3f5f6);
     }
     .fan-flow-total {
       border-color: #123f50;
     }
     .fan-flow-team {
-      min-height: 9px;
-      margin-bottom: 2px;
-      font-size: 5.5px;
-      font-weight: bold;
-      color: #123f50;
-      white-space: nowrap;
-      overflow: hidden;
+      min-height: 9px;margin-bottom: 2px;font-size: 5.5px;font-weight: bold;color: #123f50;white-space: nowrap;overflow: hidden;
       text-overflow: ellipsis;
     }
     .fan-flow-label {
-      font-size: 6px;
-      font-weight: bold;
-      color: #123f50;
+      font-size: 6px;font-weight: bold;color: #123f50;
     }
     .fan-flow-sub {
-      margin-top: 1px;
-      font-size: 5px;
-      color: #53666e;
+      margin-top: 1px;font-size: 5px;color: #53666e;
     }
     .fan-flow-value {
-      margin-top: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #000;
+      margin-top: 4px;font-size: 12px;font-weight: bold;color: #000;
     }
     .fan-flow-write {
-      height: 15px;
-      margin-top: 4px;
+      height: 15px;margin-top: 4px;
     }
     .fan-flow-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: bold;
-      color: #123f50;
+      display: flex;align-items: center;justify-content: center;font-size: 14px;font-weight: bold;color: #123f50;
     }
     /* =======================================================
-       MATCH / SCORE / STALLING
-       ======================================================= */
+    MATCH / SCORE / STALLING
+    ======================================================= */
     .matchup-row {
       display: grid;
       grid-template-columns:
-        55px
-        115px
-        minmax(0, 1fr)
-        160px
-        minmax(0, 1fr)
-        115px
-        55px;
-      gap: 8px;
-      align-items: center;
-      margin-top: 7px;
-      margin-bottom: 6px;
+      55px
+      115px
+      minmax(0, 1fr)
+      160px
+      minmax(0, 1fr)
+      115px55px;gap: 8px;align-items: center;margin-top: 7px;margin-bottom: 6px;
     }
     .side-label {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      line-height: 1;
-      color: #123f50;
+      text-align: center;font-size: 18px;font-weight: bold;line-height: 1;color: #123f50;
     }
     .matchup-team {
-      min-width: 0;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      line-height: 1.1;
-      color: #123f50;
-      overflow-wrap: anywhere;
+      min-width: 0;text-align: center;font-size: 18px;font-weight: bold;line-height: 1.1;color: #123f50;overflow-wrap: anywhere;
     }
     .score-centre {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
+      display: flex;justify-content: center;align-items: center;gap: 10px;
     }
     .score-box {
-      width: 52px;
-      height: 42px;
-      border: 1.5px solid #123f50;
-      border-radius: 7px;
-      background: #fff;
-      flex: 0 0 auto;
+      width: 52px;height: 42px;border: 1.5px solid #123f50;border-radius: 7px;background: #fff;flex: 0 0 auto;
     }
     .versus {
-      font-size: 11px;
-      font-weight: bold;
-      color: #123f50;
+      font-size: 11px;font-weight: bold;color: #123f50;
     }
     .compact-stall {
-      min-height: 42px;
-      margin: 0;
-      padding: 5px 6px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      min-height: 42px;margin: 0;padding: 5px 6px;display: flex;flex-direction: column;justify-content: center;align-items: center;
     }
     .stall-box {
-      border: 1px solid #9caeb5;
-      border-radius: 7px;
-      padding: 6px 8px;
+      border: 1px solid #9caeb5;border-radius: 7px;padding: 6px 8px;
       background: linear-gradient(
-        to bottom,
-        #fff,
-        #f3f5f6
-      );
+      to bottom,
+      #fff,
+      #f3f5f6);
     }
     .stall-label {
-      font-size: 7px;
-      color: #53666e;
-      text-align: center;
+      font-size: 7px;color: #53666e;text-align: center;
     }
     .stall-value {
-      margin-top: 3px;
-      color: #53666e;
-      font-size: 9px;
-      font-weight: bold;
-      text-align: center;
+      margin-top: 3px;color: #53666e;font-size: 9px;font-weight: bold;text-align: center;
     }
     .pregame-title {
-      text-align: center;
-      margin-top: 8px;
-      margin-bottom: 5px;
-      font-size: 18px;
-      font-weight: normal;
+      text-align: center;margin-top: 8px;margin-bottom: 5px;font-size: 18px;font-weight: normal;
     }
     /* =======================================================
     GAME STATS
     ======================================================= */
-
     .gameday-stats-table th,
     .gameday-stats-table td {
-      padding:2px 2px;
-      height:17px;
-      font-size:5.7px;
-      line-height:1.08;
-      vertical-align:middle;
+      padding:2px 2px;height:17px;font-size:5.7px;line-height:1.08;vertical-align:middle;
     }
-
     .stats-player-name { padding-right:4px !important; }
     .stats-player-name-wrap { display:flex; align-items:center; justify-content:space-between; gap:5px; width:100%; }
     .stats-player-name-text { display:block; text-align:left; flex:1 1 auto; }
     .stats-player-tag { display:inline-block; min-width:16px; padding:1px 4px; border:1px solid #0f4c5c; border-radius:8px; background:#eef4f6; color:#0f4c5c; font-size:5.6px; font-weight:700; line-height:1.1; text-align:center; }
-
     .gameday-stats-table .stats-skill-cell {
-      font-size:5.25px;
-      line-height:1.08;
+      font-size:5.25px;line-height:1.08;
     }
-
     .journeyman-blank-row td {
-      height:16px;
-      background:#fff;
+      height:16px;background:#fff;
     }
-
     /* More than 13 players */
     .gameday-stats-table.stats-tight th,
     .gameday-stats-table.stats-tight td {
-      height:15px;
-      padding:1px 2px;
-      font-size:5.2px;
+      height:15px;padding:1px 2px;font-size:5.2px;
     }
-
     .gameday-stats-table.stats-tight .stats-skill-cell {
       font-size:4.9px;
     }
-
     /* =======================================================
-      PLAYER IDENTITY COLUMNS
-      Keep # / Name / Position larger and vertically centred
-      ======================================================= */
+    PLAYER IDENTITY COLUMNS
+    Keep # / Name / Position larger and vertically centred
+    ======================================================= */
     .gameday-stats-table th:nth-child(1),.gameday-stats-table td:nth-child(1){font-size:7px;vertical-align:middle!important;text-align:center;}
     .gameday-stats-table th:nth-child(2),.gameday-stats-table td:nth-child(2){font-size:7px;vertical-align:middle!important;text-align:left;}
     .gameday-stats-table th:nth-child(3),.gameday-stats-table td:nth-child(3){font-size:6.8px;vertical-align:middle!important;text-align:left;}
-
     .gameday-stats-table.stats-tight th:nth-child(1),.gameday-stats-table.stats-tight td:nth-child(1){font-size:6.8px;vertical-align:middle!important;}
     .gameday-stats-table.stats-tight th:nth-child(2),.gameday-stats-table.stats-tight td:nth-child(2){font-size:6.8px;vertical-align:middle!important;}
     .gameday-stats-table.stats-tight th:nth-child(3),.gameday-stats-table.stats-tight td:nth-child(3){font-size:6.6px;vertical-align:middle!important;}
-
     .gameday-stats-table .stats-player-name-wrap{height:100%;align-items:center;}
-
     /* # */
     .gameday-stats-table th:nth-child(1),
     .gameday-stats-table td:nth-child(1) {
-      width:24px;
-      text-align:center;
+      width:24px;text-align:center;
     }
-
     /* PLAYER NAME */
     .gameday-stats-table th:nth-child(2),
     .gameday-stats-table td:nth-child(2) {
       width:135px;
     }
-
     /* POSITION */
     .gameday-stats-table th:nth-child(3),
     .gameday-stats-table td:nth-child(3) {
       width:120px;
     }
-
     /* MA / ST / AG / PA / AV */
     .gameday-stats-table th:nth-child(n+4):nth-child(-n+8),
     .gameday-stats-table td:nth-child(n+4):nth-child(-n+8) {
-      width:28px;
-      text-align:center;
+      width:28px;text-align:center;
     }
-
     /* CHARACTERISTIC FONT SIZE */
     .gameday-stats-table th:nth-child(n+4):nth-child(-n+8),
     .gameday-stats-table td:nth-child(n+4):nth-child(-n+8) { font-size:6.5px; }
-
     /* Keep characteristics readable on larger rosters too */
     .gameday-stats-table.stats-tight th:nth-child(n+4):nth-child(-n+8),
     .gameday-stats-table.stats-tight td:nth-child(n+4):nth-child(-n+8) { font-size:6px; }
-
     /* SKILLS / TRAITS */
     .gameday-stats-table th:nth-child(9),
     .gameday-stats-table td:nth-child(9) {
       width:190px;
     }
-
     /* COMP / TTM / LAND / INT / TD / CAS / KILLS / MVP */
     .gameday-stats-table th:nth-child(n+10):nth-child(-n+17),
     .gameday-stats-table td:nth-child(n+10):nth-child(-n+17) {
-      width:30px;
-      text-align:center;
+      width:30px;text-align:center;
     }
-
     /* INJURY / RESULT */
     .gameday-stats-table th:nth-child(18),
     .gameday-stats-table td:nth-child(18) {
       width:165px;
     }
     /* =======================================================
-       INJURY KEY
-       ======================================================= */
+    INJURY KEY
+    ======================================================= */
     .injury-key {
-      border: 1px solid #9caeb5;
-      border-radius: 7px;
-      margin-top: 5px;
-      padding: 5px 7px;
+      border: 1px solid #9caeb5;border-radius: 7px;margin-top: 5px;padding: 5px 7px;
       background: linear-gradient(
-        to bottom,
-        #fff,
-        #f5f7f7
-      );
-      font-size: 6px;
-      line-height: 1.45;
-      color: #000;
+      to bottom,
+      #fff,
+      #f5f7f7);font-size: 6px;line-height: 1.45;color: #000;
     }
     /* =======================================================
-       POST GAME DEDICATED FANS
-       ======================================================= */
+    POST GAME DEDICATED FANS
+    ======================================================= */
     .postgame-table th,
     .postgame-table td {
-      height: 22px;
-      font-size: 6.7px;
+      height: 22px;font-size: 6.7px;
     }
     .postgame-table th:first-child {
       width: 31%;
     }
     /* =======================================================
-       NOTES
-       ======================================================= */
+    NOTES
+    ======================================================= */
     .notes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 7px;
-      margin-top: 6px;
+      display: grid;grid-template-columns: 1fr;gap: 7px;margin-top: 6px;
     }
     .note-box {
-      border: 1px solid #123f50;
-      border-radius: 7px;
-      min-height: 56px;
-      padding: 6px;
+      border: 1px solid #123f50;border-radius: 7px;min-height: 56px;padding: 6px;
       background: linear-gradient(
-        to bottom,
-        #fff,
-        #f5f7f7
-      );
+      to bottom,
+      #fff,
+      #f5f7f7);
     }
     .note-title {
-      font-size: 7px;
-      margin-bottom: 4px;
+      font-size: 7px;margin-bottom: 4px;
     }
     /* =======================================================
-       FOOTER
-       ======================================================= */
+    FOOTER
+    ======================================================= */
     .stat-key {
-      margin-top: 4px;
-      font-size: 5.4px;
-      line-height: 1.35;
-      color: #4e6067;
+      margin-top: 4px;font-size: 5.4px;line-height: 1.35;color: #4e6067;
     }
     /* =======================================================
-       ERROR
-       ======================================================= */
+    ERROR
+    ======================================================= */
     #error-panel {
-      display: none;
-      width: 800px;
-      margin: 50px auto;
-      border: 1px solid #b84b4b;
-      border-radius: 8px;
-      background: #fff;
-      color: #7b1f1f;
-      padding: 20px;
+      display: none;width: 800px;margin: 50px auto;border: 1px solid #b84b4b;border-radius: 8px;background: #fff;color: #7b1f1f;padding: 20px;
       font-family: Arial, sans-serif;
     }
     /* =======================================================
-      PAGE 4 - SKILLS & TRAITS REFERENCE
-      ======================================================= */
+    PAGE 4 - SKILLS & TRAITS REFERENCE
+    ======================================================= */
     .skill-reference-intro {
-      margin: 4px 0 9px 0;
-      font-size: 7px;
-      line-height: 1.4;
-      color: #53666e;
+      margin: 4px 0 9px 0;font-size: 7px;line-height: 1.4;color: #53666e;
     }
     .skill-reference-table th:nth-child(1),
     .skill-reference-table td:nth-child(1) {
@@ -1097,68 +552,45 @@ Document
       width: auto;
     }
     .skill-reference-table td {
-      padding: 6px 7px;
-      font-size: 7.4px;
-      line-height: 1.35;
-      vertical-align: top;
+      padding: 6px 7px;font-size: 7.4px;line-height: 1.35;vertical-align: top;
     }
     .skill-reference-table td:first-child {
-      font-weight: bold;
-      color: #123f50;
+      font-weight: bold;color: #123f50;
     }
     .reference-footer {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px solid #b9c3c7;
-      font-size: 6px;
-      line-height: 1.4;
-      color: #65767d;
+      margin-top: 8px;padding-top: 6px;border-top: 1px solid #b9c3c7;font-size: 6px;line-height: 1.4;color: #65767d;
     }
     /* =======================================================
-       PRINT
-       ======================================================= */
+    PRINT
+    ======================================================= */
     @page {
-      size: A4 landscape;
-      margin: 7mm;
+      size: A4 landscape;margin: 7mm;
     }
     @media print {
       html,
-      body {
-        width: auto;
-        margin: 0;
-        padding: 0;
-        background: #fff;
-      }
-      .toolbar {
-        display: none !important;
-      }
-      .page {
-        width: auto;
-        height: 196mm;
-        min-height: 196mm;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
-        overflow: hidden;
-        page-break-after: always;
-        break-after: page;
-      }
-      .page:last-of-type {
-        page-break-after: auto;
-        break-after: auto;
-      }
-      .stats-table th,
-      .stats-table td {
-        height: 17px;
-        padding-top: 2px;
-        padding-bottom: 2px;
-      }
-      .journeyman-blank-row td {
-        height: 16px;
-      }
-      #error-panel {
-        box-shadow: none;
-      }
+    body {
+      width: auto;margin: 0;padding: 0;background: #fff;
+    }
+    .toolbar {
+      display: none !important;
+    }
+    .page {
+      width: auto;height: 196mm;min-height: 196mm;margin: 0;padding: 0;box-shadow: none;overflow: hidden;page-break-after: always;
+      break-after: page;
+    }
+    .page:last-of-type {
+      page-break-after: auto;break-after: auto;
+    }
+    .stats-table th,
+    .stats-table td {
+      height: 17px;padding-top: 2px;padding-bottom: 2px;
+    }
+    .journeyman-blank-row td {
+      height: 16px;
+    }
+    #error-panel {
+      box-shadow: none;
+    }
     }
   </style>
 </head>
@@ -1319,9 +751,7 @@ Document
           <div class="inducement-label">HIGHER CTV TEAM</div>
           <div class="inducement-team" id="ind-higher-team"></div>
         </div>
-
         <div class="inducement-vs">→</div>
-
         <div class="inducement-ctv-card">
           <div class="inducement-label">LOWER CTV TEAM</div>
           <div class="inducement-team" id="ind-lower-team"></div>
@@ -1474,7 +904,6 @@ Document
           <div class="swarming-title">SWARMING</div>
           <div class="swarming-text">After both teams set up, roll D3 and add up to that many eligible Linemen from Reserves.</div>
         </div>
-
         <div class="swarming-drives">
           <div class="swarming-drive"><strong>DRIVE 1</strong><div>D3 <span class="swarm-write"></span> EXTRA <span class="swarm-write"></span></div></div>
           <div class="swarming-drive"><strong>DRIVE 2</strong><div>D3 <span class="swarm-write"></span> EXTRA <span class="swarm-write"></span></div></div>
@@ -1618,7 +1047,6 @@ Document
       if(!el) return;
       el.textContent=value===undefined||value===null?'':String(value);
     }
-
     function money(value){
       const amount=Number(value)||0;
       return amount.toLocaleString('en-GB');
@@ -1641,13 +1069,10 @@ Document
       else raw=[player.startingSkills,player.addedSkills].filter(v=>v&&String(v).trim()).join(', ');
       return raw.split(/\s*(?:,|\|)\s*/).map(v=>v.trim()).filter(Boolean);
     }
-
     function skillsForPlayer(player){ return skillListForPlayer(player).join(' | '); }
-
     function skillsForPlayerHtml(player){
       return skillListForPlayer(player).map((skill,i)=>i%2===0?'<strong>'+skill+'</strong>':skill).join(' | ');
     }
-    
     function showError(message) {
       document.getElementById('pack-content').style.display = 'none';
       document.getElementById('gameday-loading').style.display = 'none';
@@ -1663,39 +1088,10 @@ Document
       const players = data.eligiblePlayers || [];
       players.forEach(player => {
         const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td class="num">' +
-            safe(player.playerNumber) +
-          '</td>' +
-          '<td>' +
-            safe(player.playerName) +
-          '</td>' +
-          '<td>' +
-            safe(player.position) +
-          '</td>' +
-          '<td class="num">' +
-            safe(player.ma) +
-          '</td>' +
-          '<td class="num">' +
-            safe(player.st) +
-          '</td>' +
-          '<td class="num">' +
-            safe(player.ag) +
-          '</td>' +
-          '<td class="num">' +
-            safe(player.pa) +
-          '</td>' +
-          '<td class="num">' +
-            safe(player.av) +
-          '</td>' +
-          '<td>' +
-            safe(
-              skillsForPlayer(player)
-            ) +
-          '</td>' +
-          '<td class="num">'+safe(player.careerSpp)+'</td>'+
-          '<td class="num">'+safe(player.availableSpp)+'</td>'+
-          '<td class="currency">'+money(player.currentValue)+'</td>';
+        tr.innerHTML = '<td class="num">' + safe(player.playerNumber) + '</td>' + '<td>' + safe(player.playerName) + '</td>' + '<td>' + safe(player.position) + '</td>' +
+          '<td class="num">' + safe(player.ma) + '</td>' + '<td class="num">' + safe(player.st) + '</td>' + '<td class="num">' + safe(player.ag) + '</td>' + '<td class="num">' +
+            safe(player.pa) + '</td>' + '<td class="num">' + safe(player.av) + '</td>' + '<td>' + safe( skillsForPlayer(player)) + '</td>' +
+          '<td class="num">'+safe(player.careerSpp)+'</td>'+ '<td class="num">'+safe(player.availableSpp)+'</td>'+ '<td class="currency">'+money(player.currentValue)+'</td>';
         tbody.appendChild(tr);
       });
       if (!players.length) {
@@ -1728,19 +1124,8 @@ Document
           reason = String(player.status).toUpperCase();
         }
         const tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td class="num">' +
-            safe(player.playerNumber) +
-          '</td>' +
-          '<td>' +
-            safe(player.playerName) +
-          '</td>' +
-          '<td>' +
-            safe(player.position) +
-          '</td>' +
-          '<td>' +
-            safe(reason) +
-          '</td>';
+        tr.innerHTML = '<td class="num">' + safe(player.playerNumber) + '</td>' + '<td>' + safe(player.playerName) + '</td>' + '<td>' + safe(player.position) + '</td>' + '<td>' +
+            safe(reason) + '</td>';
         body.appendChild(tr);
       });
       table.appendChild(body);
@@ -1754,36 +1139,24 @@ Document
       tbody.innerHTML='';
       const table=tbody.closest('table');
       const players=(data.eligiblePlayers||[]).slice();
-
       if(table) table.classList.remove('stats-tight');
-
       players.forEach(player=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=
-          '<td class="num">'+safe(player.playerNumber)+'</td>'+
+        tr.innerHTML= '<td class="num">'+safe(player.playerNumber)+'</td>'+
           '<td class="stats-player-name"><div class="stats-player-name-wrap"><span class="stats-player-name-text">'+safe(player.playerName)+'</span>'+(player.isJourneyman?'<span class="stats-player-tag">JM</span>':'')+'</div></td>'+
-          '<td>'+safe(player.position)+'</td>'+
-          '<td class="num">'+safe(player.ma)+'</td>'+
-          '<td class="num">'+safe(player.st)+'</td>'+
-          '<td class="num">'+safe(player.ag)+'</td>'+
-          '<td class="num">'+safe(player.pa)+'</td>'+
-          '<td class="num">'+safe(player.av)+'</td>'+
-          '<td class="stats-skill-cell">'+skillsForPlayerHtml(player)+'</td>'+
-          '<td></td>'.repeat(8)+
-          '<td></td>';
+          '<td>'+safe(player.position)+'</td>'+ '<td class="num">'+safe(player.ma)+'</td>'+ '<td class="num">'+safe(player.st)+'</td>'+ '<td class="num">'+safe(player.ag)+'</td>'+
+          '<td class="num">'+safe(player.pa)+'</td>'+ '<td class="num">'+safe(player.av)+'</td>'+ '<td class="stats-skill-cell">'+skillsForPlayerHtml(player)+'</td>'+
+          '<td></td>'.repeat(8)+ '<td></td>';
         tbody.appendChild(tr);
       });
-
       const minimumStatRows=13;
       const rowsToAdd=Math.max(0,minimumStatRows-players.length);
-
       for(let i=0;i<rowsToAdd;i++){
         const tr=document.createElement('tr');
         tr.className='journeyman-blank-row';
         tr.innerHTML='<td>&nbsp;</td>'+'<td></td>'.repeat(17);
         tbody.appendChild(tr);
       }
-
       if(table&&players.length>13) table.classList.add('stats-tight');
     }
     // =======================================================
@@ -1815,34 +1188,26 @@ Document
     const opponentCTV=Number(opponent.currentTeamValue)||0;
     const difference=Math.abs(teamCTV-opponentCTV);
     const equal=teamCTV===opponentCTV;
-
     const highTreasury=teamCTV>opponentCTV?Number(team.treasury)||0:Number(opponent.treasury)||0;
     const lowTreasury=teamCTV<opponentCTV?Number(team.treasury)||0:Number(opponent.treasury)||0;
     const lowMax=Math.min(50000,lowTreasury);
-
     const highInput=document.getElementById('ind-high-spend');
     const lowInput=document.getElementById('ind-low-add');
-
     highInput.max=String(highTreasury);
     lowInput.max=String(lowMax);
     highInput.disabled=equal;
     lowInput.disabled=equal;
-
     function recalc(){
       let highSpend=Math.max(0,Number(highInput.value)||0);
       let lowAdd=Math.max(0,Number(lowInput.value)||0);
-
       if(equal){highSpend=0;lowAdd=0;}
       if(highSpend>highTreasury){highSpend=highTreasury;highInput.value=highSpend;}
       if(lowAdd>lowMax){lowAdd=lowMax;lowInput.value=lowAdd;}
-
       const pettyCash=equal?0:difference+highSpend;
       const totalAvailable=equal?0:pettyCash+lowAdd;
-
       text('ind-petty-cash',money(pettyCash));
       text('ind-total-available',money(totalAvailable));
     }
-
     highInput.addEventListener('input',recalc);
     lowInput.addEventListener('input',recalc);
     recalc();
@@ -1891,7 +1256,6 @@ Document
         const teamSpecialRules=Array.isArray(team.specialRules)?team.specialRules:[];
         const hasBriberyAndCorruption=teamSpecialRules.some(rule=>String(rule||'').trim().toLowerCase()==='bribery and corruption');
         if(briberyCard) briberyCard.hidden=!hasBriberyAndCorruption;
-
         renderRoster(data);
         renderUnavailable(data);
         // ---------------------------------------------------
@@ -1907,9 +1271,7 @@ Document
         const teamCTV=Number(team.currentTeamValue)||0;
         const opponentCTV=Number(opponent.currentTeamValue)||0;
         const ctvDifference=Math.abs(teamCTV-opponentCTV);
-
         text('ind-ctv-difference',money(ctvDifference));
-
         if(teamCTV>opponentCTV){
           text('ind-higher-team',String(team.team||'').toUpperCase());
           text('ind-lower-team',String(opponent.team||'').toUpperCase());
@@ -1920,9 +1282,8 @@ Document
           text('ind-higher-team','EQUAL CTV');
           text('ind-lower-team','EQUAL CTV');
         }
-
         setupInducementCalculator(team,opponent);
-        
+
         // ---------------------------------------------------
         // PAGE 3 - MATCH / GAME STATS
         // ---------------------------------------------------
@@ -1956,7 +1317,6 @@ Document
         // ---------------------------------------------------
         // Request print preview once the complete roster and fonts are ready.
         setTimeout(openGameDayPackPrint,300);
-
       }
       catch (err) {
         showError(err && err.message ? err.message : String(err));
@@ -1966,21 +1326,18 @@ Document
     // GITHUB -> APPS SCRIPT LIVE DATA (JSONP)
     // =====================================================
     const GAME_DAY_API_URL='https://script.google.com/macros/s/AKfycbwxdWB--Gqs1SapVbDXHLB4-C1Ib5ublMzgQ38P05sOdZXN5KF6d_8nh5xZqAL957ie/exec';
-
     function loadGameDayPack(){
       const params=new URLSearchParams(window.location.search);
       const teamId=String(params.get('teamId')||'').trim().toUpperCase();
       const seasonId=String(params.get('seasonId')||'').trim();
       if(!/^[A-Z0-9_-]{2,20}$/.test(teamId)){showError('Missing or invalid Team ID.');return;}
       if(seasonId&&!/^[A-Za-z0-9_-]{2,30}$/.test(seasonId)){showError('Invalid Season ID.');return;}
-
       const callback='rumbleGameDayData_'+Date.now()+'_'+Math.floor(Math.random()*100000);
       const script=document.createElement('script');
       let finished=false;
       const cleanup=()=>{clearTimeout(timer);script.remove();try{delete window[callback];}catch(e){window[callback]=undefined;}};
       const fail=message=>{if(finished)return;finished=true;cleanup();showError(message);};
       const timer=setTimeout(()=>fail('Game Day Pack request timed out. Please try again.'),60000);
-
       window[callback]=function(result){
         if(finished)return;
         finished=true;cleanup();
@@ -2000,7 +1357,6 @@ Document
     function openGameDayPackPrint(){
       const pack=document.getElementById('pack-content');
       if(!pack||pack.style.display==='none') return;
-
       const fonts=document.fonts?document.fonts.ready:Promise.resolve();
       fonts.then(function(){
         requestAnimationFrame(function(){
@@ -2011,7 +1367,6 @@ Document
 
     // Manual print remains available if the dialog is closed.
     document.getElementById('print-game-day-pack')?.addEventListener('click',openGameDayPackPrint);
-
   </script>
 </body>
 </html>
