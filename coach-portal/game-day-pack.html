@@ -595,7 +595,7 @@
   <div id="pack-content" style="display:none;">
     <div class="toolbar">
       <!-- =====================================================
-           PRINT GAME DAY PACK BUTTON
+           PRINT GAME DAY PACK
            ===================================================== -->
       <button type="button" id="print-game-day-pack">PRINT GAME DAY PACK</button>
     </div>
@@ -1335,13 +1335,12 @@
     document.addEventListener('DOMContentLoaded',loadGameDayPack);
 
     // =====================================================
-    // PRINT GAME DAY PACK - MANUAL BUTTON
+    // PRINT GAME DAY PACK - ORIGINAL WINDOW METHOD
     // =====================================================
     function openGameDayPackPrint(){
       window.print();
     }
     
-    // Attach the button handler once the page is ready.
     document.getElementById('print-game-day-pack').addEventListener('click',openGameDayPackPrint);
   </script>
 </body>
