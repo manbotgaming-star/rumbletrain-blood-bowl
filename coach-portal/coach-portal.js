@@ -580,12 +580,19 @@ function renderCoachGameDayPackLink(team,coach,games) {
   // Disabled until the submission-status check finishes.
   setCoachGameDayPackState('checking');
   // =====================================================
-  // GAME DAY PACK - STANDARD NEW TAB
+  // GAME DAY PACK - OPEN NEW TAB
   // =====================================================
-  link.target='_blank';
-  link.rel='noopener noreferrer';
+  link.removeAttribute('target');
+  link.removeAttribute('rel');
+  
   link.onclick=function(event){
-    if(link.getAttribute('aria-disabled')==='true') event.preventDefault();
+    event.preventDefault();
+    if(link.getAttribute('aria-disabled')==='true') return;
+  
+    const packWindow=window.open('','_blank');
+    if(!packWindow){ window.open(packUrl,'_blank'); return; }
+  
+    packWindow.location.href=packUrl;
   };
   }
 
