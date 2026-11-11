@@ -2,6 +2,8 @@
 // RUMBLE TRAIN - COACH PORTAL
 // GitHub Front End
 // =====================================================
+
+
 // =====================================================
 // CONFIG
 // =====================================================
@@ -17,11 +19,14 @@
 // https://script.google.com/macros/s/XXXXXXXXXXXX/exec
 // =====================================================
 
-const COACH_API_URL = 'https://script.google.com/macros/s/AKfycbwxdWB--Gqs1SapVbDXHLB4-C1Ib5ublMzgQ38P05sOdZXN5KF6d_8nh5xZqAL957ie/exec';
+const COACH_API_URL =
+  'https://script.google.com/macros/s/AKfycbwxdWB--Gqs1SapVbDXHLB4-C1Ib5ublMzgQ38P05sOdZXN5KF6d_8nh5xZqAL957ie/exec';
+
 
 // Used only for the current browser tab.
 // Closing the tab clears the saved login.
-const SESSION_KEY = 'rumbleTrainCoachAccessCode';
+const SESSION_KEY =
+  'rumbleTrainCoachAccessCode';
 
 // =====================================================
 // ACCESS CODE URL CLEANUP
@@ -34,76 +39,195 @@ function clearAccessCodeFromUrl() {
   history.replaceState(null,'',url.pathname + url.search + url.hash);
 }
 
+
 // =====================================================
 // STARTUP
 // =====================================================
 
-document.addEventListener( 'DOMContentLoaded', initCoachPortal);
+document.addEventListener(
+  'DOMContentLoaded',
+  initCoachPortal
+);
+
+
 function initCoachPortal() {
+
   clearAccessCodeFromUrl();
-  const loginForm = document.getElementById( 'coach-login-form');
-  const logoutButton = document.getElementById( 'coach-logout');
+  
+  const loginForm =
+    document.getElementById(
+      'coach-login-form'
+    );
+
+  const logoutButton =
+    document.getElementById(
+      'coach-logout'
+    );
+
+
   if (loginForm) {
-    loginForm.addEventListener( 'submit', function(event) {
+
+    loginForm.addEventListener(
+      'submit',
+      function(event) {
+
         event.preventDefault();
-        const input = document.getElementById( 'coach-access-code');
-        const accessCode = String( input.value || '').trim();
-        loginCoach( accessCode);
+
+        const input =
+          document.getElementById(
+            'coach-access-code'
+          );
+
+        const accessCode =
+          String(
+            input.value || ''
+          ).trim();
+
+
+        loginCoach(
+          accessCode
+        );
       }
     );
   }
+
+
   if (logoutButton) {
-    logoutButton.addEventListener( 'click', logoutCoach);
+
+    logoutButton.addEventListener(
+      'click',
+      logoutCoach
+    );
   }
+
 
   // ---------------------------------------------------
   // Restore login for this browser tab
   // ---------------------------------------------------
 
-  const savedCode = sessionStorage.getItem( SESSION_KEY);
+  const savedCode =
+    sessionStorage.getItem(
+      SESSION_KEY
+    );
+
+
   if (savedCode) {
-    const input = document.getElementById( 'coach-access-code');
+
+    const input =
+      document.getElementById(
+        'coach-access-code'
+      );
+
     if (input) {
       input.value = savedCode;
     }
-    loginCoach( savedCode, true);
+
+    loginCoach(
+      savedCode,
+      true
+    );
   }
 }
+
 
 // =====================================================
 // LOGIN
 // =====================================================
 
-function loginCoach( accessCode, restoringSession = false) {
+function loginCoach(
+  accessCode,
+  restoringSession = false
+) {
+
   clearLoginMessage();
+
+
   if (!accessCode) {
-    showLoginMessage( 'Enter your Coach Access Code.', true);
+
+    showLoginMessage(
+      'Enter your Coach Access Code.',
+      true
+    );
+
     return;
   }
-  if ( !COACH_API_URL || COACH_API_URL.includes( 'PASTE_YOUR')) {
-    showLoginMessage( 'Coach Portal API URL has not been configured.', true);
+
+
+  if (
+    !COACH_API_URL ||
+    COACH_API_URL.includes(
+      'PASTE_YOUR'
+    )
+  ) {
+
+    showLoginMessage(
+      'Coach Portal API URL has not been configured.',
+      true
+    );
+
     return;
   }
+
+
   showLoading();
-  coachApiRequest( accessCode)
+
+
+  coachApiRequest(
+    accessCode
+  )
+
     .then(function(data) {
-      if ( !data || data.ok !== true) {
-        throw new Error( data && data.error
+
+      if (
+        !data ||
+        data.ok !== true
+      ) {
+
+        throw new Error(
+          data && data.error
             ? data.error
-            : 'Unable to sign in.');
+            : 'Unable to sign in.'
+        );
       }
-      sessionStorage.setItem( SESSION_KEY, accessCode);
-      renderCoachPortal( data);
+
+
+      sessionStorage.setItem(
+        SESSION_KEY,
+        accessCode
+      );
+
+
+      renderCoachPortal(
+        data
+      );
+
+
       showDashboard();
+
     })
+
     .catch(function(error) {
-      sessionStorage.removeItem( SESSION_KEY);
+
+      sessionStorage.removeItem(
+        SESSION_KEY
+      );
+
+
       showLogin();
+
+
       if (!restoringSession) {
-        showLoginMessage( error.message || 'Unable to sign in.', true);
+
+        showLoginMessage(
+          error.message ||
+          'Unable to sign in.',
+          true
+        );
       }
+
     });
 }
+
 
 // =====================================================
 // APPS SCRIPT API REQUEST
@@ -113,52 +237,145 @@ function loginCoach( accessCode, restoringSession = false) {
 // =====================================================
 
 function coachApiRequest(accessCode) {
-  return new Promise( function(resolve, reject) {
-      const callbackName = 'rumbleCoachCallback_' + Date.now() + '_' + Math.floor( Math.random() * 100000);
-      const script = document.createElement( 'script');
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const callbackName =
+        'rumbleCoachCallback_' +
+        Date.now() +
+        '_' +
+        Math.floor(
+          Math.random() * 100000
+        );
+
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+
       let finished = false;
-      const cleanup = function() {
+
+
+      const cleanup =
+        function() {
+
           if (script.parentNode) {
-            script.parentNode.removeChild( script);
+            script.parentNode.removeChild(
+              script
+            );
           }
+
+
           try {
-            delete window[ callbackName];
+            delete window[
+              callbackName
+            ];
           }
           catch (error) {
-            window[ callbackName] = undefined;
+
+            window[
+              callbackName
+            ] = undefined;
           }
         };
-      const timeout = setTimeout( function() {
+
+
+      const timeout =
+        setTimeout(
+          function() {
+
             if (finished) {
               return;
             }
+
             finished = true;
+
             cleanup();
-            reject( new Error( 'The Coach Portal request timed out.'));
-          }, 45000);
-      window[ callbackName] = function(data) {
+
+            reject(
+              new Error(
+                'The Coach Portal request timed out.'
+              )
+            );
+
+          },
+          45000
+        );
+
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
           if (finished) {
             return;
           }
+
           finished = true;
-          clearTimeout( timeout);
+
+          clearTimeout(
+            timeout
+          );
+
           cleanup();
-          resolve( data);
+
+          resolve(
+            data
+          );
         };
-      script.onerror = function() {
+
+
+      script.onerror =
+        function() {
+
           if (finished) {
             return;
           }
+
           finished = true;
-          clearTimeout( timeout);
+
+          clearTimeout(
+            timeout
+          );
+
           cleanup();
-          reject( new Error( 'Unable to connect to the Coach Portal service.'));
+
+          reject(
+            new Error(
+              'Unable to connect to the Coach Portal service.'
+            )
+          );
         };
-      const separator = COACH_API_URL.includes('?')
+
+
+      const separator =
+        COACH_API_URL.includes('?')
           ? '&'
           : '?';
-      script.src = COACH_API_URL + separator + 'view=coach' + '&code=' + encodeURIComponent( accessCode) + '&callback=' + encodeURIComponent( callbackName);
-      document.head.appendChild( script);
+
+
+      script.src =
+        COACH_API_URL +
+        separator +
+        'view=coach' +
+        '&code=' +
+        encodeURIComponent(
+          accessCode
+        ) +
+        '&callback=' +
+        encodeURIComponent(
+          callbackName
+        );
+
+
+      document.head.appendChild(
+        script
+      );
+
     }
   );
 }
@@ -170,15 +387,31 @@ function coachApiRequest(accessCode) {
 // advancement option.
 // =====================================================
 
-function coachApiAdvancementChoicesRequest( accessCode, playerId, type) {
+function coachApiAdvancementChoicesRequest(
+  accessCode,
+  playerId,
+  type
+) {
+
   return new Promise(function(resolve, reject) {
-    const callbackName = 'rumbleCoachChoicesCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-    const script = document.createElement('script');
+
+    const callbackName =
+      'rumbleCoachChoicesCallback_' +
+      Date.now() +
+      '_' +
+      Math.floor(Math.random() * 100000);
+
+    const script =
+      document.createElement('script');
+
     let finished = false;
+
     const cleanup = function() {
+
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
+
       try {
         delete window[callbackName];
       }
@@ -186,31 +419,71 @@ function coachApiAdvancementChoicesRequest( accessCode, playerId, type) {
         window[callbackName] = undefined;
       }
     };
-    const timeout = setTimeout(function() {
+
+    const timeout =
+      setTimeout(function() {
+
         if (finished) return;
+
         finished = true;
         cleanup();
-        reject( new Error( 'Advancement choices request timed out.'));
+
+        reject(
+          new Error(
+            'Advancement choices request timed out.'
+          )
+        );
+
       }, 45000);
-    window[callbackName] = function(data) {
+
+    window[callbackName] =
+      function(data) {
+
         if (finished) return;
+
         finished = true;
+
         clearTimeout(timeout);
         cleanup();
+
         resolve(data);
       };
-    script.onerror = function() {
+
+    script.onerror =
+      function() {
+
         if (finished) return;
+
         finished = true;
+
         clearTimeout(timeout);
         cleanup();
-        reject( new Error( 'Unable to load advancement choices.'));
+
+        reject(
+          new Error(
+            'Unable to load advancement choices.'
+          )
+        );
       };
-    const separator = COACH_API_URL.includes('?')
+
+    const separator =
+      COACH_API_URL.includes('?')
         ? '&'
         : '?';
-    script.src = COACH_API_URL + separator + 'view=coachchoices' + '&code=' + encodeURIComponent(accessCode) + '&playerId=' + encodeURIComponent(playerId) + '&type=' +
-      encodeURIComponent(type) + '&callback=' + encodeURIComponent(callbackName);
+
+    script.src =
+      COACH_API_URL +
+      separator +
+      'view=coachchoices' +
+      '&code=' +
+      encodeURIComponent(accessCode) +
+      '&playerId=' +
+      encodeURIComponent(playerId) +
+      '&type=' +
+      encodeURIComponent(type) +
+      '&callback=' +
+      encodeURIComponent(callbackName);
+
     document.head.appendChild(script);
   });
 }
@@ -223,60 +496,188 @@ function coachApiAdvancementChoicesRequest( accessCode, playerId, type) {
 // on different domains.
 // =====================================================
 
-function coachApiValidateAdvancementRequest( accessCode, playerId, type, category, improvement) {
-  return new Promise( function(resolve, reject) {
-      const callbackName = 'rumbleCoachValidateCallback_' + Date.now() + '_' + Math.floor( Math.random() * 100000);
-      const script = document.createElement( 'script');
+function coachApiValidateAdvancementRequest(
+  accessCode,
+  playerId,
+  type,
+  category,
+  improvement
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const callbackName =
+        'rumbleCoachValidateCallback_' +
+        Date.now() +
+        '_' +
+        Math.floor(
+          Math.random() * 100000
+        );
+
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+
       let finished = false;
-      const cleanup = function() {
+
+
+      const cleanup =
+        function() {
+
           if (script.parentNode) {
-            script.parentNode.removeChild( script);
+
+            script.parentNode.removeChild(
+              script
+            );
           }
+
+
           try {
-            delete window[ callbackName];
+
+            delete window[
+              callbackName
+            ];
+
           }
           catch (error) {
-            window[ callbackName] = undefined;
+
+            window[
+              callbackName
+            ] = undefined;
           }
         };
-      const timeout = setTimeout( function() {
+
+
+      const timeout =
+        setTimeout(
+          function() {
+
             if (finished) {
               return;
             }
+
+
             finished = true;
+
             cleanup();
-            reject( new Error( 'Advancement validation timed out.'));
-          }, 15000);
-      window[ callbackName] = function(data) {
+
+
+            reject(
+              new Error(
+                'Advancement validation timed out.'
+              )
+            );
+
+          },
+          15000
+        );
+
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
           if (finished) {
             return;
           }
+
+
           finished = true;
-          clearTimeout( timeout);
+
+
+          clearTimeout(
+            timeout
+          );
+
+
           cleanup();
-          resolve( data);
+
+
+          resolve(
+            data
+          );
         };
-      script.onerror = function() {
+
+
+      script.onerror =
+        function() {
+
           if (finished) {
             return;
           }
+
+
           finished = true;
-          clearTimeout( timeout);
+
+
+          clearTimeout(
+            timeout
+          );
+
+
           cleanup();
-          reject( new Error( 'Unable to validate the advancement.'));
+
+
+          reject(
+            new Error(
+              'Unable to validate the advancement.'
+            )
+          );
         };
-      const separator = COACH_API_URL.includes('?')
+
+
+      const separator =
+        COACH_API_URL.includes('?')
           ? '&'
           : '?';
-      script.src = COACH_API_URL + separator +
+
+
+      script.src =
+        COACH_API_URL +
+        separator +
+
         'view=coachvalidate' +
-        '&code=' + encodeURIComponent( accessCode) +
-        '&playerId=' + encodeURIComponent( playerId) +
-        '&type=' + encodeURIComponent( type) +
-        '&category=' + encodeURIComponent( category) +
-        '&improvement=' + encodeURIComponent( improvement) +
-        '&callback=' + encodeURIComponent( callbackName);
-      document.head.appendChild( script);
+
+        '&code=' +
+        encodeURIComponent(
+          accessCode
+        ) +
+
+        '&playerId=' +
+        encodeURIComponent(
+          playerId
+        ) +
+
+        '&type=' +
+        encodeURIComponent(
+          type
+        ) +
+
+        '&category=' +
+        encodeURIComponent(
+          category
+        ) +
+
+        '&improvement=' +
+        encodeURIComponent(
+          improvement
+        ) +
+
+        '&callback=' +
+        encodeURIComponent(
+          callbackName
+        );
+
+
+      document.head.appendChild(
+        script
+      );
+
     }
   );
 }
@@ -289,13 +690,29 @@ function coachApiValidateAdvancementRequest( accessCode, playerId, type, categor
 // on different domains.
 // =====================================================
 
-function coachApiSubmitAdvancementRequest( accessCode, playerId, type, category, improvement, expectedAdvancement) {
+function coachApiSubmitAdvancementRequest(
+  accessCode,
+  playerId,
+  type,
+  category,
+  improvement,
+  expectedAdvancement
+) {
+
   return new Promise(function(resolve, reject) {
-    const callbackName = 'rumbleCoachSubmitCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+
+    const callbackName =
+      'rumbleCoachSubmitCallback_' +
+      Date.now() +
+      '_' +
+      Math.floor(Math.random() * 100000);
+
     const script = document.createElement('script');
     let finished = false;
+
     const cleanup = function() {
       if (script.parentNode) script.parentNode.removeChild(script);
+
       try {
         delete window[callbackName];
       }
@@ -303,30 +720,49 @@ function coachApiSubmitAdvancementRequest( accessCode, playerId, type, category,
         window[callbackName] = undefined;
       }
     };
+
     const timeout = setTimeout(function() {
       if (finished) return;
+
       finished = true;
       cleanup();
+
       reject(new Error('Advancement submission timed out.'));
     }, 45000);
+
     window[callbackName] = function(data) {
       if (finished) return;
+
       finished = true;
       clearTimeout(timeout);
       cleanup();
       resolve(data);
     };
+
     script.onerror = function() {
       if (finished) return;
+
       finished = true;
       clearTimeout(timeout);
       cleanup();
+
       reject(new Error('Unable to submit the advancement.'));
     };
+
     const separator = COACH_API_URL.includes('?') ? '&' : '?';
-    script.src = COACH_API_URL + separator + 'view=coachsubmit' + '&code=' + encodeURIComponent(accessCode) + '&playerId=' + encodeURIComponent(playerId) +
-      '&type=' + encodeURIComponent(type) + '&category=' + encodeURIComponent(category) + '&improvement=' + encodeURIComponent(improvement) +
-      '&expectedAdvancement=' + encodeURIComponent(expectedAdvancement) + '&callback=' + encodeURIComponent(callbackName);
+
+    script.src =
+      COACH_API_URL +
+      separator +
+      'view=coachsubmit' +
+      '&code=' + encodeURIComponent(accessCode) +
+      '&playerId=' + encodeURIComponent(playerId) +
+      '&type=' + encodeURIComponent(type) +
+      '&category=' + encodeURIComponent(category) +
+      '&improvement=' + encodeURIComponent(improvement) +
+      '&expectedAdvancement=' + encodeURIComponent(expectedAdvancement) +
+      '&callback=' + encodeURIComponent(callbackName);
+
     document.head.appendChild(script);
   });
 }
@@ -339,15 +775,30 @@ function coachApiSubmitAdvancementRequest( accessCode, playerId, type, category,
 // on different domains.
 // =====================================================
 
-function coachApiSubmitTeamManagementPurchaseRequest( accessCode, purchaseKey) {
+function coachApiSubmitTeamManagementPurchaseRequest(
+  accessCode,
+  purchaseKey
+) {
+
   return new Promise(function(resolve, reject) {
-    const callbackName = 'rumbleCoachManagementPurchaseCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-    const script = document.createElement('script');
+
+    const callbackName =
+      'rumbleCoachManagementPurchaseCallback_' +
+      Date.now() +
+      '_' +
+      Math.floor(Math.random() * 100000);
+
+    const script =
+      document.createElement('script');
+
     let finished = false;
+
     const cleanup = function() {
+
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
+
       try {
         delete window[callbackName];
       }
@@ -355,38 +806,83 @@ function coachApiSubmitTeamManagementPurchaseRequest( accessCode, purchaseKey) {
         window[callbackName] = undefined;
       }
     };
-    const timeout = setTimeout(function() {
+
+    const timeout =
+      setTimeout(function() {
+
         if (finished) return;
+
         finished = true;
         cleanup();
-        reject( new Error( 'Team Management purchase request timed out.'));
+
+        reject(
+          new Error(
+            'Team Management purchase request timed out.'
+          )
+        );
+
       }, 45000);
-    window[callbackName] = function(data) {
+
+    window[callbackName] =
+      function(data) {
+
         if (finished) return;
+
         finished = true;
+
         clearTimeout(timeout);
         cleanup();
+
         resolve(data);
       };
-    script.onerror = function() {
+
+    script.onerror =
+      function() {
+
         if (finished) return;
+
         finished = true;
+
         clearTimeout(timeout);
         cleanup();
-        reject( new Error( 'Unable to submit the Team Management purchase.'));
+
+        reject(
+          new Error(
+            'Unable to submit the Team Management purchase.'
+          )
+        );
       };
-    const separator = COACH_API_URL.includes('?')
+
+    const separator =
+      COACH_API_URL.includes('?')
         ? '&'
         : '?';
-    script.src = COACH_API_URL + separator + 'view=coachbuymanagement' + '&code=' + encodeURIComponent(accessCode) + '&purchase=' + encodeURIComponent(purchaseKey) + '&callback=' +
+
+    script.src =
+      COACH_API_URL +
+      separator +
+      'view=coachbuymanagement' +
+      '&code=' +
+      encodeURIComponent(accessCode) +
+      '&purchase=' +
+      encodeURIComponent(purchaseKey) +
+      '&callback=' +
       encodeURIComponent(callbackName);
-    document.head.appendChild( script);
+
+    document.head.appendChild(
+      script
+    );
   });
 }
 
+
 // Legacy wrapper retained for older code paths.
 function coachApiSubmitRerollPurchaseRequest(accessCode) {
-  return coachApiSubmitTeamManagementPurchaseRequest( accessCode, 'reroll');
+
+  return coachApiSubmitTeamManagementPurchaseRequest(
+    accessCode,
+    'reroll'
+  );
 }
 
 // =====================================================
@@ -398,17 +894,20 @@ function coachApiPlayerRequest(view,params,errorMessage,timeoutMs=45000) {
     const callbackName = 'rumbleCoachPlayerCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
     const script = document.createElement('script');
     let finished = false;
+
     function cleanup() {
       if (script.parentNode) script.parentNode.removeChild(script);
       try { delete window[callbackName]; }
       catch (error) { window[callbackName] = undefined; }
     }
+
     const timeout = setTimeout(function() {
       if (finished) return;
       finished = true;
       cleanup();
       reject(new Error(errorMessage || 'Coach Player request timed out.'));
     },timeoutMs);
+
     window[callbackName] = function(data) {
       if (finished) return;
       finished = true;
@@ -416,6 +915,7 @@ function coachApiPlayerRequest(view,params,errorMessage,timeoutMs=45000) {
       cleanup();
       resolve(data);
     };
+
     script.onerror = function() {
       if (finished) return;
       finished = true;
@@ -423,13 +923,16 @@ function coachApiPlayerRequest(view,params,errorMessage,timeoutMs=45000) {
       cleanup();
       reject(new Error(errorMessage || 'Unable to complete the Coach Player request.'));
     };
+
     const query = Object.keys(params || {}).map(function(key) {
       return encodeURIComponent(key) + '=' + encodeURIComponent(params[key] ?? '');
     }).join('&');
+
     script.src = COACH_API_URL + '?view=' + encodeURIComponent(view) + (query ? '&' + query : '') + '&callback=' + encodeURIComponent(callbackName);
     document.head.appendChild(script);
   });
 }
+
 let coachGameSubmissionCache=null;
 const COACH_GAME_CACHE_MS=5*60*1000;
 
@@ -437,7 +940,11 @@ const COACH_GAME_CACHE_MS=5*60*1000;
 // COACH GAME SUBMISSION OPTIONS
 // =====================================================
 function coachApiGetGameSubmissionOptionsRequest(accessCode){
-  return coachApiPlayerRequest( 'coachgamesubmissionoptions', {code:accessCode}, 'Unable to load post-game submission options.');
+  return coachApiPlayerRequest(
+    'coachgamesubmissionoptions',
+    {code:accessCode},
+    'Unable to load post-game submission options.'
+  );
 }
 
 // =====================================================
@@ -446,18 +953,25 @@ function coachApiGetGameSubmissionOptionsRequest(accessCode){
 // =====================================================
 function coachApiSubmitGameSubmissionRequest(accessCode,payload){
   return coachApiPlayerRequest('coachgamesubmit',{
-    code:accessCode, payload:JSON.stringify(payload)
+    code:accessCode,
+    payload:JSON.stringify(payload)
   },'Unable to submit the game.',120000);
 }
+
 function coachApiGetPlayerPurchaseOptionsRequest(accessCode) {
   return coachApiPlayerRequest('coachplayeroptions',{code:accessCode},'Unable to load Buy Player options.');
 }
+
 function coachApiGeneratePlayerNameRequest(accessCode,position) {
   return coachApiPlayerRequest('coachplayername',{code:accessCode,position:position},'Unable to generate a player name.');
 }
+
 function coachApiSubmitPlayerPurchaseRequest(accessCode,position,playerNumber,playerName) {
   return coachApiPlayerRequest('coachbuyplayer',{
-    code:accessCode, position:position, number:playerNumber, name:playerName
+    code:accessCode,
+    position:position,
+    number:playerNumber,
+    name:playerName
   },'Unable to submit the player purchase.');
 }
 
@@ -468,14 +982,22 @@ function coachApiSubmitPlayerPurchaseRequest(accessCode,position,playerNumber,pl
 function coachApiGetRaiseDeadOptionsRequest(accessCode){
   return coachApiPlayerRequest('coachraisedeadoptions',{code:accessCode},'Unable to load Raise the Dead options.');
 }
+
 function coachApiSubmitRaiseDeadRequest(accessCode,gameId,position,playerNumber,playerName){
   return coachApiPlayerRequest('coachraisedead',{
-    code:accessCode, gameId:gameId, position:position, number:playerNumber, name:playerName
+    code:accessCode,
+    gameId:gameId,
+    position:position,
+    number:playerNumber,
+    name:playerName
   },'Unable to submit Raise the Dead.');
 }
+
 function coachApiSubmitJourneymanHireRequest(accessCode,journeymanId,playerNumber){
   return coachApiPlayerRequest('coachhirejourneyman',{
-    code:accessCode, journeymanId:journeymanId, number:playerNumber
+    code:accessCode,
+    journeymanId:journeymanId,
+    number:playerNumber
   },'Unable to hire the Journeyman.');
 }
 
@@ -484,7 +1006,8 @@ function coachApiSubmitJourneymanHireRequest(accessCode,journeymanId,playerNumbe
 // =====================================================
 function coachApiSubmitPlayerRetirementRequest(accessCode,playerId){
   return coachApiPlayerRequest('coachretireplayer',{
-    code:accessCode, playerId:playerId
+    code:accessCode,
+    playerId:playerId
   },'Unable to retire the player.');
 }
 
@@ -493,18 +1016,38 @@ function coachApiSubmitPlayerRetirementRequest(accessCode,playerId){
 // =====================================================
 
 function renderCoachPortal(data) {
-  const coach = data.coach || {};
-  const team = data.team || {};
-  const management = data.management || {};
-  const players = Array.isArray( data.players)
+
+  const coach =
+    data.coach || {};
+
+  const team =
+    data.team || {};
+
+  const management =
+    data.management || {};
+
+  const players =
+    Array.isArray(
+      data.players
+    )
       ? data.players
       : [];
-  const advancementPlayers = data.advancements && Array.isArray( data.advancements.players)
+
+  const advancementPlayers =
+  data.advancements &&
+  Array.isArray(
+    data.advancements.players
+  )
     ? data.advancements.players
     : [];
-  const games = Array.isArray( data.games)
+  
+  const games =
+    Array.isArray(
+      data.games
+    )
       ? data.games
       : [];
+
 
   // ---------------------------------------------------
   // TEAM HEADER
@@ -519,7 +1062,7 @@ function renderCoachPortal(data) {
   setText('coach-treasury',formatGold(team.treasury));
   setText('coach-rerolls',displayValue(team.rerolls));
   setText('coach-apothecary',displayValue(team.apothecary));
-
+  
   // ---------------------------------------------------
   // RENDER TEAM MANAGEMENT SUMMARY
   // ---------------------------------------------------
@@ -527,24 +1070,45 @@ function renderCoachPortal(data) {
   const currentPlayers=players.filter(function(player){
     return !isCoachPlayerOffRoster(player.status);
   }).length;
-  setText( 'coach-management-players', currentPlayers);
-  renderCoachManagement( team, management);
+
+  setText(
+    'coach-management-players',
+    currentPlayers
+  );
+
+  renderCoachManagement(
+    team,
+    management
+  );
 
   // ---------------------------------------------------
   // TEAM LOGO
   // ---------------------------------------------------
 
-  const logo = document.getElementById( 'coach-team-logo');
+  const logo =
+    document.getElementById(
+      'coach-team-logo'
+    );
+
+
   if (logo) {
+
     if (team.logoUrl) {
+
       logo.src = team.logoUrl;
+
       logo.hidden = false;
+
     }
     else {
+
       logo.removeAttribute('src');
+
       logo.hidden = true;
     }
   }
+
+
   renderCoachGames(games,team,coach);
   renderCoachAdvancements(advancementPlayers);
   renderCoachRoster(players);
@@ -556,67 +1120,74 @@ function renderCoachPortal(data) {
 function renderCoachGameDayPackLink(team,coach,games) {
   const link = document.getElementById('coach-game-day-pack');
   if (!link) return;
+
   const teamId = String(team.teamId || coach.teamId || '').trim();
   const seasonId = String(coach.seasonId || team.seasonId || '').trim();
+
   const hasUpcomingGame = Array.isArray(games) && games.some(function(game) {
     const status=String(game.status||'').trim().toLowerCase();
     return game.isBye!==true && status!=='' && status!=='completed';
   });
+
   if (!teamId || !seasonId || !hasUpcomingGame) {
     link.hidden = true;
     link.removeAttribute('href');
     link.onclick = null;
     return;
   }
-  
-  // =====================================================
-  // GAME DAY PACK - GITHUB HOSTING
-  // =====================================================
-  const packUrl='https://manbotgaming-star.github.io/rumbletrain-blood-bowl/coach-portal/game-day-pack.html?teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
+
+  const packUrl = COACH_API_URL + '?view=gameDayPack&teamId=' + encodeURIComponent(teamId) + '&seasonId=' + encodeURIComponent(seasonId);
 
   link.href=packUrl;
   link.hidden=false;
-
+  
   // Disabled until the submission-status check finishes.
   setCoachGameDayPackState('checking');
-  // =====================================================
-  // GAME DAY PACK - OPEN NEW TAB
-  // =====================================================
-  link.removeAttribute('target');
-  link.removeAttribute('rel');
   
   link.onclick=function(event){
     event.preventDefault();
-    if(link.getAttribute('aria-disabled')==='true') return;
   
-    // =====================================================
-    // GAME DAY PACK - ORIGINAL LOADING WINDOW
-    // =====================================================
-    const packWindow=window.open('','_blank');
-    if(!packWindow){ window.open(packUrl,'_blank'); return; }
+      // ---------------------------------------------------
+      // DO NOT REOPEN A SUBMITTED GAME
+      // ---------------------------------------------------
+      if(link.getAttribute('aria-disabled')==='true') return;
     
+      const packWindow=window.open('','_blank');
+    
+      if (!packWindow) {
+        window.open(packUrl,'_blank');
+        return;
+      }
+
     packWindow.document.open();
     packWindow.document.write(`<!DOCTYPE html>
-    <html><head><meta charset="UTF-8"><title>Preparing Game Day Pack</title>
-    <style>
-    html,body{margin:0;width:100%;height:100%;background:#eef3f5;font-family:Georgia,serif;color:#123f4e}
-    body{display:flex;align-items:center;justify-content:center}
-    .loading-card{background:#fff;border:1px solid #9eb4bd;border-top:6px solid #174f61;border-radius:8px;padding:38px 48px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:320px}
-    .loading-card h1{margin:0 0 12px;font-size:26px;text-transform:uppercase}
-    .loading-card p{margin:0 0 22px;color:#5d7078}
-    .spinner{width:38px;height:38px;margin:0 auto;border:4px solid #d8e1e5;border-top-color:#174f61;border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    </style></head><body>
-    <div class="loading-card">
-    <h1>Preparing Game Day Pack</h1>
-    <p>Loading current roster and game information...</p>
-    <div class="spinner"></div>
-    </div></body></html>`);
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Preparing Game Day Pack</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#eef3f5;font-family:Georgia,serif;color:#123f4e}
+body{display:flex;align-items:center;justify-content:center}
+.loading-card{background:#fff;border:1px solid #9eb4bd;border-top:6px solid #174f61;border-radius:8px;padding:38px 48px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.12);min-width:320px}
+.loading-card h1{margin:0 0 12px;font-size:26px;text-transform:uppercase}
+.loading-card p{margin:0 0 22px;color:#5d7078}
+.spinner{width:38px;height:38px;margin:0 auto;border:4px solid #d8e1e5;border-top-color:#174f61;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="loading-card">
+<h1>Preparing Game Day Pack</h1>
+<p>Loading current roster and game information...</p>
+<div class="spinner"></div>
+</div>
+</body>
+</html>`);
     packWindow.document.close();
-    
-    setTimeout(function(){ packWindow.location.href=packUrl; },100);
+
+    setTimeout(function(){ packWindow.location.href = packUrl; },100);
   };
-  }
+}
 
 // =====================================================
 // GAME DAY PACK - BUTTON STATE
@@ -624,15 +1195,18 @@ function renderCoachGameDayPackLink(team,coach,games) {
 function setCoachGameDayPackState(state,gameId){
   const link=document.getElementById('coach-game-day-pack');
   if(!link) return;
+
   link.classList.remove('is-checking','is-pending','is-unavailable');
   delete link.dataset.pendingText;
   delete link.dataset.pendingGameId;
+
   if(state==='checking'){
     link.classList.add('is-checking');
     link.setAttribute('aria-disabled','true');
     link.setAttribute('tabindex','-1');
     return;
   }
+
     if(state==='review'){
     link.classList.add('is-pending');
     link.dataset.pendingText='PENDING COMMISSIONER REVIEW';
@@ -641,6 +1215,7 @@ function setCoachGameDayPackState(state,gameId){
     link.setAttribute('tabindex','-1');
     return;
   }
+
   if(state==='pending'){
     link.classList.add('is-pending');
     link.dataset.pendingText='PENDING OPPONENT SUBMISSION';
@@ -649,12 +1224,14 @@ function setCoachGameDayPackState(state,gameId){
     link.setAttribute('tabindex','-1');
     return;
   }
+
   if(state==='unavailable'){
     link.classList.add('is-unavailable');
     link.setAttribute('aria-disabled','true');
     link.setAttribute('tabindex','-1');
     return;
   }
+
   link.removeAttribute('aria-disabled');
   link.removeAttribute('tabindex');
 }
@@ -664,15 +1241,42 @@ function setCoachGameDayPackState(state,gameId){
 // =====================================================
 
 function renderCoachManagement(team, management) {
+
   team = team || {};
   management = management || {};
-  const purchases = management.purchases || {};
-  setText( 'coach-management-treasury', formatGold(team.treasury));
-  setText( 'coach-management-rerolls', displayValue(team.rerolls));
-  setText( 'coach-management-apothecary', displayValue(team.apothecary));
-  setText( 'coach-management-assistant-coaches', displayValue(team.assistantCoaches));
-  setText( 'coach-management-cheerleaders', displayValue(team.cheerleaders));
-  setText( 'coach-management-dedicated-fans', displayValue(team.dedicatedFans));
+
+  const purchases =
+    management.purchases || {};
+
+  setText(
+    'coach-management-treasury',
+    formatGold(team.treasury)
+  );
+
+  setText(
+    'coach-management-rerolls',
+    displayValue(team.rerolls)
+  );
+
+  setText(
+    'coach-management-apothecary',
+    displayValue(team.apothecary)
+  );
+
+  setText(
+    'coach-management-assistant-coaches',
+    displayValue(team.assistantCoaches)
+  );
+
+  setText(
+    'coach-management-cheerleaders',
+    displayValue(team.cheerleaders)
+  );
+
+  setText(
+    'coach-management-dedicated-fans',
+    displayValue(team.dedicatedFans)
+  );
 
   // Keep any existing header/stat fields synchronized.
   setText('coach-treasury', formatGold(team.treasury));
@@ -685,92 +1289,199 @@ function renderCoachManagement(team, management) {
       const buyPlayerButton=document.getElementById('coach-management-buy-player');
       const playerCount=Number(document.getElementById('coach-management-players')?.textContent)||0;
       const canAttemptPurchase=Number(team.treasury)>0&&playerCount<16;
+    
       if(buyPlayerButton){
         buyPlayerButton.disabled=!canAttemptPurchase;
         buyPlayerButton.title=canAttemptPurchase?'Load current player purchase options.':'No funds available or roster is full.';
         buyPlayerButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
         buyPlayerButton.onclick=canAttemptPurchase?openCoachPlayerPurchase:null;
       }
-
+  
     // ---------------------------------------------------
     // RAISE THE DEAD - ONLY CHECK ROSTERS WITH THE RULE
     // ---------------------------------------------------
     const raiseDeadButton=document.getElementById('coach-management-raise-dead');
     const specialRules=management.details&&Array.isArray(management.details.specialRules)?management.details.specialRules:[];
     const hasMastersOfUndeath=specialRules.some(rule=>String(rule||'').trim().toLowerCase()==='masters of undeath');
+  
     if(raiseDeadButton){
       raiseDeadButton.hidden=!hasMastersOfUndeath;
       raiseDeadButton.disabled=true;
       raiseDeadButton.onclick=null;
+  
       if(hasMastersOfUndeath) refreshCoachRaiseDeadButtonState();
     }
-  const options = [ {
-      key: 'reroll', buttonId: 'coach-management-buy-reroll', buttonLabel: 'Buy Re-roll', confirmLabel: 'Team Re-roll' }, {
-      key: 'apothecary', buttonId: 'coach-management-buy-apothecary', buttonLabel: 'Buy Apothecary', confirmLabel: 'Apothecary' }, {
-      key: 'assistantCoach', buttonId: 'coach-management-buy-assistant-coach', buttonLabel: 'Buy Assistant Coach', confirmLabel: 'Assistant Coach' }, {
-      key: 'cheerleader', buttonId: 'coach-management-buy-cheerleader', buttonLabel: 'Buy Cheerleader', confirmLabel: 'Cheerleader'
+
+  const options = [
+    {
+      key: 'reroll',
+      buttonId: 'coach-management-buy-reroll',
+      buttonLabel: 'Buy Re-roll',
+      confirmLabel: 'Team Re-roll'
+    },
+    {
+      key: 'apothecary',
+      buttonId: 'coach-management-buy-apothecary',
+      buttonLabel: 'Buy Apothecary',
+      confirmLabel: 'Apothecary'
+    },
+    {
+      key: 'assistantCoach',
+      buttonId: 'coach-management-buy-assistant-coach',
+      buttonLabel: 'Buy Assistant Coach',
+      confirmLabel: 'Assistant Coach'
+    },
+    {
+      key: 'cheerleader',
+      buttonId: 'coach-management-buy-cheerleader',
+      buttonLabel: 'Buy Cheerleader',
+      confirmLabel: 'Cheerleader'
     }
   ];
+
   options.forEach(function(item) {
-    const purchase = purchases[item.key] || {};
-    const button = document.getElementById( item.buttonId);
+
+    const purchase =
+      purchases[item.key] || {};
+
+    const button =
+      document.getElementById(
+        item.buttonId
+      );
+
     if (!button) {
       return;
     }
-    const cost = Number( purchase.cost) || 0;
-    const costDisplay = cost > 0
+
+    const cost =
+      Number(
+        purchase.cost
+      ) || 0;
+
+    const costDisplay =
+      cost > 0
         ? formatGold(cost)
         : '-';
+
     button.innerHTML = `
       <span>${escapePortalHtml(item.buttonLabel)}</span>
       <strong>${escapePortalHtml(costDisplay)}</strong>
     `;
-    button.disabled = purchase.allowed !== true;
-    button.title = purchase.reason || '';
+
+    button.disabled =
+      purchase.allowed !== true;
+
+    button.title =
+      purchase.reason || '';
+
     button.onclick = async function() {
-      const accessCode = sessionStorage.getItem( SESSION_KEY) || '';
+
+      const accessCode =
+        sessionStorage.getItem(
+          SESSION_KEY
+        ) || '';
+
       if (!accessCode) {
-        alert( 'Your Coach Portal session has expired. Please log in again.');
+
+        alert(
+          'Your Coach Portal session has expired. Please log in again.'
+        );
+
         return;
       }
-      const confirmed = await showCoachPurchaseConfirmation( item.confirmLabel, cost);
+
+      const confirmed =
+        await showCoachPurchaseConfirmation(
+          item.confirmLabel,
+          cost
+        );
+
       if (!confirmed) {
         return;
       }
+
       button.disabled = true;
+
       button.innerHTML = `
         <span>Purchasing...</span>
         <strong>${escapePortalHtml(costDisplay)}</strong>
       `;
-      coachApiSubmitTeamManagementPurchaseRequest( accessCode, item.key)
+
+      coachApiSubmitTeamManagementPurchaseRequest(
+        accessCode,
+        item.key
+      )
+
         .then(function(result) {
-          if ( !result || result.ok !== true || result.submitted !== true) {
-            throw new Error( result && result.reason
+
+          if (
+            !result ||
+            result.ok !== true ||
+            result.submitted !== true
+          ) {
+
+            throw new Error(
+              result && result.reason
                 ? result.reason
                 : result && result.error
                   ? result.error
-                  : 'The purchase could not be completed.');
+                  : 'The purchase could not be completed.'
+            );
           }
-          if ( !result.team || !result.management) {
-            throw new Error( 'The purchase succeeded, but updated Team Management data was not returned.');
+
+          if (
+            !result.team ||
+            !result.management
+          ) {
+
+            throw new Error(
+              'The purchase succeeded, but updated Team Management data was not returned.'
+            );
           }
-          renderCoachManagement( result.team, result.management);
-          showCoachManagementSuccess( item.confirmLabel + ' purchased successfully.');
+
+          renderCoachManagement(
+            result.team,
+            result.management
+          );
+
+          showCoachManagementSuccess(
+            item.confirmLabel +
+            ' purchased successfully.'
+          );
         })
+
         .catch(function(error) {
-          alert( error && error.message
+
+          alert(
+            error && error.message
               ? error.message
-              : 'The Team Management purchase failed.');
+              : 'The Team Management purchase failed.'
+          );
 
           // Failure-path safety refresh only.
-          coachApiRequest( accessCode)
+          coachApiRequest(
+            accessCode
+          )
+
             .then(function(data) {
-              if ( data && data.ok === true) {
-                renderCoachPortal( data);
+
+              if (
+                data &&
+                data.ok === true
+              ) {
+
+                renderCoachPortal(
+                  data
+                );
               }
             })
+
             .catch(function(refreshError) {
-              console.error( 'Coach Portal refresh failed:', refreshError);
+
+              console.error(
+                'Coach Portal refresh failed:',
+                refreshError
+              );
             });
         });
     };
@@ -783,15 +1494,19 @@ function renderCoachManagement(team, management) {
 function applyCoachRaiseDeadButtonState(result){
   const button=document.getElementById('coach-management-raise-dead');
   if(!button) return;
+
   const hasRule=result&&result.ok===true&&result.hasMastersOfUndeath===true;
   const available=hasRule&&result.available===true;
   const pending=hasRule&&result.pending===true;
   const kills=Number(result&&result.kills)||0;
+
   if(!hasRule){
     button.hidden=true; button.disabled=true; button.onclick=null;
     return;
   }
+
   button.hidden=false;
+
   if(available){
     button.disabled=false;
     button.title='Raise the Dead available.';
@@ -799,6 +1514,7 @@ function applyCoachRaiseDeadButtonState(result){
     button.onclick=openCoachRaiseDead;
     return;
   }
+
   if(pending){
     button.disabled=true;
     button.title=result.reason||'Pending Opponent Submission.';
@@ -806,6 +1522,7 @@ function applyCoachRaiseDeadButtonState(result){
     button.onclick=null;
     return;
   }
+
   button.disabled=true;
   button.title=result.reason||'No eligible opposing dead player.';
   button.innerHTML='<span>Raise the Dead</span><strong>'+kills+' Kill'+(kills===1?'':'s')+' — No Eligible Dead</strong>';
@@ -818,6 +1535,7 @@ function applyCoachRaiseDeadButtonState(result){
 async function refreshCoachRaiseDeadButtonState(){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const button=document.getElementById('coach-management-raise-dead');
+
   if(!button||!accessCode) return;
 
   // Show the control while checking, similar to Buy Player.
@@ -826,6 +1544,7 @@ async function refreshCoachRaiseDeadButtonState(){
   button.title='Checking Raise the Dead availability...';
   button.innerHTML='<span>Raise the Dead</span><strong>Checking...</strong>';
   button.onclick=null;
+
   try{
     const result=await coachApiGetRaiseDeadOptionsRequest(accessCode);
     applyCoachRaiseDeadButtonState(result);
@@ -847,19 +1566,27 @@ async function refreshCoachRaiseDeadButtonState(){
 async function openCoachRaiseDead(){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const launchButton=document.getElementById('coach-management-raise-dead');
+
   if(!accessCode){
     alert('Your Coach Portal session has expired. Please log in again.');
     return;
   }
+
   if(launchButton){
     launchButton.disabled=true;
     launchButton.innerHTML='<span>Loading...</span><strong>Please wait</strong>';
   }
+
   try{
-    const [raiseOptions,playerOptions]=await Promise.all([ coachApiGetRaiseDeadOptionsRequest(accessCode), coachApiGetPlayerPurchaseOptionsRequest(accessCode)]);
+    const [raiseOptions,playerOptions]=await Promise.all([
+      coachApiGetRaiseDeadOptionsRequest(accessCode),
+      coachApiGetPlayerPurchaseOptionsRequest(accessCode)
+    ]);
+
     if(!raiseOptions||raiseOptions.ok!==true) throw new Error(raiseOptions&&raiseOptions.error?raiseOptions.error:'Unable to load Raise the Dead options.');
     if(raiseOptions.available!==true) throw new Error(raiseOptions.reason||'Raise the Dead is not currently available.');
     if(!playerOptions||playerOptions.ok!==true) throw new Error(playerOptions&&playerOptions.error?playerOptions.error:'Unable to load the current roster.');
+
     showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions);
     applyCoachRaiseDeadButtonState(raiseOptions);
   }
@@ -885,10 +1612,12 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   const message=document.getElementById('coach-raise-dead-message');
   const cancelButton=document.getElementById('coach-raise-dead-cancel');
   const confirmButton=document.getElementById('coach-raise-dead-confirm');
+
   if(!modal||!gameSelect||!opponentText||!positionSelect||!numberSelect||!nameInput||!randomButton||!valueText||!message||!cancelButton||!confirmButton){
     alert('The Raise the Dead window could not be opened.');
     return;
   }
+
   const games=Array.isArray(raiseOptions.games)?raiseOptions.games:[];
   const raisePositions=Array.isArray(raiseOptions.positions)?raiseOptions.positions:[];
   const legalPositions=Array.isArray(playerOptions.positions)?playerOptions.positions:[];
@@ -902,6 +1631,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
       return String(legal.position||'')===String(item.position||'');
     });
   });
+
   if(!games.length||!positions.length||!numbers.length){
     alert('No legal Raise the Dead option is currently available.');
     refreshCoachRaiseDeadButtonState();
@@ -912,6 +1642,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // LOAD GAMES
   // ---------------------------------------------------
   gameSelect.innerHTML='';
+
   games.forEach(function(game){
     const option=document.createElement('option');
     option.value=String(game.gameId||'');
@@ -923,6 +1654,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // LOAD POSITIONS
   // ---------------------------------------------------
   positionSelect.innerHTML='';
+
   positions.forEach(function(item){
     const option=document.createElement('option');
     option.value=String(item.position||'');
@@ -934,6 +1666,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // LOAD AVAILABLE NUMBERS
   // ---------------------------------------------------
   numberSelect.innerHTML='';
+
   numbers.forEach(function(number){
     const option=document.createElement('option');
     option.value=String(number);
@@ -947,15 +1680,19 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   function selectedGame(){
     return games.find(item=>String(item.gameId||'')===gameSelect.value)||null;
   }
+
   function selectedPosition(){
     return positions.find(item=>String(item.position||'')===positionSelect.value)||null;
   }
+
   function refreshState(){
     const game=selectedGame();
     const position=selectedPosition();
     const playerName=String(nameInput.value||'').trim();
+
     opponentText.textContent=game?(game.opponentTeam||game.opponentTeamId||'-'):'-';
     valueText.textContent=position?formatGold(position.cost):'-';
+
     randomButton.disabled=!position;
     confirmButton.disabled=!game||!position||!numberSelect.value||!playerName;
   }
@@ -966,14 +1703,18 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   randomButton.onclick=async function(){
     const position=selectedPosition();
     if(!position) return;
+
     randomButton.disabled=true;
     randomButton.textContent='Generating...';
     message.textContent='';
+
     try{
       const result=await coachApiGeneratePlayerNameRequest(accessCode,position.position);
+
       if(!result||result.ok!==true||!result.name){
         throw new Error(result&&result.error?result.error:'Unable to generate a player name.');
       }
+
       nameInput.value=result.name;
       refreshState();
       nameInput.focus();
@@ -1002,6 +1743,7 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
     nameInput.oninput=null;
     document.removeEventListener('keydown',handleKey);
   }
+
   function handleKey(event){
     if(event.key==='Escape') closeModal();
   }
@@ -1010,11 +1752,13 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   // FIELD CHANGES
   // ---------------------------------------------------
   gameSelect.onchange=refreshState;
+
   positionSelect.onchange=function(){
     nameInput.value='';
     message.textContent='';
     refreshState();
   };
+
   numberSelect.onchange=refreshState;
   nameInput.oninput=refreshState;
   cancelButton.onclick=closeModal;
@@ -1027,29 +1771,48 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
     const position=selectedPosition();
     const playerNumber=Number(numberSelect.value);
     const playerName=String(nameInput.value||'').trim();
+
     if(!game||!position||!playerNumber||!playerName){
       message.textContent='Choose a game, position, player number and player name.';
       refreshState();
       return;
     }
+
     confirmButton.disabled=true;
     cancelButton.disabled=true;
     randomButton.disabled=true;
     message.textContent='Raising player...';
+
     try{
-      const result=await coachApiSubmitRaiseDeadRequest( accessCode, game.gameId, position.position, playerNumber, playerName);
+      const result=await coachApiSubmitRaiseDeadRequest(
+        accessCode,
+        game.gameId,
+        position.position,
+        playerNumber,
+        playerName
+      );
+
       if(!result||result.ok!==true||result.submitted!==true||result.raised!==true){
-        throw new Error( result&&result.reason?result.reason: result&&result.error?result.error: 'The player could not be raised.');
+        throw new Error(
+          result&&result.reason?result.reason:
+          result&&result.error?result.error:
+          'The player could not be raised.'
+        );
       }
+
       closeModal();
 
       // Refresh the full Portal so roster, CTV, player count
       // and Raise the Dead availability all update together.
       const refreshed=await coachApiRequest(accessCode);
+
       if(refreshed&&refreshed.ok===true){
         renderCoachPortal(refreshed);
       }
-      showCoachManagementSuccess( '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' raised from the dead.');
+
+      showCoachManagementSuccess(
+        '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' raised from the dead.'
+      );
     }
     catch(error){
       message.textContent=error&&error.message?error.message:'Raise the Dead failed.';
@@ -1065,7 +1828,9 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
   message.textContent='';
   cancelButton.disabled=false;
   confirmButton.disabled=true;
+
   document.addEventListener('keydown',handleKey);
+
   modal.hidden=false;
   refreshState();
 
@@ -1080,16 +1845,21 @@ function showCoachRaiseDeadModal(accessCode,raiseOptions,playerOptions){
 function applyCoachBuyPlayerButtonState(result){
   const button=document.getElementById('coach-management-buy-player');
   if(!button) return;
+
   const available=result&&result.ok===true&&(result.canBuy===true||result.canHireJourneyman===true);
+
   button.disabled=!available;
   button.title=result&&(result.reason||result.error)?(result.reason||result.error):'';
   button.innerHTML='<span>Buy Player</span><strong>Select</strong>';
   button.onclick=available?openCoachPlayerPurchase:null;
 }
+
 async function refreshCoachBuyPlayerButtonState() {
   const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
   const button = document.getElementById('coach-management-buy-player');
+
   if (!button || !accessCode) return;
+
   try {
     const result = await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
     applyCoachBuyPlayerButtonState(result);
@@ -1101,25 +1871,34 @@ async function refreshCoachBuyPlayerButtonState() {
     button.onclick = null;
   }
 }
+
 async function openCoachPlayerPurchase() {
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const launchButton=document.getElementById('coach-management-buy-player');
+
   if(!accessCode){
     alert('Your Coach Portal session has expired. Please log in again.');
     return;
   }
+
   if(launchButton){
     launchButton.disabled=true;
     launchButton.innerHTML='<span>Loading...</span><strong>Please wait</strong>';
   }
+
   try{
     const result=await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+
     if(!result||result.ok!==true) throw new Error(result&&result.error?result.error:'Unable to load Buy Player options.');
+
     const journeymen=Array.isArray(result.availableJourneymen)?result.availableJourneymen:[];
     const canHireJourneyman=result.canHireJourneyman===true||journeymen.some(item=>item.affordable===true);
     const canOpen=result.canBuy===true||canHireJourneyman;
+
     if(!canOpen) throw new Error(result.reason||'No player is currently available to purchase.');
+    
     applyCoachBuyPlayerButtonState(result);
+
     showCoachPlayerPurchaseModal(accessCode,result);
   }
   catch(error){
@@ -1131,6 +1910,7 @@ async function openCoachPlayerPurchase() {
     }
   }
 }
+
 function showCoachPlayerPurchaseModal(accessCode,options){
   const modal=document.getElementById('coach-player-modal');
   const typeSelect=document.getElementById('coach-player-purchase-type');
@@ -1143,30 +1923,38 @@ function showCoachPlayerPurchaseModal(accessCode,options){
   const message=document.getElementById('coach-player-message');
   const cancelButton=document.getElementById('coach-player-cancel');
   const confirmButton=document.getElementById('coach-player-confirm');
+
   if(!modal||!typeSelect||!positionLabel||!positionSelect||!numberSelect||!nameInput||!randomButton||!costText||!message||!cancelButton||!confirmButton){
     alert('The Buy Player window could not be opened.');
     return;
   }
+
   const positions=Array.isArray(options.positions)?options.positions:[];
   const numbers=Array.isArray(options.availableNumbers)?options.availableNumbers:[];
   const journeymen=Array.isArray(options.availableJourneymen)?options.availableJourneymen:[];
   const canBuyNew=options.canBuy===true;
   const canHire=options.canHireJourneyman===true||journeymen.some(item=>item.affordable===true);
+
   typeSelect.innerHTML='';
+
   const newOption=document.createElement('option');
   newOption.value='new';
   newOption.textContent='New Player';
   newOption.disabled=!canBuyNew;
   typeSelect.appendChild(newOption);
+
   const journeymanOption=document.createElement('option');
   journeymanOption.value='journeyman';
   journeymanOption.textContent='Hire Journeyman';
   journeymanOption.disabled=!canHire;
   typeSelect.appendChild(journeymanOption);
+
   typeSelect.value=canBuyNew?'new':'journeyman';
+
   function selectedPosition(){
     return positions.find(item=>item.position===positionSelect.value)||null;
   }
+
   function selectedJourneyman(){
     return journeymen.find(item=>item.journeymanId===positionSelect.value)||null;
   }
@@ -1178,36 +1966,51 @@ function showCoachPlayerPurchaseModal(accessCode,options){
   // ---------------------------------------------------
   function loadPlayerNumbers(){
     numberSelect.innerHTML='';
+  
     let available=numbers;
     let preferredNumber=0;
+  
     if(typeSelect.value==='journeyman'){
       const selected=selectedJourneyman();
-      available= selected&&Array.isArray(selected.availableNumbers)
+  
+      available=
+        selected&&Array.isArray(selected.availableNumbers)
           ?selected.availableNumbers
           :[];
-      preferredNumber= selected
+  
+      preferredNumber=
+        selected
           ?Number(selected.journeymanNumber)
           :0;
     }
+  
     available.forEach(function(number){
       const option=document.createElement('option');
       option.value=String(number);
       option.textContent='#'+number;
       numberSelect.appendChild(option);
     });
+  
     numberSelect.disabled=false;
-    if( typeSelect.value==='journeyman' && available.includes(preferredNumber)){
+  
+    if(
+      typeSelect.value==='journeyman' &&
+      available.includes(preferredNumber)
+    ){
       numberSelect.value=String(preferredNumber);
     }
   }
+
   function loadPurchaseType(){
     positionSelect.innerHTML='';
     message.textContent='';
+
     if(typeSelect.value==='journeyman'){
       positionLabel.textContent='Journeyman';
       nameInput.readOnly=true;
       randomButton.hidden=true;
       confirmButton.textContent='Hire Journeyman';
+
       journeymen.forEach(function(item){
         const option=document.createElement('option');
         option.value=item.journeymanId||'';
@@ -1215,8 +2018,10 @@ function showCoachPlayerPurchaseModal(accessCode,options){
         option.disabled=item.affordable!==true;
         positionSelect.appendChild(option);
       });
+
       const firstAffordable=journeymen.find(item=>item.affordable===true);
       if(firstAffordable) positionSelect.value=firstAffordable.journeymanId;
+
       const selected=selectedJourneyman();
       nameInput.value=selected?selected.playerName:'';
     }
@@ -1226,6 +2031,7 @@ function showCoachPlayerPurchaseModal(accessCode,options){
       nameInput.value='';
       randomButton.hidden=false;
       confirmButton.textContent='Buy Player';
+
       positions.forEach(function(item){
         const option=document.createElement('option');
         option.value=item.position||'';
@@ -1233,12 +2039,15 @@ function showCoachPlayerPurchaseModal(accessCode,options){
         option.disabled=item.affordable!==true;
         positionSelect.appendChild(option);
       });
+
       const firstAffordable=positions.find(item=>item.affordable===true);
       if(firstAffordable) positionSelect.value=firstAffordable.position;
     }
+
     loadPlayerNumbers();
     refreshState();
   }
+
   function refreshState(){
     if(typeSelect.value==='journeyman'){
       const selected=selectedJourneyman();
@@ -1247,11 +2056,13 @@ function showCoachPlayerPurchaseModal(accessCode,options){
       confirmButton.disabled=!selected||selected.affordable!==true||!numberSelect.value;
       return;
     }
+
     const selected=selectedPosition();
     costText.textContent=selected?formatGold(selected.cost):'-';
     randomButton.disabled=!selected;
     confirmButton.disabled=!selected||selected.affordable!==true||!numberSelect.value||!String(nameInput.value||'').trim();
   }
+
   function closeModal(){
     modal.hidden=true;
     nameInput.readOnly=false;
@@ -1264,12 +2075,16 @@ function showCoachPlayerPurchaseModal(accessCode,options){
     modal.onclick=null;
     document.removeEventListener('keydown',handleKey);
   }
+
   function handleKey(event){
     if(event.key==='Escape') closeModal();
   }
+
   typeSelect.onchange=loadPurchaseType;
+
   positionSelect.onchange=function(){
     message.textContent='';
+
     if(typeSelect.value==='journeyman'){
       const selected=selectedJourneyman();
       nameInput.value=selected?selected.playerName:'';
@@ -1277,23 +2092,31 @@ function showCoachPlayerPurchaseModal(accessCode,options){
     else{
       nameInput.value='';
     }
+
     loadPlayerNumbers();
     refreshState();
   };
+
   numberSelect.onchange=refreshState;
   nameInput.oninput=refreshState;
+
   randomButton.onclick=async function(){
     if(typeSelect.value!=='new') return;
+
     const selected=selectedPosition();
     if(!selected) return;
+
     randomButton.disabled=true;
     randomButton.textContent='Generating...';
     message.textContent='';
+
     try{
       const result=await coachApiGeneratePlayerNameRequest(accessCode,selected.position);
+
       if(!result||result.ok!==true||!result.name){
         throw new Error(result&&result.error?result.error:'Unable to generate a player name.');
       }
+
       nameInput.value=result.name;
       refreshState();
       nameInput.focus();
@@ -1306,79 +2129,118 @@ function showCoachPlayerPurchaseModal(accessCode,options){
       refreshState();
     }
   };
+
   cancelButton.onclick=closeModal;
+
   confirmButton.onclick=async function(){
     const playerNumber=Number(numberSelect.value);
+
 if(typeSelect.value==='journeyman'){
   const selected=selectedJourneyman();
+
   if(!selected||!playerNumber){
     message.textContent='Choose a Journeyman and an available player number.';
     refreshState();
     return;
   }
+
   confirmButton.disabled=true;
   cancelButton.disabled=true;
   randomButton.disabled=true;
   message.textContent='Hiring Journeyman...';
+
   try{
     const result=await coachApiSubmitJourneymanHireRequest(accessCode,selected.journeymanId,playerNumber);
+
     if(!result||result.ok!==true||result.submitted!==true||result.purchased!==true){
-      throw new Error( result&&result.reason?result.reason: result&&result.error?result.error: 'The Journeyman could not be hired.');
+      throw new Error(
+        result&&result.reason?result.reason:
+        result&&result.error?result.error:
+        'The Journeyman could not be hired.'
+      );
     }
+
     if(!result.team||!result.management||!Array.isArray(result.players)){
       throw new Error('The Journeyman was hired, but updated team data was not returned.');
     }
+
     closeModal();
     renderCoachManagement(result.team,result.management);
+
     const currentPlayers=result.players.filter(function(player){
       return !isCoachPlayerOffRoster(player.status);
     }).length;
+
     setText('coach-management-players',currentPlayers);
     renderCoachRoster(result.players);
+
     const advancementPlayers=result.advancements&&Array.isArray(result.advancements.players)
       ?result.advancements.players
       :[];
+
     renderCoachAdvancements(advancementPlayers);
-    showCoachManagementSuccess( 'Journeyman #'+result.playerNumber+' '+result.playerName+' — '+result.position+' hired successfully.');
+
+    showCoachManagementSuccess(
+      'Journeyman #'+result.playerNumber+' '+result.playerName+' — '+result.position+' hired successfully.'
+    );
   }
   catch(error){
     message.textContent=error&&error.message?error.message:'The Journeyman hire failed.';
     cancelButton.disabled=false;
     refreshState();
   }
+
   return;
 }
+
     const selected=selectedPosition();
     const playerName=String(nameInput.value||'').trim();
+
     if(!selected||!playerNumber||!playerName){
       message.textContent='Choose a position, player number and player name.';
       refreshState();
       return;
     }
+
     confirmButton.disabled=true;
     cancelButton.disabled=true;
     randomButton.disabled=true;
     message.textContent='Purchasing player...';
+
     try{
       const result=await coachApiSubmitPlayerPurchaseRequest(accessCode,selected.position,playerNumber,playerName);
+
       if(!result||result.ok!==true||result.submitted!==true||result.purchased!==true){
-        throw new Error( result&&result.reason?result.reason: result&&result.error?result.error: 'The player purchase could not be completed.');
+        throw new Error(
+          result&&result.reason?result.reason:
+          result&&result.error?result.error:
+          'The player purchase could not be completed.'
+        );
       }
+
       if(!result.team||!result.management||!Array.isArray(result.players)){
         throw new Error('The player was purchased, but updated team data was not returned.');
       }
+
       closeModal();
       renderCoachManagement(result.team,result.management);
+
       const currentPlayers=result.players.filter(function(player){
         return !isCoachPlayerOffRoster(player.status);
       }).length;
+
       setText('coach-management-players',currentPlayers);
       renderCoachRoster(result.players);
+
       const advancementPlayers=result.advancements&&Array.isArray(result.advancements.players)
         ?result.advancements.players
         :[];
+
       renderCoachAdvancements(advancementPlayers);
-      showCoachManagementSuccess( 'Player #'+result.playerNumber+' '+result.playerName+' — '+result.position+' purchased successfully.');
+
+      showCoachManagementSuccess(
+        'Player #'+result.playerNumber+' '+result.playerName+' — '+result.position+' purchased successfully.'
+      );
     }
     catch(error){
       message.textContent=error&&error.message?error.message:'The player purchase failed.';
@@ -1386,9 +2248,11 @@ if(typeSelect.value==='journeyman'){
       refreshState();
     }
   };
+
   modal.onclick=function(event){
     if(event.target===modal) closeModal();
   };
+
   document.addEventListener('keydown',handleKey);
   loadPurchaseType();
   modal.hidden=false;
@@ -1400,55 +2264,110 @@ if(typeSelect.value==='journeyman'){
 // =====================================================
 
 function renderCoachAdvancements(players) {
-  const container = document.getElementById( 'coach-advancements');
+
+  const container =
+    document.getElementById(
+      'coach-advancements'
+    );
+
+
   if (!container) {
     return;
   }
+
+
   container.innerHTML = '';
+
 
   // ---------------------------------------------------
   // NO ELIGIBLE PLAYERS
   // ---------------------------------------------------
 
   if (!players.length) {
-    const empty = document.createElement( 'div');
-    empty.className = 'coach-advancement-empty';
+
+    const empty =
+      document.createElement(
+        'div'
+      );
+
+
+    empty.className =
+      'coach-advancement-empty';
+
+
     empty.innerHTML = `
       <strong>No players can currently advance.</strong>
+
       <span>
         Players will appear here automatically when they
         have enough available SPP to purchase their next
         legal advancement.
       </span>
     `;
-    container.appendChild( empty);
+
+
+    container.appendChild(
+      empty
+    );
+
     return;
   }
+
 
   // ---------------------------------------------------
   // ELIGIBLE PLAYERS
   // ---------------------------------------------------
 
-  players.forEach( function(player) {
-      const card = document.createElement( 'div');
-      card.className = 'coach-advancement-card';
-      const header = document.createElement( 'div');
-      header.className = 'coach-advancement-player';
+  players.forEach(
+    function(player) {
+
+      const card =
+        document.createElement(
+          'div'
+        );
+
+
+      card.className =
+        'coach-advancement-card';
+
+
+      const header =
+        document.createElement(
+          'div'
+        );
+
+
+      header.className =
+        'coach-advancement-player';
+
+
       header.innerHTML = `
         <div class="coach-advancement-number">
           #${escapePortalHtml(player.number)}
         </div>
+
         <div>
           <strong>
             ${escapePortalHtml(player.playerName)}
           </strong>
+
           <span>
             ${escapePortalHtml(player.position)}
           </span>
         </div>
       `;
-      const stats = document.createElement( 'div');
-      stats.className = 'coach-advancement-stats';
+
+
+      const stats =
+        document.createElement(
+          'div'
+        );
+
+
+      stats.className =
+        'coach-advancement-stats';
+
+
       stats.innerHTML = `
         <div>
           <span>Available SPP</span>
@@ -1456,24 +2375,28 @@ function renderCoachAdvancements(players) {
             ${escapePortalHtml(player.availableSpp)}
           </strong>
         </div>
+
         <div>
           <span>Career SPP</span>
           <strong>
             ${escapePortalHtml(player.careerSpp)}
           </strong>
         </div>
+
         <div>
           <span>Next Advancement</span>
           <strong>
             #${escapePortalHtml(player.nextAdvancement)}
           </strong>
         </div>
+
         <div>
           <span>Primary</span>
           <strong>
             ${escapePortalHtml(player.primary)}
           </strong>
         </div>
+
         <div>
           <span>Secondary</span>
           <strong>
@@ -1481,35 +2404,99 @@ function renderCoachAdvancements(players) {
           </strong>
         </div>
       `;
-      const options = document.createElement( 'div');
-      options.className = 'coach-advancement-options';
-      const title = document.createElement( 'div');
-      title.className = 'coach-advancement-options-title';
-      title.textContent = 'Affordable Options';
-      options.appendChild( title);
-      ( player.options || []).forEach( function(option) {
-          const item = document.createElement( 'button');
+
+
+      const options =
+        document.createElement(
+          'div'
+        );
+
+
+      options.className =
+        'coach-advancement-options';
+
+
+      const title =
+        document.createElement(
+          'div'
+        );
+
+
+      title.className =
+        'coach-advancement-options-title';
+
+
+      title.textContent =
+        'Affordable Options';
+
+
+      options.appendChild(
+        title
+      );
+
+
+      (
+        player.options || []
+      ).forEach(
+        function(option) {
+
+          const item =
+            document.createElement(
+              'button'
+            );
+          
+          
           item.type = 'button';
-          item.className = 'coach-advancement-option';
+          
+          item.className =
+            'coach-advancement-option';
+          
+          
           item.innerHTML = `
             <span>
               ${escapePortalHtml(option.type)}
             </span>
+          
             <strong>
               ${escapePortalHtml(option.cost)} SPP
             </strong>
           `;
-          item.addEventListener( 'click', function() {
+          
+          
+          item.addEventListener(
+            'click',
+            function() {
+          
               showCoachAdvancementSelection(card, player, option);
             }
           );
-          options.appendChild( item);
+          
+          
+          options.appendChild(
+            item
+          );
+
         }
       );
-      card.appendChild( header);
-      card.appendChild( stats);
-      card.appendChild( options);
-      container.appendChild( card);
+
+
+      card.appendChild(
+        header
+      );
+
+      card.appendChild(
+        stats
+      );
+
+      card.appendChild(
+        options
+      );
+
+
+      container.appendChild(
+        card
+      );
+
     }
   );
 }
@@ -1519,70 +2506,142 @@ function renderCoachAdvancements(players) {
 // =====================================================
 
 function showCoachAdvancementSelection(card, player, option) {
-  const existing = card.querySelector( '.coach-advancement-selection');
+
+  const existing =
+    card.querySelector(
+      '.coach-advancement-selection'
+    );
+
+
   if (existing) {
     existing.remove();
   }
 
+
   // Clear previous selected option
-  card.querySelectorAll( '.coach-advancement-option').forEach( function(button) {
-        button.classList.remove( 'selected');
+  card
+    .querySelectorAll(
+      '.coach-advancement-option'
+    )
+    .forEach(
+      function(button) {
+
+        button.classList.remove(
+          'selected'
+        );
       }
     );
 
+
   // Highlight current advancement type
-  card.querySelectorAll( '.coach-advancement-option').forEach( function(button) {
-        const label = button.querySelector( 'span');
-        if ( label && label.textContent.trim() === String(option.type).trim()) {
-          button.classList.add( 'selected');
+  card
+    .querySelectorAll(
+      '.coach-advancement-option'
+    )
+    .forEach(
+      function(button) {
+
+        const label =
+          button.querySelector(
+            'span'
+          );
+
+
+        if (
+          label &&
+          label.textContent.trim() ===
+            String(option.type).trim()
+        ) {
+
+          button.classList.add(
+            'selected'
+          );
         }
       }
     );
+
 
   // ---------------------------------------------------
   // LOAD CHOICES ON DEMAND
   // ---------------------------------------------------
 
   if (!option.choices) {
-    const loading = document.createElement('div');
-    loading.className = 'coach-advancement-selection';
+
+    const loading =
+      document.createElement('div');
+
+    loading.className =
+      'coach-advancement-selection';
+
     loading.innerHTML = `
       <div class="coach-advancement-selection-title">
         Advancement Selection
       </div>
+
       <div class="coach-advancement-selection-note">
         Loading legal advancement choices...
       </div>
     `;
+
     card.appendChild(loading);
-    const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+
+    const accessCode =
+      sessionStorage.getItem(SESSION_KEY) || '';
+
     if (!accessCode) {
+
       loading.innerHTML = `
         <div class="coach-advancement-selection-note">
           Your Coach Portal session has expired. Please log in again.
         </div>
       `;
+
       return;
     }
-    coachApiAdvancementChoicesRequest( accessCode, player.playerId, option.type)
+
+    coachApiAdvancementChoicesRequest(
+      accessCode,
+      player.playerId,
+      option.type
+    )
+
       .then(function(result) {
-        if ( !result || result.ok !== true) {
-          throw new Error( result && result.error
+
+        if (
+          !result ||
+          result.ok !== true
+        ) {
+          throw new Error(
+            result && result.error
               ? result.error
-              : 'Unable to load advancement choices.');
+              : 'Unable to load advancement choices.'
+          );
         }
-        option.choices = result.choices || {
+
+        option.choices =
+          result.choices || {
             categories: []
           };
+
         if (result.cost !== undefined) {
           option.cost = result.cost;
         }
+
         if (result.nextAdvancement) {
-          player.nextAdvancement = result.nextAdvancement;
+          player.nextAdvancement =
+            result.nextAdvancement;
         }
-        showCoachAdvancementSelection( card, player, option);
+
+        showCoachAdvancementSelection(
+          card,
+          player,
+          option
+        );
+
       })
+
       .catch(function(error) {
+
         loading.innerHTML = `
           <div class="coach-advancement-selection-note">
             ${escapePortalHtml(
@@ -1592,16 +2651,30 @@ function showCoachAdvancementSelection(card, player, option) {
             )}
           </div>
         `;
+
       });
+
     return;
   }
-  const selection = document.createElement( 'div');
-  selection.className = 'coach-advancement-selection';
+
+
+  const selection =
+    document.createElement(
+      'div'
+    );
+
+
+  selection.className =
+    'coach-advancement-selection';
+
+
   selection.innerHTML = `
     <div class="coach-advancement-selection-title">
       Advancement Selection
     </div>
+
     <div class="coach-advancement-selection-grid">
+
       <div>
         <span>Player</span>
         <strong>
@@ -1609,18 +2682,21 @@ function showCoachAdvancementSelection(card, player, option) {
           ${escapePortalHtml(player.playerName)}
         </strong>
       </div>
+
       <div>
         <span>Type</span>
         <strong>
           ${escapePortalHtml(option.type)}
         </strong>
       </div>
+
       <div>
         <span>Cost</span>
         <strong>
           ${escapePortalHtml(option.cost)} SPP
         </strong>
       </div>
+
       <div>
         <span>SPP After</span>
         <strong>
@@ -1630,29 +2706,47 @@ function showCoachAdvancementSelection(card, player, option) {
           )}
         </strong>
       </div>
+
     </div>
   `;
+
 
   // ===================================================
   // LEGAL CHOICES
   // ===================================================
 
-  const choices = option && option.choices && Array.isArray( option.choices.categories)
+  const choices =
+    option &&
+    option.choices &&
+    Array.isArray(
+      option.choices.categories
+    )
       ? option.choices.categories
       : [];
-  const choiceArea = document.createElement( 'div');
-  choiceArea.className = 'coach-advancement-choice-area';
+
+
+  const choiceArea =
+    document.createElement(
+      'div'
+    );
+
+
+  choiceArea.className =
+    'coach-advancement-choice-area';
+
 
   // ---------------------------------------------------
   // NO CHOICE DATA
   // ---------------------------------------------------
 
   if (!choices.length) {
+
     choiceArea.innerHTML = `
       <div class="coach-advancement-selection-note">
         No legal advancement choices were returned.
       </div>
     `;
+
   }
 
   // ---------------------------------------------------
@@ -1660,100 +2754,295 @@ function showCoachAdvancementSelection(card, player, option) {
   // ---------------------------------------------------
 
   else if (option.type === 'Random Primary') {
-    const heading = document.createElement('div');
-    heading.className = 'coach-advancement-choice-title';
-    heading.textContent = 'Choose Random Primary Category';
+
+    const heading =
+      document.createElement('div');
+
+    heading.className =
+      'coach-advancement-choice-title';
+
+    heading.textContent =
+      'Choose Random Primary Category';
+
     choiceArea.appendChild(heading);
-    const categoryButtons = document.createElement('div');
-    categoryButtons.className = 'coach-advancement-category-buttons';
-    const randomArea = document.createElement('div');
-    randomArea.className = 'coach-advancement-improvements';
+
+
+    const categoryButtons =
+      document.createElement('div');
+
+    categoryButtons.className =
+      'coach-advancement-category-buttons';
+
+
+    const randomArea =
+      document.createElement('div');
+
+    randomArea.className =
+      'coach-advancement-improvements';
+
+
     choiceArea.appendChild(categoryButtons);
     choiceArea.appendChild(randomArea);
-    const randomCategories = choices.filter(function(category) {
-        return ( Array.isArray(category.improvements) && category.improvements.length > 0);
+
+
+    const randomCategories =
+      choices.filter(function(category) {
+
+        return (
+          Array.isArray(category.improvements) &&
+          category.improvements.length > 0
+        );
       });
-    randomCategories.forEach( function(category) {
-        const button = document.createElement('button');
+
+
+    randomCategories.forEach(
+      function(category) {
+
+        const button =
+          document.createElement('button');
+
         button.type = 'button';
-        button.className = 'coach-advancement-category';
-        button.textContent = category.category;
-        button.addEventListener( 'click', function() {
-            categoryButtons.querySelectorAll( '.coach-advancement-category').forEach( function(other) {
-                  other.classList.remove( 'selected');
+
+        button.className =
+          'coach-advancement-category';
+
+        button.textContent =
+          category.category;
+
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            categoryButtons
+              .querySelectorAll(
+                '.coach-advancement-category'
+              )
+              .forEach(
+                function(other) {
+
+                  other.classList.remove(
+                    'selected'
+                  );
                 }
               );
-            button.classList.add( 'selected');
-            renderCoachRandomPrimaryConfirmation( randomArea, player, option, category);
+
+
+            button.classList.add(
+              'selected'
+            );
+
+
+            renderCoachRandomPrimaryConfirmation(
+              randomArea,
+              player,
+              option,
+              category
+            );
+
           }
         );
-        categoryButtons.appendChild( button);
+
+
+        categoryButtons.appendChild(
+          button
+        );
+
       }
     );
+
+
     if (!randomCategories.length) {
+
       randomArea.innerHTML = `
         <div class="coach-advancement-selection-note">
           No legal Random Primary skills remain for this player.
         </div>
       `;
+
     }
-    else if ( randomCategories.length === 1) {
-      const firstButton = categoryButtons.querySelector( '.coach-advancement-category');
+    else if (
+      randomCategories.length === 1
+    ) {
+
+      const firstButton =
+        categoryButtons.querySelector(
+          '.coach-advancement-category'
+        );
+
       if (firstButton) {
         firstButton.click();
       }
     }
   }
+
 
   // ---------------------------------------------------
   // CHOOSE / CHARACTERISTIC
   // ---------------------------------------------------
 
   else {
-    const heading = document.createElement( 'div');
-    heading.className = 'coach-advancement-choice-title';
-    heading.textContent = option.type === 'Characteristic'
+
+    const heading =
+      document.createElement(
+        'div'
+      );
+
+
+    heading.className =
+      'coach-advancement-choice-title';
+
+
+    heading.textContent =
+      option.type === 'Characteristic'
         ? 'Choose Characteristic'
         : 'Choose Skill Category';
-    choiceArea.appendChild( heading);
-    const categoryButtons = document.createElement( 'div');
-    categoryButtons.className = 'coach-advancement-category-buttons';
-    const improvementArea = document.createElement( 'div');
-    improvementArea.className = 'coach-advancement-improvements';
-    choiceArea.appendChild( categoryButtons);
-    choiceArea.appendChild( improvementArea);
-    choices.forEach( function(category) {
-        const button = document.createElement( 'button');
-        button.type = 'button';
-        button.className = 'coach-advancement-category';
-        button.textContent = category.category;
-        button.addEventListener( 'click', function() {
-            categoryButtons.querySelectorAll( '.coach-advancement-category').forEach( function(other) {
-                  other.classList.remove( 'selected');
+
+
+    choiceArea.appendChild(
+      heading
+    );
+
+
+    const categoryButtons =
+      document.createElement(
+        'div'
+      );
+
+
+    categoryButtons.className =
+      'coach-advancement-category-buttons';
+
+
+    const improvementArea =
+      document.createElement(
+        'div'
+      );
+
+
+    improvementArea.className =
+      'coach-advancement-improvements';
+
+
+    choiceArea.appendChild(
+      categoryButtons
+    );
+
+
+    choiceArea.appendChild(
+      improvementArea
+    );
+
+
+    choices.forEach(
+      function(category) {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.type =
+          'button';
+
+
+        button.className =
+          'coach-advancement-category';
+
+
+        button.textContent =
+          category.category;
+
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            categoryButtons
+              .querySelectorAll(
+                '.coach-advancement-category'
+              )
+              .forEach(
+                function(other) {
+
+                  other.classList.remove(
+                    'selected'
+                  );
                 }
               );
-            button.classList.add( 'selected');
-            renderCoachAdvancementImprovements( improvementArea, category, player, option);
+
+
+            button.classList.add(
+              'selected'
+            );
+
+
+            renderCoachAdvancementImprovements(
+              improvementArea,
+              category,
+              player,
+              option
+            );
+
           }
         );
-        categoryButtons.appendChild( button);
+
+
+        categoryButtons.appendChild(
+          button
+        );
+
       }
     );
 
+
     // Automatically open if there is only one category
-    if ( choices.length === 1) {
-      const firstButton = categoryButtons.querySelector( '.coach-advancement-category');
+    if (
+      choices.length === 1
+    ) {
+
+      const firstButton =
+        categoryButtons.querySelector(
+          '.coach-advancement-category'
+        );
+
+
       if (firstButton) {
         firstButton.click();
       }
     }
+
   }
-  selection.appendChild( choiceArea);
-  const note = document.createElement( 'div');
-  note.className = 'coach-advancement-selection-note';
-  note.textContent = 'Selection preview only. Nothing has been submitted to the league yet.';
-  selection.appendChild( note);
-  card.appendChild( selection);
+
+
+  selection.appendChild(
+    choiceArea
+  );
+
+
+  const note =
+    document.createElement(
+      'div'
+    );
+
+
+  note.className =
+    'coach-advancement-selection-note';
+
+
+  note.textContent =
+    'Selection preview only. Nothing has been submitted to the league yet.';
+
+
+  selection.appendChild(
+    note
+  );
+
+
+  card.appendChild(
+    selection
+  );
 }
 
 // =====================================================
@@ -1761,42 +3050,120 @@ function showCoachAdvancementSelection(card, player, option) {
 // =====================================================
 
 function renderCoachAdvancementImprovements(container, category, player, option) {
+
   container.innerHTML = '';
-  const improvements = Array.isArray( category.improvements)
+
+
+  const improvements =
+    Array.isArray(
+      category.improvements
+    )
       ? category.improvements
       : [];
+
+
   if (!improvements.length) {
+
     container.innerHTML = `
       <div class="coach-advancement-selection-note">
         No legal improvements are available in this category.
       </div>
     `;
+
     return;
   }
-  const title = document.createElement( 'div');
-  title.className = 'coach-advancement-choice-title';
-  title.textContent = 'Choose Improvement';
-  container.appendChild( title);
-  const grid = document.createElement( 'div');
-  grid.className = 'coach-advancement-skill-grid';
-  improvements.forEach( function(improvement) {
-      const button = document.createElement( 'button');
-      button.type = 'button';
-      button.className = 'coach-advancement-skill';
-      button.textContent = improvement;
-      button.addEventListener( 'click', function() {
-          grid.querySelectorAll( '.coach-advancement-skill').forEach( function(other) {
-                other.classList.remove( 'selected');
+
+
+  const title =
+    document.createElement(
+      'div'
+    );
+
+
+  title.className =
+    'coach-advancement-choice-title';
+
+
+  title.textContent =
+    'Choose Improvement';
+
+
+  container.appendChild(
+    title
+  );
+
+
+  const grid =
+    document.createElement(
+      'div'
+    );
+
+
+  grid.className =
+    'coach-advancement-skill-grid';
+
+
+  improvements.forEach(
+    function(improvement) {
+
+      const button =
+        document.createElement(
+          'button'
+        );
+
+
+      button.type =
+        'button';
+
+
+      button.className =
+        'coach-advancement-skill';
+
+
+      button.textContent =
+        improvement;
+
+
+      button.addEventListener(
+        'click',
+        function() {
+
+          grid
+            .querySelectorAll(
+              '.coach-advancement-skill'
+            )
+            .forEach(
+              function(other) {
+
+                other.classList.remove(
+                  'selected'
+                );
               }
             );
-          button.classList.add( 'selected');
+
+
+          button.classList.add(
+            'selected'
+          );
+
+
           renderCoachAdvancementConfirmation(container, player, option, category, improvement);
+
         }
       );
-      grid.appendChild( button);
+
+
+      grid.appendChild(
+        button
+      );
+
     }
   );
-  container.appendChild( grid);
+
+
+  container.appendChild(
+    grid
+  );
 }
 
 // =====================================================
@@ -1804,144 +3171,263 @@ function renderCoachAdvancementImprovements(container, category, player, option)
 // =====================================================
 
 function renderCoachAdvancementConfirmation(container, player, option, category, improvement) {
-  const existing = container.querySelector( '.coach-advancement-confirmation');
+
+  const existing =
+    container.querySelector(
+      '.coach-advancement-confirmation'
+    );
+
+
   if (existing) {
     existing.remove();
   }
+
+
   const remainingSpp = Number(player.availableSpp) - Number(option.cost);
-  const confirmation = document.createElement( 'div');
-  confirmation.className = 'coach-advancement-confirmation';
+
+  const confirmation =
+    document.createElement(
+      'div'
+    );
+
+
+  confirmation.className =
+    'coach-advancement-confirmation';
+
+
   confirmation.innerHTML = `
     <div class="coach-advancement-confirmation-title">
       Advancement Ready
     </div>
+
     <div class="coach-advancement-confirmation-grid">
+
       <div>
         <span>Player</span>
+
         <strong>
           #${escapePortalHtml(player.number)}
           ${escapePortalHtml(player.playerName)}
         </strong>
       </div>
+
       <div>
         <span>Advancement</span>
         <strong>${escapePortalHtml(option.type)}</strong>
       </div>
+
       <div>
         <span>Category</span>
+
         <strong>
           ${escapePortalHtml(category.category)}
         </strong>
       </div>
+
       <div>
         <span>Improvement</span>
+
         <strong>
           ${escapePortalHtml(improvement)}
         </strong>
       </div>
+
       <div>
         <span>Cost</span>
+
         <strong>
           ${escapePortalHtml(option.cost)} SPP
         </strong>
       </div>
+
       <div>
         <span>SPP Remaining</span>
+
         <strong>
           ${escapePortalHtml(remainingSpp)}
         </strong>
       </div>
+
     </div>
+
     <button
       type="button"
       class="coach-advancement-confirm-button"
     >
       Validate Advancement
     </button>
+
     <div class="coach-advancement-confirmation-note">
       Validation only. Nothing will be submitted to the league.
     </div>
   `;
-  container.appendChild( confirmation);
-  const button = confirmation.querySelector( '.coach-advancement-confirm-button');
-  const note = confirmation.querySelector( '.coach-advancement-confirmation-note');
+
+
+  container.appendChild(
+    confirmation
+  );
+
+
+  const button =
+    confirmation.querySelector(
+      '.coach-advancement-confirm-button'
+    );
+
+
+  const note =
+    confirmation.querySelector(
+      '.coach-advancement-confirmation-note'
+    );
+
   if (!button || !note) {
     return;
   }
+
   let readyToSubmit = false;
+  
   button.addEventListener('click', function() {
+  
     const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+  
     if (!accessCode) {
       note.textContent = 'Your Coach Portal session has expired. Please log in again.';
       return;
     }
-
+  
+  
     // ===================================================
     // SECOND CLICK = SUBMIT
     // ===================================================
-
+  
     if (readyToSubmit) {
+  
       button.disabled = true;
       button.textContent = 'Submitting...';
       note.textContent = 'Writing the advancement to the league...';
-      coachApiSubmitAdvancementRequest( accessCode, player.playerId, option.type, category.category, improvement, player.nextAdvancement)
+  
+      coachApiSubmitAdvancementRequest(
+        accessCode,
+        player.playerId,
+        option.type,
+        category.category,
+        improvement,
+        player.nextAdvancement
+      )
+  
         .then(function(result) {
-          if ( !result || result.ok !== true || result.submitted !== true) {
-            throw new Error( result && result.error
+  
+          if (
+            !result ||
+            result.ok !== true ||
+            result.submitted !== true
+          ) {
+            throw new Error(
+              result && result.error
                 ? result.error
-                : 'The advancement could not be submitted.');
+                : 'The advancement could not be submitted.'
+            );
           }
+  
           button.textContent = 'Advancement Submitted';
-          const successMessage = '#' + player.number + ' ' + player.playerName + ' gained ' + improvement + ' — ' + (result.advancementId || 'Advancement recorded');
+          
+          const successMessage =
+            '#' + player.number + ' ' +
+            player.playerName + ' gained ' +
+            improvement + ' — ' +
+            (result.advancementId || 'Advancement recorded');
+          
           note.textContent = 'Successfully submitted.';
-          const refreshedPlayers = Array.isArray(result.players)
+
+          const refreshedPlayers =
+            Array.isArray(result.players)
               ? result.players
               : [];
-          const refreshedAdvancements = result.advancements && Array.isArray(result.advancements.players)
+          
+          const refreshedAdvancements =
+            result.advancements &&
+            Array.isArray(result.advancements.players)
               ? result.advancements.players
               : [];
+          
           renderCoachAdvancements(refreshedAdvancements);
           renderCoachRoster(refreshedPlayers);
+          
           showCoachAdvancementSuccess(successMessage);
+  
         })
+  
         .catch(function(error) {
+  
           button.disabled = false;
           button.textContent = 'SUBMIT ADVANCEMENT';
-          note.textContent = error && error.message
+  
+          note.textContent =
+            error && error.message
               ? error.message
               : 'Advancement submission failed.';
+  
         });
+  
       return;
     }
-
+  
+  
     // ===================================================
     // FIRST CLICK = VALIDATE
     // ===================================================
-
+  
     button.disabled = true;
     button.textContent = 'Validating...';
     note.textContent = 'Checking the current league data...';
-    coachApiValidateAdvancementRequest( accessCode, player.playerId, option.type, category.category, improvement)
+  
+    coachApiValidateAdvancementRequest(
+      accessCode,
+      player.playerId,
+      option.type,
+      category.category,
+      improvement
+    )
+  
       .then(function(result) {
-        if ( !result || result.ok !== true || result.validated !== true) {
-          throw new Error( result && result.error
+  
+        if (
+          !result ||
+          result.ok !== true ||
+          result.validated !== true
+        ) {
+          throw new Error(
+            result && result.error
               ? result.error
-              : 'The advancement could not be validated.');
+              : 'The advancement could not be validated.'
+          );
         }
+  
         readyToSubmit = true;
+  
         button.disabled = false;
         button.textContent = 'SUBMIT ADVANCEMENT';
-        note.textContent = 'Server validation passed. Click SUBMIT ADVANCEMENT to add this advancement to the league.';
+  
+        note.textContent =
+          'Server validation passed. Click SUBMIT ADVANCEMENT to add this advancement to the league.';
+  
       })
+  
       .catch(function(error) {
+  
         readyToSubmit = false;
+  
         button.disabled = false;
         button.textContent = 'Validate Advancement';
-        note.textContent = error && error.message
+  
+        note.textContent =
+          error && error.message
             ? error.message
             : 'Advancement validation failed.';
+  
       });
+  
   });
+
 }
 
 // =====================================================
@@ -1949,19 +3435,31 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
 // =====================================================
 
 function renderCoachRandomPrimaryConfirmation(container, player, option, category) {
+
   container.innerHTML = '';
-  const skills = Array.isArray(category.improvements)
+
+  const skills =
+    Array.isArray(category.improvements)
       ? category.improvements
       : [];
-  const remainingSpp = Number(player.availableSpp) -
+
+  const remainingSpp =
+    Number(player.availableSpp) -
     Number(option.cost);
-  const confirmation = document.createElement('div');
-  confirmation.className = 'coach-advancement-confirmation';
+
+  const confirmation =
+    document.createElement('div');
+
+  confirmation.className =
+    'coach-advancement-confirmation';
+
   confirmation.innerHTML = `
     <div class="coach-advancement-confirmation-title">
       Random Primary Ready
     </div>
+
     <div class="coach-advancement-confirmation-grid">
+
       <div>
         <span>Player</span>
         <strong>
@@ -1969,29 +3467,35 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
           ${escapePortalHtml(player.playerName)}
         </strong>
       </div>
+
       <div>
         <span>Advancement</span>
         <strong>Random Primary</strong>
       </div>
+
       <div>
         <span>Category</span>
         <strong>
           ${escapePortalHtml(category.category)}
         </strong>
       </div>
+
       <div>
         <span>Cost</span>
         <strong>
           ${escapePortalHtml(option.cost)} SPP
         </strong>
       </div>
+
       <div>
         <span>SPP Remaining</span>
         <strong>
           ${escapePortalHtml(remainingSpp)}
         </strong>
       </div>
+
     </div>
+
     <div class="coach-random-skill-pool">
       <strong>Possible Skills</strong>
       <span>
@@ -2000,63 +3504,127 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
         }).join(', ')}
       </span>
     </div>
+
     <button
       type="button"
       class="coach-advancement-confirm-button"
     >
       ROLL RANDOM PRIMARY
     </button>
+
     <div class="coach-advancement-confirmation-note">
       The server will randomly select one legal skill from this category.
     </div>
   `;
+
   container.appendChild(confirmation);
-  const button = confirmation.querySelector( '.coach-advancement-confirm-button');
-  const note = confirmation.querySelector( '.coach-advancement-confirmation-note');
+
+  const button =
+    confirmation.querySelector(
+      '.coach-advancement-confirm-button'
+    );
+
+  const note =
+    confirmation.querySelector(
+      '.coach-advancement-confirmation-note'
+    );
+
   if (!button || !note) return;
+
   button.addEventListener('click', function() {
-    const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
+
+    const accessCode =
+      sessionStorage.getItem(SESSION_KEY) || '';
+
     if (!accessCode) {
-      note.textContent = 'Your Coach Portal session has expired. Please log in again.';
+      note.textContent =
+        'Your Coach Portal session has expired. Please log in again.';
       return;
     }
+
     button.disabled = true;
     button.textContent = 'Rolling...';
-    note.textContent = 'Selecting a legal Random Primary skill...';
-    coachApiSubmitAdvancementRequest( accessCode, player.playerId, option.type, category.category, '', player.nextAdvancement)
+    note.textContent =
+      'Selecting a legal Random Primary skill...';
+
+    coachApiSubmitAdvancementRequest(
+      accessCode,
+      player.playerId,
+      option.type,
+      category.category,
+      '',
+      player.nextAdvancement
+    )
+
       .then(function(result) {
-        if ( !result || result.ok !== true || result.submitted !== true) {
-          throw new Error( result && result.error
+
+        if (
+          !result ||
+          result.ok !== true ||
+          result.submitted !== true
+        ) {
+          throw new Error(
+            result && result.error
               ? result.error
-              : 'The Random Primary advancement could not be submitted.');
+              : 'The Random Primary advancement could not be submitted.'
+          );
         }
-        button.textContent = 'Random Primary Submitted';
-        note.textContent = 'Random skill selected: ' + result.improvement;
-        const successMessage = '#' + player.number + ' ' + player.playerName + ' gained ' + result.improvement + ' — ' + (result.advancementId || 'Advancement recorded');
-        const refreshedPlayers = Array.isArray(result.players)
+
+        button.textContent =
+          'Random Primary Submitted';
+
+        note.textContent =
+          'Random skill selected: ' +
+          result.improvement;
+
+        const successMessage =
+          '#' + player.number + ' ' +
+          player.playerName + ' gained ' +
+          result.improvement + ' — ' +
+          (result.advancementId || 'Advancement recorded');
+
+        const refreshedPlayers =
+          Array.isArray(result.players)
             ? result.players
             : [];
-        const refreshedAdvancements = result.advancements && Array.isArray(result.advancements.players)
+        
+        const refreshedAdvancements =
+          result.advancements &&
+          Array.isArray(result.advancements.players)
             ? result.advancements.players
             : [];
+        
         renderCoachAdvancements(refreshedAdvancements);
         renderCoachRoster(refreshedPlayers);
+        
         showCoachAdvancementSuccess(successMessage);
+
       })
+
       .catch(function(error) {
-        const message = error && error.message
+      
+        const message =
+          error && error.message
             ? error.message
             : 'Random Primary advancement failed.';
+      
         if (message === 'Advancement submission timed out.') {
+      
           button.disabled = true;
           button.textContent = 'CHECKING RESULT...';
-          note.textContent = 'The server did not respond in time. Refresh the portal before attempting another roll. If the roll was recorded, the result is already locked in.';
+      
+          note.textContent =
+            'The server did not respond in time. Refresh the portal before attempting another roll. If the roll was recorded, the result is already locked in.';
+      
           return;
         }
+      
         button.disabled = false;
         button.textContent = 'ROLL RANDOM PRIMARY';
         note.textContent = message;
+      
       });
+
   });
 }
 
@@ -2066,16 +3634,20 @@ function renderCoachRandomPrimaryConfirmation(container, player, option, categor
 function renderCoachGames(games,team,coach){
   const container=document.getElementById('coach-games');
   if(!container) return;
+
   container.innerHTML='';
+
   if(!games.length){
     container.textContent='No fixtures available.';
     return;
   }
+
   games.forEach(function(game){
     const card=document.createElement('div');
     card.className='coach-game-card';
     card.dataset.gameId=String(game.gameId||'');
 
+    
     // =====================================================
     // BYE ROUND - DISPLAY ONLY
     // =====================================================
@@ -2083,11 +3655,14 @@ function renderCoachGames(games,team,coach){
       const round=document.createElement('div');
       round.className='coach-game-round';
       round.textContent='Round '+game.round;
+
       const matchup=document.createElement('strong');
       matchup.textContent='BYE WEEK';
+
       const details=document.createElement('div');
       details.className='coach-game-details';
       details.textContent='No game this round';
+
       card.classList.add('coach-game-bye');
       card.appendChild(round);
       card.appendChild(matchup);
@@ -2095,23 +3670,35 @@ function renderCoachGames(games,team,coach){
       container.appendChild(card);
       return;
     }
+
+
     const round=document.createElement('div');
     round.className='coach-game-round';
     round.textContent=game.round?'Round '+game.round:(game.gameId||'Fixture');
+
     const matchup=document.createElement('strong');
     const home=game.homeTeamName||displayTeamForGame(game.homeTeamId,team,coach);
     const away=game.awayTeamName||displayTeamForGame(game.awayTeamId,team,coach);
     matchup.textContent=home+' vs '+away;
+
     const details=document.createElement('div');
     details.className='coach-game-details';
+
     const detailParts=[];
+
     if(game.gameId) detailParts.push(game.gameId);
     if(game.date) detailParts.push(game.date);
     if(game.status) detailParts.push(game.status);
-    if( game.homeScore!==''&&game.homeScore!==null&&game.homeScore!==undefined && game.awayScore!==''&&game.awayScore!==null&&game.awayScore!==undefined){
+
+    if(
+      game.homeScore!==''&&game.homeScore!==null&&game.homeScore!==undefined &&
+      game.awayScore!==''&&game.awayScore!==null&&game.awayScore!==undefined
+    ){
       detailParts.push('Score '+game.homeScore+'-'+game.awayScore);
     }
+
     details.textContent=detailParts.join(' | ');
+
     card.appendChild(round);
     card.appendChild(matchup);
     card.appendChild(details);
@@ -2129,26 +3716,34 @@ function renderCoachGames(games,team,coach){
 function setCoachPendingGameNotice(show,isReview){
   const notice=document.querySelector('.coach-management-pending-game');
   if(!notice) return;
+
   notice.hidden=!show;
+
   if(show){
     notice.textContent=isReview
       ?'Game winnings pending commissioner review.'
       :'Game winnings pending opponent submission.';
   }
 }
+
 async function refreshCoachGameSubmissionButton(){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+
   if(!accessCode){
     setCoachPendingGameNotice(false);
     setCoachGameDayPackState('unavailable');
     return;
   }
+
   try{
     const result=await coachApiGetGameSubmissionOptionsRequest(accessCode);
+
     coachGameSubmissionCache=result&&result.ok===true&&result.game&&result.canSubmit===true
       ?{accessCode:accessCode,loadedAt:Date.now(),data:result}
       :null;
-    console.log('Star Players returned by API:', (result&&result.inducementRules||[]).filter(r=>String(r.inducement||'').includes('Star')));
+    
+    console.log('Star Players returned by API:',
+      (result&&result.inducementRules||[]).filter(r=>String(r.inducement||'').includes('Star')));
 
     // ---------------------------------------------------
     // STATUS CHECK FAILED
@@ -2158,7 +3753,7 @@ async function refreshCoachGameSubmissionButton(){
       setCoachGameDayPackState('unavailable');
       return;
     }
-
+    
     // ---------------------------------------------------
     // NO CURRENT POST-GAME SUBMISSION
     // ---------------------------------------------------
@@ -2174,25 +3769,32 @@ async function refreshCoachGameSubmissionButton(){
     const submission=result.existingSubmission||null;
     const validationStatus=String(submission&&submission.validationStatus||'').trim();
     const isReview=validationStatus==='Mismatch';
+    
     setCoachPendingGameNotice(!!submission,isReview);
     setCoachGameDayPackState(submission?(isReview?'review':'pending'):'ready',result.game.gameId);
-
+    
     // Keep Commissioner Review warning visible until resolved.
     const existingResult=document.querySelector('.coach-game-submission-result');
+    
     if(isReview){
       showCoachGameSubmissionResult({
-        validationStatus:'Mismatch', mismatchFields:Array.isArray(submission.mismatchFields)?submission.mismatchFields:[]
+        validationStatus:'Mismatch',
+        mismatchFields:Array.isArray(submission.mismatchFields)?submission.mismatchFields:[]
       },true);
     }
     else if(existingResult){
       existingResult.remove();
     }
+
     const cards=Array.from(document.querySelectorAll('.coach-game-card'));
     const card=cards.find(function(item){
       return item.dataset.gameId===String(result.game.gameId||'');
     });
+
     if(!card) return;
+
     let button=card.querySelector('.coach-game-submit-button');
+
     if(!button){
       button=document.createElement('button');
       button.type='button';
@@ -2221,6 +3823,7 @@ async function refreshCoachGameSubmissionButton(){
       button.onclick=function(){ openCoachGameSubmissionPreview(button); };
       return;
     }
+
     button.remove();
   }
   catch(error){
@@ -2242,18 +3845,27 @@ async function openCoachGameSubmissionPreview(launchButton){
   const closeButton=document.getElementById('coach-game-submission-close');
   const reviewButton=document.getElementById('coach-game-submission-review');
   const message=document.getElementById('coach-game-submission-message');
+
   if(!accessCode){ alert('Your Coach Portal session has expired. Please log in again.'); return; }
   if(!modal||!summary||!body||!closeButton||!reviewButton||!message){ alert('The Game Submission window could not be opened.'); return; }
+
   if(launchButton){ launchButton.disabled=true; launchButton.textContent='Loading...'; }
+
+  
   try{
     const cached=coachGameSubmissionCache;
-    const useCache=cached&&cached.accessCode===accessCode&& Date.now()-cached.loadedAt<COACH_GAME_CACHE_MS;
+    const useCache=cached&&cached.accessCode===accessCode&&
+      Date.now()-cached.loadedAt<COACH_GAME_CACHE_MS;
+  
     const result=useCache
       ?cached.data
       :await coachApiGetGameSubmissionOptionsRequest(accessCode);
+  
     console.log('Submit Game data source:',useCache?'CACHE':'SERVER');
+  
     if(!result||result.ok!==true||!result.game) throw new Error(result&&result.error?result.error:'Unable to load the game submission.');
     if(result.canSubmit!==true) throw new Error(result.reason||'This game is not currently available for submission.');
+
     const game=result.game;
     const team=result.team||{};
 
@@ -2272,6 +3884,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     const homeFactor=document.getElementById('coach-submit-home-factor');
     const awayFactor=document.getElementById('coach-submit-away-factor');
     const attendance=document.getElementById('coach-submit-fan-attendance');
+    
     const homeTeam=document.getElementById('coach-submit-home-team');
     const awayTeam=document.getElementById('coach-submit-away-team');
     const homeIcon=document.getElementById('coach-submit-home-icon');
@@ -2280,6 +3893,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     const awayScore=document.getElementById('coach-submit-away-score');
     const homeStalled=document.getElementById('coach-submit-home-stalled');
     const awayStalled=document.getElementById('coach-submit-away-stalled');
+
     const postHomeTeam=document.getElementById('coach-submit-post-home-team');
     const postAwayTeam=document.getElementById('coach-submit-post-away-team');
     const postHomeBefore=document.getElementById('coach-submit-post-home-before');
@@ -2305,8 +3919,10 @@ async function openCoachGameSubmissionPreview(launchButton){
     const inducementTreasury=document.getElementById('coach-submit-inducement-treasury');
     const inducementTotal=document.getElementById('coach-submit-inducement-total');
     const inducementMessage=document.getElementById('coach-submit-inducement-message');
+
     const apothecaryUsed=document.getElementById('coach-game-submission-apothecary');
     const apothecaryNote=document.getElementById('coach-game-submission-apothecary-note');
+    
     if(!apothecaryUsed||!apothecaryNote) throw new Error('The Apothecary game field could not be loaded.');
     if(!inducementBody||!inducementRole||!inducementDifference||!inducementHighSpend||!inducementPetty||!inducementTreasury||!inducementTotal||!inducementMessage) throw new Error('The Inducement game fields could not be loaded.');
 
@@ -2314,8 +3930,10 @@ async function openCoachGameSubmissionPreview(launchButton){
     // HEADER / GAME DATA
     // =====================================================
     summary.textContent='GAME: '+game.gameId+'   ROUND: '+game.round+'   SUBMITTING AS: '+game.submittingSide;
+
     homeTeam.textContent=String(game.homeTeam||'HOME TEAM').toUpperCase();
     awayTeam.textContent=String(game.awayTeam||'AWAY TEAM').toUpperCase();
+
     function setSubmitTeamIcon(img,url,altText){
       if(!img) return;
       if(url){
@@ -2328,10 +3946,13 @@ async function openCoachGameSubmissionPreview(launchButton){
         img.classList.add('is-empty');
       }
     }
+
     setSubmitTeamIcon(homeIcon,game.homeIconUrl||game.homeLogoUrl||'',String(game.homeTeam||'Home Team')+' icon');
     setSubmitTeamIcon(awayIcon,game.awayIconUrl||game.awayLogoUrl||'',String(game.awayTeam||'Away Team')+' icon');
+
     homeDfBefore.textContent=displayValue(game.homeDfBefore);
     awayDfBefore.textContent=displayValue(game.awayDfBefore);
+
     postHomeTeam.textContent=String(game.homeTeam||'');
     postAwayTeam.textContent=String(game.awayTeam||'');
     postHomeBefore.textContent=displayValue(game.homeDfBefore);
@@ -2342,8 +3963,10 @@ async function openCoachGameSubmissionPreview(launchButton){
     // =====================================================
     const postHomeRow=homeDfRoll.closest('tr');
     const postAwayRow=awayDfRoll.closest('tr');
+    
     if(postHomeRow) postHomeRow.hidden=!submittingIsHome;
     if(postAwayRow) postAwayRow.hidden=submittingIsHome;
+
     homeFair.value='';
     awayFair.value='';
     homeScore.value='';
@@ -2362,45 +3985,59 @@ async function openCoachGameSubmissionPreview(launchButton){
     const ctvDifference=Math.max(0,Number(game.ctvDifference)||0);
     const treasuryAvailable=Math.max(0,Number(team.treasury)||0);
     const lowerTreasuryMax=Math.min(50000,treasuryAvailable);
+
     let inducementFundingState={valid:true,error:'',higherCtvTreasurySpent:0,pettyCashAvailable:0,pettyCashUsed:0,treasuryUsed:0,totalPurchased:0,purchases:[]};
+
     function inducementInputValue(input){
       const value=String(input&&input.value||'').replace(/,/g,'').trim();
       return /^\d+$/.test(value)?Number(value):0;
     }
+
     function setInducementInput(input,value){
       if(input) input.value=String(Math.max(0,Math.floor(Number(value)||0)));
     }
+
     inducementRole.textContent=ctvRole==='HIGHER'?'HIGHER CTV':ctvRole==='LOWER'?'LOWER CTV':'EQUAL CTV';
     inducementDifference.textContent=formatGold(ctvDifference);
     inducementBody.innerHTML='';
+
     inducementRules.forEach(function(rule){
       const cost=Math.max(0,Number(rule.cost)||0);
       const maxQty=Math.max(1,Number(rule.maxQty)||1);
       const variableCost=rule.variableCost===true&&rule.inducement==='Star Players';
       const row=document.createElement('tr');
+
       row.dataset.inducement=String(rule.inducement||'');
       row.dataset.cost=String(cost);
       row.dataset.variableCost=variableCost?'true':'false';
+
       const name=document.createElement('td');
       name.textContent=String(rule.inducement||'');
       if(rule.notes) name.title=String(rule.notes);
+
       const costCell=document.createElement('td');
       costCell.textContent=variableCost?'Variable':formatGold(cost);
+
       const maxCell=document.createElement('td');
       maxCell.textContent=maxQty;
+
       const qtyCell=document.createElement('td');
       const qty=document.createElement('select');
       qty.className='coach-submit-inducement-qty';
+
       for(let i=0;i<=maxQty;i++){
         const option=document.createElement('option');
         option.value=String(i);
         option.textContent=String(i);
         qty.appendChild(option);
       }
+
       qty.disabled=ctvRole==='EQUAL';
       qtyCell.appendChild(qty);
+
       const totalCell=document.createElement('td');
       totalCell.className='coach-submit-inducement-row-total';
+      
       if(variableCost){
         const input=document.createElement('input');
         input.type='text';
@@ -2415,15 +4052,19 @@ async function openCoachGameSubmissionPreview(launchButton){
       else{
         totalCell.textContent='0';
       }
+
       const pettyCell=document.createElement('td');
       pettyCell.className='coach-submit-inducement-row-petty';
       pettyCell.textContent='0';
+
       const treasuryCell=document.createElement('td');
       treasuryCell.className='coach-submit-inducement-row-treasury';
       treasuryCell.textContent='0';
+
       const sourceCell=document.createElement('td');
       sourceCell.className='coach-submit-inducement-row-source';
       sourceCell.textContent='-';
+
       row.appendChild(name);
       row.appendChild(costCell);
       row.appendChild(maxCell);
@@ -2432,6 +4073,7 @@ async function openCoachGameSubmissionPreview(launchButton){
       row.appendChild(pettyCell);
       row.appendChild(treasuryCell);
       row.appendChild(sourceCell);
+
       qty.onchange=function(){
         const input=row.querySelector('.coach-submit-inducement-variable-cost');
         if(input){
@@ -2442,6 +4084,7 @@ async function openCoachGameSubmissionPreview(launchButton){
       };
       inducementBody.appendChild(row);
     });
+
     if(!inducementRules.length){
       const row=document.createElement('tr');
       const cell=document.createElement('td');
@@ -2450,8 +4093,10 @@ async function openCoachGameSubmissionPreview(launchButton){
       row.appendChild(cell);
       inducementBody.appendChild(row);
     }
+
     function updateInducementFunding(){
       const rows=Array.from(inducementBody.querySelectorAll('tr[data-inducement]')).map(function(row){
+        
       const qty=row.querySelector('.coach-submit-inducement-qty');
       const quantity=Number(qty?qty.value:0)||0;
       const variableCost=row.dataset.variableCost==='true';
@@ -2459,28 +4104,45 @@ async function openCoachGameSubmissionPreview(launchButton){
       const costInput=row.querySelector('.coach-submit-inducement-variable-cost');
       const costText=costInput?String(costInput.value||'').replace(/,/g,'').trim():'';
       const totalCost=variableCost?(quantity>0?Number(costText)||0:0):quantity*unitCost;
+      
       return {
-        row:row, inducement:String(row.dataset.inducement||''), qty:quantity, unitCost:unitCost, totalCost:totalCost, variableCost:variableCost, costText:costText
+        row:row,
+        inducement:String(row.dataset.inducement||''),
+        qty:quantity,
+        unitCost:unitCost,
+        totalCost:totalCost,
+        variableCost:variableCost,
+        costText:costText
       };
       });
+
       const totalPurchased=rows.reduce(function(sum,item){ return sum+item.totalCost; },0);
+
       let highSpend=0;
       let pettyAvailable=0;
       let pettyUsed=0;
       let treasuryUsed=0;
       let valid=true;
       let error='';
+
       const invalidVariable=rows.find(function(item){
         if(!item.variableCost||item.qty===0) return false;
-        return !/^\d+$/.test(item.costText) || item.totalCost<5000 || item.totalCost>9999999 || item.totalCost%5000!==0;
+        return !/^\d+$/.test(item.costText) ||
+          item.totalCost<5000 ||
+          item.totalCost>9999999 ||
+          item.totalCost%5000!==0;
       });
+
       if(ctvRole==='HIGHER'){
         highSpend=totalPurchased;
         treasuryUsed=totalPurchased;
+
         setInducementInput(inducementHighSpend,highSpend);
         setInducementInput(inducementTreasury,treasuryUsed);
+
         inducementHighSpend.disabled=true;
         inducementTreasury.disabled=true;
+
         if(totalPurchased>treasuryAvailable){
           valid=false;
           error='Inducement purchases exceed this team\'s available Treasury.';
@@ -2489,17 +4151,24 @@ async function openCoachGameSubmissionPreview(launchButton){
       else if(ctvRole==='LOWER'){
         inducementHighSpend.disabled=false;
         inducementTreasury.disabled=false;
+
         highSpend=inducementInputValue(inducementHighSpend);
         pettyAvailable=ctvDifference+highSpend;
+
         let enteredTreasury=inducementInputValue(inducementTreasury);
         enteredTreasury=Math.min(enteredTreasury,lowerTreasuryMax,totalPurchased);
+
         const requiredTreasury=Math.max(0,totalPurchased-pettyAvailable);
+
         if(requiredTreasury<=lowerTreasuryMax&&enteredTreasury<requiredTreasury){
           enteredTreasury=requiredTreasury;
         }
+
         setInducementInput(inducementTreasury,enteredTreasury);
+
         treasuryUsed=enteredTreasury;
         pettyUsed=Math.max(0,totalPurchased-treasuryUsed);
+
         if(requiredTreasury>lowerTreasuryMax){
           valid=false;
           error='These inducements require more than the allowed 50,000 Treasury contribution.';
@@ -2512,20 +4181,26 @@ async function openCoachGameSubmissionPreview(launchButton){
       else{
         setInducementInput(inducementHighSpend,0);
         setInducementInput(inducementTreasury,0);
+
         inducementHighSpend.disabled=true;
         inducementTreasury.disabled=true;
+
         if(totalPurchased>0){
           valid=false;
           error='CTV is equal. Treasury cannot be spent on Inducements.';
         }
       }
+
       if(ctvRole==='HIGHER') pettyUsed=0;
       if(ctvRole==='EQUAL'){ pettyAvailable=0; pettyUsed=0; treasuryUsed=0; highSpend=0; }
+
       let pettyRemaining=pettyUsed;
       const purchases=[];
+
       rows.forEach(function(item){
         let rowPetty=0;
         let rowTreasury=0;
+
         if(item.qty>0){
           if(ctvRole==='LOWER'){
             rowPetty=Math.min(item.totalCost,pettyRemaining);
@@ -2535,27 +4210,42 @@ async function openCoachGameSubmissionPreview(launchButton){
           else if(ctvRole==='HIGHER'){
             rowTreasury=item.totalCost;
           }
+
           const fundingSource=rowPetty>0&&rowTreasury>0?'Mixed':rowPetty>0?'Petty Cash':rowTreasury>0?'Treasury':'';
+
           purchases.push({
-            inducement:item.inducement, qty:item.qty, unitCost:item.unitCost, totalCost:item.totalCost, pettyCashUsed:rowPetty, treasuryUsed:rowTreasury, fundingSource:fundingSource });
+            inducement:item.inducement,
+            qty:item.qty,
+            unitCost:item.unitCost,
+            totalCost:item.totalCost,
+            pettyCashUsed:rowPetty,
+            treasuryUsed:rowTreasury,
+            fundingSource:fundingSource
+          });
+
           item.row.querySelector('.coach-submit-inducement-row-source').textContent=fundingSource||'-';
         }
         else{
           item.row.querySelector('.coach-submit-inducement-row-source').textContent='-';
         }
+
         if(!item.variableCost){
           item.row.querySelector('.coach-submit-inducement-row-total').textContent=formatGold(item.totalCost);
         }
         item.row.querySelector('.coach-submit-inducement-row-petty').textContent=formatGold(rowPetty);
         item.row.querySelector('.coach-submit-inducement-row-treasury').textContent=formatGold(rowTreasury);
       });
+
       inducementPetty.textContent=formatGold(pettyAvailable);
       inducementTotal.textContent=formatGold(totalPurchased);
+
       inducementMessage.className='coach-game-submission-message';
+
       if(invalidVariable){
         valid=false;
         error='Enter a valid Star Player total cost in multiples of 5,000 GP.';
       }
+      
       if(!valid){
         inducementMessage.classList.add('is-error');
         inducementMessage.textContent=error;
@@ -2569,14 +4259,23 @@ async function openCoachGameSubmissionPreview(launchButton){
       else{
         inducementMessage.textContent='CTV is equal. Neither team may spend Treasury on Inducements.';
       }
+
       inducementFundingState={
-        valid:valid, error:error, higherCtvTreasurySpent:highSpend, pettyCashAvailable:pettyAvailable, pettyCashUsed:pettyUsed, treasuryUsed:treasuryUsed, totalPurchased:totalPurchased,
+        valid:valid,
+        error:error,
+        higherCtvTreasurySpent:highSpend,
+        pettyCashAvailable:pettyAvailable,
+        pettyCashUsed:pettyUsed,
+        treasuryUsed:treasuryUsed,
+        totalPurchased:totalPurchased,
         purchases:purchases
       };
     }
+
     inducementHighSpend.oninput=updateInducementFunding;
     inducementTreasury.oninput=updateInducementFunding;
     updateInducementFunding();
+
     message.className='coach-game-submission-message';
     message.textContent='Complete the Game Day Pack entries, then select Review Entries.';
 
@@ -2586,12 +4285,15 @@ async function openCoachGameSubmissionPreview(launchButton){
     function updateFans(){
       const homeRoll=homeFair.value===''?null:Number(homeFair.value);
       const awayRoll=awayFair.value===''?null:Number(awayFair.value);
+
       const homeValue=homeRoll===null?null:Number(game.homeDfBefore||0)+homeRoll;
       const awayValue=awayRoll===null?null:Number(game.awayDfBefore||0)+awayRoll;
+
       homeFactor.textContent=homeValue===null?'-':homeValue;
       awayFactor.textContent=awayValue===null?'-':awayValue;
       attendance.textContent=(homeValue===null||awayValue===null)?'-':homeValue+awayValue;
     }
+
     homeFair.onchange=updateFans;
     awayFair.onchange=updateFans;
     updateFans();
@@ -2610,30 +4312,37 @@ async function openCoachGameSubmissionPreview(launchButton){
     function updateResults(){
       const home=scoreValue(homeScore);
       const away=scoreValue(awayScore);
+    
       function enableSubmittingDfRoll(enabled){
         homeDfRoll.disabled=!submittingIsHome||!enabled;
         awayDfRoll.disabled=submittingIsHome||!enabled;
         if(submittingIsHome) awayDfRoll.value=''; else homeDfRoll.value='';
       }
+    
       function previewDf(before,result,roll,changeEl,afterEl){
         if(!changeEl||!afterEl) return;
+    
         if(result==='DRAW'){
           changeEl.textContent='0';
           afterEl.textContent=String(before);
           return;
         }
+    
         if(!roll){
           changeEl.textContent='—';
           afterEl.textContent='—';
           return;
         }
+    
         let change=0;
         if(result==='WIN'&&roll>=before) change=1;
         if(result==='LOSS'&&roll<=before) change=-1;
+    
         const after=Math.max(1,Math.min(7,before+change));
         changeEl.textContent=change>0?'+1':String(change);
         afterEl.textContent=String(after);
       }
+    
       if(home===null||away===null){
         postHomeResult.textContent='-'; postAwayResult.textContent='-';
         postHomeChange.textContent='—'; postAwayChange.textContent='—';
@@ -2641,6 +4350,7 @@ async function openCoachGameSubmissionPreview(launchButton){
         enableSubmittingDfRoll(true);
         return;
       }
+    
       if(home===away){
         postHomeResult.textContent='DRAW'; postAwayResult.textContent='DRAW';
         homeDfRoll.value=''; awayDfRoll.value='';
@@ -2649,14 +4359,18 @@ async function openCoachGameSubmissionPreview(launchButton){
         previewDf(Number(game.awayDfBefore)||0,'DRAW',0,postAwayChange,postAwayAfter);
         return;
       }
+    
       const homeResult=home>away?'WIN':'LOSS';
       const awayResult=away>home?'WIN':'LOSS';
+    
       postHomeResult.textContent=homeResult;
       postAwayResult.textContent=awayResult;
       enableSubmittingDfRoll(true);
+    
       previewDf(Number(game.homeDfBefore)||0,homeResult,Number(homeDfRoll.value)||0,postHomeChange,postHomeAfter);
       previewDf(Number(game.awayDfBefore)||0,awayResult,Number(awayDfRoll.value)||0,postAwayChange,postAwayAfter);
     }
+
     homeScore.oninput=updateResults;
     awayScore.oninput=updateResults;
     homeDfRoll.onchange=updateResults;
@@ -2667,6 +4381,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     // PLAYER STATS
     // =====================================================
     body.innerHTML='';
+
     function createStatInput(field,max){
       const input=document.createElement('input');
       input.type='text';
@@ -2677,20 +4392,33 @@ async function openCoachGameSubmissionPreview(launchButton){
       input.dataset.max=max===undefined?'':String(max);
       return input;
     }
+
     function createInjurySelect(){
       const select=document.createElement('select');
       select.className='coach-submit-injury-result';
-      select.innerHTML= '<option value="">-</option>'+ '<option value="Badly Hurt">Badly Hurt</option>'+ '<option value="Seriously Hurt">Seriously Hurt</option>'+
-        '<option value="Serious Injury">Serious Injury</option>'+ '<option value="Lasting Injury">Lasting Injury</option>'+ '<option value="Dead">Dead</option>';
+      select.innerHTML=
+        '<option value="">-</option>'+
+        '<option value="Badly Hurt">Badly Hurt</option>'+
+        '<option value="Seriously Hurt">Seriously Hurt</option>'+
+        '<option value="Serious Injury">Serious Injury</option>'+
+        '<option value="Lasting Injury">Lasting Injury</option>'+
+        '<option value="Dead">Dead</option>';
       return select;
     }
+
     function createLastingSelect(){
       const select=document.createElement('select');
       select.className='coach-submit-lasting-injury is-hidden';
-      select.innerHTML= '<option value="">Select Lasting Injury</option>'+ '<option value="Head Injury">Head Injury</option>'+ '<option value="Smashed Knee">Smashed Knee</option>'+
-        '<option value="Broken Arm">Broken Arm</option>'+ '<option value="Dislocated Hip">Dislocated Hip</option>'+ '<option value="Broken Shoulder">Broken Shoulder</option>';
+      select.innerHTML=
+        '<option value="">Select Lasting Injury</option>'+
+        '<option value="Head Injury">Head Injury</option>'+
+        '<option value="Smashed Knee">Smashed Knee</option>'+
+        '<option value="Broken Arm">Broken Arm</option>'+
+        '<option value="Dislocated Hip">Dislocated Hip</option>'+
+        '<option value="Broken Shoulder">Broken Shoulder</option>';
       return select;
     }
+
     (result.players||[]).forEach(function(player){
       const row=document.createElement('tr');
       row.dataset.playerId=String(player.playerId||'');
@@ -2698,51 +4426,64 @@ async function openCoachGameSubmissionPreview(launchButton){
       row.dataset.playerName=String(player.playerName||'');
       row.dataset.position=String(player.position||'');
       row.dataset.journeyman=player.isJourneyman?'true':'false';
+
       const number=document.createElement('td');
       number.textContent=displayValue(player.playerNumber);
+
       const name=document.createElement('td');
       name.className='coach-game-submission-player-cell';
+
       const nameText=document.createElement('span');
       nameText.className='coach-game-submission-player-name';
       nameText.textContent=String(player.playerName||'');
       name.appendChild(nameText);
+
       if(player.isJourneyman){
         const jmTag=document.createElement('span');
         jmTag.className='coach-game-submission-jm';
         jmTag.textContent='JM';
         name.appendChild(jmTag);
       }
+
       const position=document.createElement('td');
       position.textContent=displayValue(player.position);
+
       const fields=['comp','ttm','land','int','td','cas','kills'];
       const statCells=fields.map(function(field){
         const cell=document.createElement('td');
         cell.appendChild(createStatInput(field));
         return cell;
       });
+
       const mvp=document.createElement('td');
       const mvpSelect=document.createElement('select');
       mvpSelect.className='coach-game-submission-stat coach-submit-mvp';
       mvpSelect.dataset.field='mvp';
       mvpSelect.innerHTML='<option value="">-</option><option value="1">1</option>';
       mvp.appendChild(mvpSelect);
+
       const injury=document.createElement('td');
       injury.className='coach-submit-injury-cell';
+
       const injurySelect=createInjurySelect();
       const lastingSelect=createLastingSelect();
+
       injurySelect.onchange=function(){
         const showLasting=injurySelect.value==='Lasting Injury';
         lastingSelect.classList.toggle('is-hidden',!showLasting);
         if(!showLasting) lastingSelect.value='';
       };
+
       injury.appendChild(injurySelect);
       injury.appendChild(lastingSelect);
+
       row.appendChild(number);
       row.appendChild(name);
       row.appendChild(position);
       statCells.forEach(function(cell){ row.appendChild(cell); });
       row.appendChild(mvp);
       row.appendChild(injury);
+
       body.appendChild(row);
     });
 
@@ -2750,49 +4491,80 @@ async function openCoachGameSubmissionPreview(launchButton){
 // APOTHECARY
 // =====================================================
 const ownsApothecary=Number(team.apothecary||0)>0;
+
 apothecaryUsed.value='No';
 apothecaryUsed.disabled=!ownsApothecary;
 apothecaryNote.textContent=ownsApothecary?'Available this game':'No Apothecary rostered';
 
+    
 // =====================================================
 // BUILD SUBMISSION PAYLOAD
 // =====================================================
 function collectGameSubmissionPayload(){
   const home=scoreValue(homeScore);
   const away=scoreValue(awayScore);
+
   const players=Array.from(body.querySelectorAll('tr')).map(function(row){
     function stat(field){
       const input=row.querySelector('[data-field="'+field+'"]');
       const value=String(input?input.value:'').trim();
       return value===''?0:Number(value);
     }
+  
     const injury=row.querySelector('.coach-submit-injury-result');
     const lasting=row.querySelector('.coach-submit-lasting-injury');
-
+  
     // Keep every player so Games Played still works,
     // but only send entered results. The server already
     // knows player number, name and position.
     const entry={playerId:String(row.dataset.playerId||'')};
+  
     const stats={
-      comp:stat('comp'), ttm:stat('ttm'), land:stat('land'), int:stat('int'), td:stat('td'), cas:stat('cas'), kills:stat('kills'), mvp:stat('mvp')
+      comp:stat('comp'),
+      ttm:stat('ttm'),
+      land:stat('land'),
+      int:stat('int'),
+      td:stat('td'),
+      cas:stat('cas'),
+      kills:stat('kills'),
+      mvp:stat('mvp')
     };
+  
     Object.keys(stats).forEach(function(key){
       if(stats[key]) entry[key]=stats[key];
     });
+  
     if(injury&&injury.value) entry.injuryResult=injury.value;
     if(lasting&&lasting.value) entry.lastingInjury=lasting.value;
+  
     return entry;
   });
+
   return {
     gameId:String(game.gameId||''),
-    higherCtvTreasurySpent:inducementFundingState.higherCtvTreasurySpent, inducementTreasuryUsed:inducementFundingState.treasuryUsed, inducements:inducementFundingState.purchases,
-    homeFairWeather:Number(homeFair.value), awayFairWeather:Number(awayFair.value),
-    homeScore:home, awayScore:away,
-    homeStalled:homeStalled.value, awayStalled:awayStalled.value,
-    homeDfRoll:home===away?'':(submittingIsHome?Number(homeDfRoll.value):''), awayDfRoll:home===away?'':(!submittingIsHome?Number(awayDfRoll.value):''),
-    apothecaryUsed:apothecaryUsed.value, coachNotes:String(notes.value||'').trim(), players:players
+
+    higherCtvTreasurySpent:inducementFundingState.higherCtvTreasurySpent,
+    inducementTreasuryUsed:inducementFundingState.treasuryUsed,
+    inducements:inducementFundingState.purchases,
+
+    homeFairWeather:Number(homeFair.value),
+    awayFairWeather:Number(awayFair.value),
+
+    homeScore:home,
+    awayScore:away,
+
+    homeStalled:homeStalled.value,
+    awayStalled:awayStalled.value,
+
+    homeDfRoll:home===away?'':(submittingIsHome?Number(homeDfRoll.value):''),
+    awayDfRoll:home===away?'':(!submittingIsHome?Number(awayDfRoll.value):''),
+
+    apothecaryUsed:apothecaryUsed.value,
+    coachNotes:String(notes.value||'').trim(),
+    players:players
   };
 }
+
 
 // =====================================================
 // FINAL REVIEW
@@ -2807,17 +4579,26 @@ function openFinalGameReview(payload){
   const backButton=document.getElementById('coach-game-review-back');
   const submitButton=document.getElementById('coach-game-review-submit');
   const reviewInducements=document.getElementById('coach-game-review-inducements');
+
   if(!reviewModal||!reviewMatch||!reviewDetails||!reviewInducements||!reviewPlayers||!reviewNotes||!reviewMessage||!backButton||!submitButton){
     alert('The Final Review window could not be opened.');
     return;
   }
+
   const homeFan=Number(game.homeDfBefore||0)+Number(payload.homeFairWeather||0);
   const awayFan=Number(game.awayDfBefore||0)+Number(payload.awayFairWeather||0);
   const attendance=homeFan+awayFan;
+  
   const submittingDfRoll=submittingIsHome?payload.homeDfRoll:payload.awayDfRoll;
   const submittingDfTeam=submittingIsHome?game.homeTeam:game.awayTeam;
-  reviewMatch.textContent= String(game.homeTeam||'HOME')+'  '+payload.homeScore+ '  —  '+payload.awayScore+'  '+ String(game.awayTeam||'AWAY');
-  reviewDetails.innerHTML= '<div class="coach-game-review-detail"><strong>Home Fair-Weather</strong><span>'+escapePortalHtml(payload.homeFairWeather)+'</span></div>'+
+
+  reviewMatch.textContent=
+    String(game.homeTeam||'HOME')+'  '+payload.homeScore+
+    '  —  '+payload.awayScore+'  '+
+    String(game.awayTeam||'AWAY');
+
+  reviewDetails.innerHTML=
+    '<div class="coach-game-review-detail"><strong>Home Fair-Weather</strong><span>'+escapePortalHtml(payload.homeFairWeather)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away Fair-Weather</strong><span>'+escapePortalHtml(payload.awayFairWeather)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Home Fan Factor</strong><span>'+escapePortalHtml(homeFan)+'</span></div>'+
     '<div class="coach-game-review-detail"><strong>Away Fan Factor</strong><span>'+escapePortalHtml(awayFan)+'</span></div>'+
@@ -2833,51 +4614,69 @@ function openFinalGameReview(payload){
   // INDUCEMENTS REVIEW
   // =====================================================
   reviewInducements.innerHTML='';
+
   const reviewPurchases=Array.isArray(payload.inducements)?payload.inducements:[];
+
   if(!reviewPurchases.length){
     const row=document.createElement('tr');
     const cell=document.createElement('td');
+
     cell.colSpan=6;
     cell.textContent='No inducements purchased.';
+
     row.appendChild(cell);
     reviewInducements.appendChild(row);
   }
   else{
     reviewPurchases.forEach(function(item){
       const row=document.createElement('tr');
+
       [item.inducement,item.qty,formatGold(item.totalCost),formatGold(item.pettyCashUsed),formatGold(item.treasuryUsed),item.fundingSource].forEach(function(value){
         const cell=document.createElement('td');
         cell.textContent=displayValue(value);
         row.appendChild(cell);
       });
+
       reviewInducements.appendChild(row);
     });
   }
+
   reviewPlayers.innerHTML='';
+
   const meaningfulPlayers=payload.players.filter(function(player){
-    return Number(player.comp)||Number(player.ttm)||Number(player.land)||Number(player.int)|| Number(player.td)||Number(player.cas)||Number(player.kills)||Number(player.mvp)||
-          String(player.injuryResult||'').trim();
+    return Number(player.comp)||Number(player.ttm)||Number(player.land)||Number(player.int)||
+           Number(player.td)||Number(player.cas)||Number(player.kills)||Number(player.mvp)||
+           String(player.injuryResult||'').trim();
   });
+
   if(!meaningfulPlayers.length){
     const row=document.createElement('tr');
     const cell=document.createElement('td');
+
     cell.colSpan=3;
     cell.textContent='No player statistics or injuries recorded.';
+
     row.appendChild(cell);
     reviewPlayers.appendChild(row);
   }
   else{
     meaningfulPlayers.forEach(function(player){
       const row=document.createElement('tr');
+
       const sourceRow=Array.from(body.querySelectorAll('tr')).find(function(item){
         return String(item.dataset.playerId||'')===String(player.playerId||'');
       });
+      
       const number=document.createElement('td');
       number.textContent=sourceRow?String(sourceRow.dataset.playerNumber||''):'';
+      
       const name=document.createElement('td');
       name.textContent=sourceRow?String(sourceRow.dataset.playerName||''):'';
+      
       const resultCell=document.createElement('td');
+
       const parts=[];
+
       if(player.comp) parts.push('COMP '+player.comp);
       if(player.ttm) parts.push('TTM '+player.ttm);
       if(player.land) parts.push('LAND '+player.land);
@@ -2886,43 +4685,59 @@ function openFinalGameReview(payload){
       if(player.cas) parts.push('CAS '+player.cas);
       if(player.kills) parts.push('KILLS '+player.kills);
       if(player.mvp) parts.push('MVP '+player.mvp);
+
       if(player.injuryResult){
-        parts.push( player.injuryResult==='Lasting Injury'
+        parts.push(
+          player.injuryResult==='Lasting Injury'
             ?'Lasting Injury — '+player.lastingInjury
-            :player.injuryResult);
+            :player.injuryResult
+        );
       }
+
       resultCell.textContent=parts.join(' | ');
+
       row.appendChild(number);
       row.appendChild(name);
       row.appendChild(resultCell);
+
       reviewPlayers.appendChild(row);
     });
   }
+
   reviewNotes.textContent=payload.coachNotes||'None';
+
   reviewMessage.className='coach-game-review-warning';
   reviewMessage.textContent='Check the information carefully before submitting. Once submitted, this game will be sent to the commissioner for review.';
+
   modal.hidden=true;
   reviewModal.hidden=false;
+
   document.removeEventListener('keydown',handleKey);
+
   backButton.onclick=function(){
     reviewModal.hidden=true;
     modal.hidden=false;
     document.addEventListener('keydown',handleKey);
   };
+
   submitButton.onclick=async function(){
     submitButton.disabled=true;
     submitButton.textContent='Submitting...';
+
     reviewMessage.className='coach-game-review-warning';
     reviewMessage.textContent='Submitting game...';
+
     try{
       const submitted=await coachApiSubmitGameSubmissionRequest(accessCode,payload);
+
       if(!submitted||submitted.ok!==true||submitted.submitted!==true){
         throw new Error(submitted&&submitted.error?submitted.error:'The game could not be submitted.');
       }
+
       reviewModal.hidden=true;
       modal.hidden=true;
       coachGameSubmissionCache=null;
-
+      
       // =====================================================
       // IMMEDIATELY LOCK THE SUBMITTED FIXTURE
       // Do not make the coach wait for the portal refresh.
@@ -2933,14 +4748,17 @@ function openFinalGameReview(payload){
         launchButton.title='This game has already been submitted.';
         launchButton.onclick=null;
       }
+      
       setCoachPendingGameNotice(true,false);
       setCoachGameDayPackState('pending',game.gameId);
       showCoachGameSubmissionResult(submitted);
-
+      
       // Refresh the full portal in the background.
-      coachApiRequest(accessCode).then(function(data){
+      coachApiRequest(accessCode)
+        .then(function(data){
           if(data&&data.ok===true) renderCoachPortal(data);
-        }).catch(function(refreshError){
+        })
+        .catch(function(refreshError){
           console.error('Coach Portal refresh failed:',refreshError);
         });
     }
@@ -2960,68 +4778,89 @@ function openFinalGameReview(payload){
 // =====================================================
 reviewButton.onclick=function(){
   message.className='coach-game-submission-message';
+
   updateInducementFunding();
+
   if(!inducementFundingState.valid){
     message.classList.add('is-error');
     message.textContent=inducementFundingState.error||'Check the Inducement purchases and funding.';
     inducementBody.scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
+
   const home=scoreValue(homeScore);
   const away=scoreValue(awayScore);
+
   if(home===null||away===null){
     message.classList.add('is-error');
     message.textContent='Enter both final scores.';
     return;
   }
+
   if(!homeFair.value||!awayFair.value){
     message.classList.add('is-error');
     message.textContent='Enter both Fair-Weather D3 rolls.';
     return;
   }
+
   if(!homeStalled.value||!awayStalled.value){
     message.classList.add('is-error');
     message.textContent='Select Stalled? for both teams.';
     return;
   }
+
   const submittingDfRoll=submittingIsHome?homeDfRoll:awayDfRoll;
+
   if(home!==away&&!submittingDfRoll.value){
     message.classList.add('is-error');
     message.textContent='Enter your Post-Game Dedicated Fans D6 roll.';
     return;
   }
+
   const statInputs=Array.from(body.querySelectorAll('input.coach-game-submission-stat'));
+
   const invalidStat=statInputs.find(function(input){
     const value=String(input.value||'').trim();
+
     if(value==='') return false;
     if(!/^\d+$/.test(value)) return true;
+
     const max=input.dataset.max!==''?Number(input.dataset.max):null;
+
     return max!==null&&Number(value)>max;
   });
+
   if(invalidStat){
     invalidStat.focus();
     message.classList.add('is-error');
     message.textContent='Player stat entries must be whole numbers.';
     return;
   }
+
   const injuryCells=Array.from(body.querySelectorAll('.coach-submit-injury-cell'));
+
   const missingLasting=injuryCells.find(function(cell){
     const injury=cell.querySelector('.coach-submit-injury-result');
     const lasting=cell.querySelector('.coach-submit-lasting-injury');
+
     return injury&&lasting&&injury.value==='Lasting Injury'&&!lasting.value;
   });
+
   if(missingLasting){
     missingLasting.querySelector('.coach-submit-lasting-injury').focus();
     message.classList.add('is-error');
     message.textContent='Select the specific Lasting Injury.';
     return;
   }
+
   const payload=collectGameSubmissionPayload();
+
   message.classList.add('is-success');
   message.textContent='Entries look valid. Opening Final Review...';
+
   openFinalGameReview(payload);
 };
-
+    
     // =====================================================
     // CLOSE MODAL
     // =====================================================
@@ -3033,11 +4872,14 @@ reviewButton.onclick=function(){
       modal.onclick=null;
       document.removeEventListener('keydown',handleKey);
     }
+
     function handleKey(event){
       if(event.key==='Escape') closeModal();
     }
+
     closeButton.onclick=closeModal;
     document.addEventListener('keydown',handleKey);
+
     modal.hidden=false;
     reportCoachPortalHeight();
     setTimeout(reportCoachPortalHeight,50);
@@ -3057,9 +4899,11 @@ reviewButton.onclick=function(){
 function displayTeamForGame(teamId,team,coach){
   const id=String(teamId||'').trim();
   const ownId=String(team.teamId||coach.teamId||'').trim();
+
   if(id&&id===ownId){
     return team.teamName||coach.teamName||id;
   }
+
   return id||'-';
 }
 
@@ -3069,7 +4913,9 @@ function displayTeamForGame(teamId,team,coach){
 function renderCoachRoster(players){
   const body=document.getElementById('coach-roster-body');
   if(!body) return;
+
   body.innerHTML='';
+
   if(!players.length){
     const row=document.createElement('tr');
     const cell=document.createElement('td');
@@ -3088,13 +4934,16 @@ function renderCoachRoster(players){
     function rosterRank(player){
       const status=String(player.status||'').trim().toLowerCase();
       const mng=String(player.mng||'').trim().toLowerCase()==='yes';
+  
       if(status==='dead') return 3;
       if(status==='retired'||status==='released') return 2;
       if(mng) return 1;
       return 0;
     }
+  
     return rosterRank(a)-rosterRank(b);
   });
+  
   sortedPlayers.forEach(function(player){
     const row=document.createElement('tr');
     const playerStatus=String(player.status||'').trim().toLowerCase();
@@ -3104,6 +4953,7 @@ function renderCoachRoster(players){
     // ---------------------------------------------------
     if(playerStatus==='dead') row.classList.add('coach-player-dead');
     if(playerStatus==='retired') row.classList.add('coach-player-retired');
+
     appendCell(row,player.number);
     appendCell(row,player.playerName);
     appendCell(row,player.position);
@@ -3120,21 +4970,28 @@ function renderCoachRoster(players){
     // STATUS + RETIRE PLAYER
     // ---------------------------------------------------
     let status=player.status||'';
+
     if(String(player.mng||'').toLowerCase()==='yes'){
       status+=status?' / MNG':'MNG';
     }
+
     if(Number(player.niggling||0)>0){
       status+=' / Niggling '+Number(player.niggling);
     }
+
     const statusCell=document.createElement('td');
     statusCell.className='coach-roster-status-cell';
+    
     const statusContent=document.createElement('div');
     statusContent.className='coach-roster-status-content';
+    
     const statusText=document.createElement('span');
     statusText.className='coach-roster-status-text';
     statusText.textContent=displayValue(status);
+    
     statusContent.appendChild(statusText);
     statusCell.appendChild(statusContent);
+    
     if(playerStatus==='active'){
       const retireButton=document.createElement('button');
       retireButton.type='button';
@@ -3142,49 +4999,75 @@ function renderCoachRoster(players){
       retireButton.textContent='×';
       retireButton.title='Retire '+player.playerName;
       retireButton.setAttribute('aria-label','Retire '+player.playerName);
+
       retireButton.onclick=async function(){
         const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+
         if(!accessCode){
           alert('Your Coach Portal session has expired. Please log in again.');
           return;
         }
+
         const confirmed=await showCoachRetirementConfirmation(player);
         if(!confirmed) return;
+
         retireButton.disabled=true;
         retireButton.textContent='…';
+
         try{
           const result=await coachApiSubmitPlayerRetirementRequest(accessCode,player.playerId);
+
           if(!result||result.ok!==true||result.submitted!==true||result.retired!==true){
-            throw new Error( result&&result.error
+            throw new Error(
+              result&&result.error
                 ?result.error
-                :'The player could not be retired.');
+                :'The player could not be retired.'
+            );
           }
+
           if(!result.team||!result.management||!Array.isArray(result.players)){
             throw new Error('The player was retired, but updated team data was not returned.');
           }
+
           renderCoachManagement(result.team,result.management);
+
           const currentPlayers=result.players.filter(function(item){
             return !isCoachPlayerOffRoster(item.status);
           }).length;
+
           setText('coach-management-players',currentPlayers);
           renderCoachRoster(result.players);
-          const advancementPlayers= result.advancements&&Array.isArray(result.advancements.players)
+
+          const advancementPlayers=
+            result.advancements&&Array.isArray(result.advancements.players)
               ?result.advancements.players
               :[];
+
           renderCoachAdvancements(advancementPlayers);
-          showCoachRosterSuccess( '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' retired.');
+
+          showCoachRosterSuccess(
+            '#'+result.playerNumber+' '+result.playerName+' — '+result.position+' retired.'
+          );
         }
         catch(error){
-          alert( (error&&error.message?error.message:'The player retirement failed.')+ '\n\nThe portal will refresh before another retirement is attempted.');
-          coachApiRequest(accessCode).then(function(data){
+          alert(
+            (error&&error.message?error.message:'The player retirement failed.')+
+            '\n\nThe portal will refresh before another retirement is attempted.'
+          );
+
+          coachApiRequest(accessCode)
+            .then(function(data){
               if(data&&data.ok===true) renderCoachPortal(data);
-            }).catch(function(refreshError){
+            })
+            .catch(function(refreshError){
               console.error('Coach Portal refresh failed:',refreshError);
             });
         }
       };
+
       statusContent.appendChild(retireButton);
     }
+
     row.appendChild(statusCell);
     body.appendChild(row);
   });
@@ -3197,11 +5080,18 @@ function renderCoachRoster(players){
 function logoutCoach() {
   coachGameSubmissionCache=null;
   sessionStorage.removeItem(SESSION_KEY);
-  const input = document.getElementById( 'coach-access-code');
+
+  const input =
+    document.getElementById(
+      'coach-access-code'
+    );
+
   if (input) {
     input.value = '';
   }
+
   clearLoginMessage();
+
   showLogin();
 }
 
@@ -3210,48 +5100,118 @@ function logoutCoach() {
 // =====================================================
 
 function showLoading() {
-  setHidden( 'coach-login', true);
-  setHidden( 'coach-dashboard', true);
-  setHidden( 'coach-loading', false);
+
+  setHidden(
+    'coach-login',
+    true
+  );
+
+  setHidden(
+    'coach-dashboard',
+    true
+  );
+
+  setHidden(
+    'coach-loading',
+    false
+  );
 }
+
+
 function showDashboard() {
-  setHidden( 'coach-login', true);
-  setHidden( 'coach-loading', true);
-  setHidden( 'coach-dashboard', false);
+
+  setHidden(
+    'coach-login',
+    true
+  );
+
+  setHidden(
+    'coach-loading',
+    true
+  );
+
+  setHidden(
+    'coach-dashboard',
+    false
+  );
 }
+
+
 function showLogin() {
-  setHidden( 'coach-loading', true);
-  setHidden( 'coach-dashboard', true);
-  setHidden( 'coach-login', false);
+
+  setHidden(
+    'coach-loading',
+    true
+  );
+
+  setHidden(
+    'coach-dashboard',
+    true
+  );
+
+  setHidden(
+    'coach-login',
+    false
+  );
 }
+
 
 // =====================================================
 // MESSAGE HELPERS
 // =====================================================
 
-function showLoginMessage( message, isError) {
-  const element = document.getElementById( 'coach-login-message');
+function showLoginMessage(
+  message,
+  isError
+) {
+
+  const element =
+    document.getElementById(
+      'coach-login-message'
+    );
+
+
   if (!element) {
     return;
   }
-  element.textContent = message || '';
-  element.className = isError
+
+
+  element.textContent =
+    message || '';
+
+
+  element.className =
+    isError
       ? 'coach-message coach-message-error'
       : 'coach-message';
 }
+
+
 function clearLoginMessage() {
-  showLoginMessage( '', false);
+
+  showLoginMessage(
+    '',
+    false
+  );
 }
+
 function showCoachAdvancementSuccess(message) {
+
   const container = document.getElementById('coach-advancements');
+
   if (!container) return;
+
   const success = document.createElement('div');
+
   success.className = 'coach-advancement-success';
+
   success.innerHTML = `
     <strong>Advancement successfully recorded</strong>
     <span>${escapePortalHtml(message)}</span>
   `;
+
   container.prepend(success);
+
   setTimeout(function() {
     if (success.parentNode) success.remove();
   }, 5000);
@@ -3262,35 +5222,80 @@ function showCoachAdvancementSuccess(message) {
 // =====================================================
 
 function showCoachManagementSuccess(message) {
-  const button = document.getElementById( 'coach-management-buy-reroll');
+
+  const button =
+    document.getElementById(
+      'coach-management-buy-reroll'
+    );
+
   if (!button) {
     return;
   }
-  const panel = button.closest( '.coach-panel');
+
+
+  const panel =
+    button.closest(
+      '.coach-panel'
+    );
+
   if (!panel) {
     return;
   }
-  const existing = panel.querySelector( '.coach-management-success');
+
+
+  const existing =
+    panel.querySelector(
+      '.coach-management-success'
+    );
+
   if (existing) {
     existing.remove();
   }
-  const success = document.createElement( 'div');
-  success.className = 'coach-management-success';
+
+
+  const success =
+    document.createElement(
+      'div'
+    );
+
+
+  success.className =
+    'coach-management-success';
+
+
   success.innerHTML = `
     <strong>Purchase completed</strong>
     <span>${escapePortalHtml(message)}</span>
   `;
-  const heading = panel.querySelector( 'h2');
+
+
+  const heading =
+    panel.querySelector(
+      'h2'
+    );
+
+
   if (heading) {
-    heading.insertAdjacentElement( 'afterend', success);
+
+    heading.insertAdjacentElement(
+      'afterend',
+      success
+    );
   }
   else {
-    panel.prepend( success);
+
+    panel.prepend(
+      success
+    );
   }
+
+
   setTimeout(function() {
+
     if (success.parentNode) {
       success.remove();
     }
+
   }, 5000);
 }
 
@@ -3300,14 +5305,19 @@ function showCoachManagementSuccess(message) {
 function showCoachGameSubmissionResult(submitted,persistent=false){
   const container=document.getElementById('coach-games');
   if(!container) return;
+
   const panel=container.closest('.coach-panel');
   if(!panel) return;
+
   const existing=panel.querySelector('.coach-game-submission-result');
   if(existing) existing.remove();
+
   const status=String(submitted&&submitted.validationStatus||'').trim();
   const fields=Array.isArray(submitted&&submitted.mismatchFields)?submitted.mismatchFields.filter(Boolean):[];
+
   let title='Game Submitted';
   let message='Your game submission has been recorded. The game will be validated when both coach submissions are available.';
+
   if(status==='Matched'){
     title='Match Verified';
     message='Both coach submissions match. The game has been completed automatically.';
@@ -3316,12 +5326,15 @@ function showCoachGameSubmissionResult(submitted,persistent=false){
     title='Commissioner Review Required';
     message='The two coach submissions do not match'+(fields.length?': '+fields.join(', '):'.')+' The game remains pending for commissioner review.';
   }
+
   const result=document.createElement('div');
   result.className='coach-management-success coach-game-submission-result';
   result.innerHTML='<strong>'+escapePortalHtml(title)+'</strong><span>'+escapePortalHtml(message)+'</span>';
+
   const heading=panel.querySelector('h2');
   if(heading) heading.insertAdjacentElement('afterend',result);
   else panel.prepend(result);
+
   if(!persistent){
     setTimeout(function(){
       if(result.parentNode) result.remove();
@@ -3335,16 +5348,21 @@ function showCoachGameSubmissionResult(submitted,persistent=false){
 function showCoachRosterSuccess(message){
   const body=document.getElementById('coach-roster-body');
   if(!body) return;
+
   const panel=body.closest('.coach-panel');
   if(!panel) return;
+
   const existing=panel.querySelector('.coach-management-success');
   if(existing) existing.remove();
+
   const success=document.createElement('div');
   success.className='coach-management-success';
   success.innerHTML='<strong>Player retired</strong><span>'+escapePortalHtml(message)+'</span>';
+
   const heading=panel.querySelector('h2');
   if(heading) heading.insertAdjacentElement('afterend',success);
   else panel.prepend(success);
+
   setTimeout(function(){
     if(success.parentNode) success.remove();
   },5000);
@@ -3357,40 +5375,118 @@ function showCoachRosterSuccess(message){
 function isCoachPlayerOffRoster(status){
   return ['dead','retired','released'].includes(String(status||'').trim().toLowerCase());
 }
-function setHidden( id, hidden) {
-  const element = document.getElementById( id);
+
+function setHidden(
+  id,
+  hidden
+) {
+
+  const element =
+    document.getElementById(
+      id
+    );
+
+
   if (element) {
-    element.hidden = hidden;
+
+    element.hidden =
+      hidden;
   }
 }
-function setText( id, value) {
-  const element = document.getElementById( id);
+
+
+function setText(
+  id,
+  value
+) {
+
+  const element =
+    document.getElementById(
+      id
+    );
+
+
   if (element) {
-    element.textContent = value === null || value === undefined || value === ''
+
+    element.textContent =
+      value === null ||
+      value === undefined ||
+      value === ''
         ? '-'
         : String(value);
   }
 }
-function appendCell( row, value) {
-  const cell = document.createElement( 'td');
-  cell.textContent = displayValue( value);
-  row.appendChild( cell);
+
+
+function appendCell(
+  row,
+  value
+) {
+
+  const cell =
+    document.createElement(
+      'td'
+    );
+
+
+  cell.textContent =
+    displayValue(
+      value
+    );
+
+
+  row.appendChild(
+    cell
+  );
 }
+
+
 function displayValue(value) {
-  if ( value === null || value === undefined || value === '') {
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === ''
+  ) {
+
     return '-';
   }
-  return String( value);
+
+
+  return String(
+    value
+  );
 }
+
+
 function formatGold(value) {
-  if ( value === '' || value === null || value === undefined) {
+
+  if (
+    value === '' ||
+    value === null ||
+    value === undefined
+  ) {
+
     return '-';
   }
-  const number = Number(value);
+
+
+  const number =
+    Number(value);
+
+
   if (Number.isNaN(number)) {
-    return String( value);
+
+    return String(
+      value
+    );
   }
-  return number.toLocaleString( 'en-GB');
+
+
+  return number
+    .toLocaleString(
+      'en-GB'
+    );
 }
 
 // =====================================================
@@ -3403,36 +5499,47 @@ function showCoachRetirementConfirmation(player){
   const costText=document.getElementById('coach-purchase-modal-cost');
   const cancelButton=document.getElementById('coach-purchase-cancel');
   const confirmButton=document.getElementById('coach-purchase-confirm');
+
   if(!modal||!heading||!messageText||!costText||!cancelButton||!confirmButton) return Promise.resolve(false);
+
   heading.textContent='Retire Player';
   messageText.textContent='Are you sure you want to retire #'+player.number+' '+player.playerName+'? Career statistics and history will be preserved.';
   costText.textContent='No Treasury refund';
   confirmButton.textContent='Retire Player';
   modal.classList.add('coach-retire-confirmation');
   modal.hidden=false;
+
   return new Promise(function(resolve){
     let finished=false;
+
     function close(result){
       if(finished) return;
       finished=true;
+
       modal.hidden=true;
       modal.classList.remove('coach-retire-confirmation');
+
       heading.textContent='Confirm Purchase';
       messageText.textContent='Confirm this Team Management purchase?';
       costText.textContent='-';
       confirmButton.textContent='Confirm Purchase';
+
       cancelButton.onclick=null;
       confirmButton.onclick=null;
       modal.onclick=null;
       document.removeEventListener('keydown',handleKey);
+
       resolve(result);
     }
+
     function handleKey(event){
       if(event.key==='Escape') close(false);
     }
+
     cancelButton.onclick=function(){ close(false); };
     confirmButton.onclick=function(){ close(true); };
     modal.onclick=function(event){ if(event.target===modal) close(false); };
+
     document.addEventListener('keydown',handleKey);
     confirmButton.focus();
   });
@@ -3443,46 +5550,83 @@ function showCoachRetirementConfirmation(player){
 // =====================================================
 
 function showCoachPurchaseConfirmation(itemLabel, cost) {
+
   const modal = document.getElementById('coach-purchase-modal');
   const messageText = document.getElementById('coach-purchase-modal-text');
   const costText = document.getElementById('coach-purchase-modal-cost');
   const cancelButton = document.getElementById('coach-purchase-cancel');
   const confirmButton = document.getElementById('coach-purchase-confirm');
-  if ( !modal || !messageText || !costText || !cancelButton || !confirmButton) {
+
+  if (
+    !modal ||
+    !messageText ||
+    !costText ||
+    !cancelButton ||
+    !confirmButton
+  ) {
     return Promise.resolve(false);
   }
-  messageText.textContent = 'Buy one ' + itemLabel + '?';
-  costText.textContent = formatGold(cost);
+
+  messageText.textContent =
+    'Buy one ' +
+    itemLabel +
+    '?';
+
+  costText.textContent =
+    formatGold(cost);
+
   modal.hidden = false;
+
   return new Promise(function(resolve) {
+
     let finished = false;
+
     function close(result) {
+
       if (finished) return;
+
       finished = true;
       modal.hidden = true;
+
       cancelButton.onclick = null;
       confirmButton.onclick = null;
       modal.onclick = null;
-      document.removeEventListener( 'keydown', handleKey);
+
+      document.removeEventListener(
+        'keydown',
+        handleKey
+      );
+
       resolve(result);
     }
+
     function handleKey(event) {
+
       if (event.key === 'Escape') {
         close(false);
       }
     }
+
     cancelButton.onclick = function() {
       close(false);
     };
+
     confirmButton.onclick = function() {
       close(true);
     };
+
     modal.onclick = function(event) {
+
       if (event.target === modal) {
         close(false);
       }
     };
-    document.addEventListener( 'keydown', handleKey);
+
+    document.addEventListener(
+      'keydown',
+      handleKey
+    );
+
     confirmButton.focus();
   });
 }
@@ -3492,7 +5636,30 @@ function showCoachPurchaseConfirmation(itemLabel, cost) {
 // =====================================================
 
 function escapePortalHtml(value) {
-  return String( value ?? '').replace( /&/g, '&amp;').replace( /</g, '&lt;').replace( />/g, '&gt;').replace( /"/g, '&quot;').replace( /'/g, '&#039;');
+
+  return String(
+    value ?? ''
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
 }
 
 // ============================================================
@@ -3502,9 +5669,12 @@ function reportCoachPortalHeight(){
   const height=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
   window.parent.postMessage({type:'rtCoachPortalHeight',height:height},'*');
 }
+
 window.addEventListener('load',()=>{ reportCoachPortalHeight(); setTimeout(reportCoachPortalHeight,300); setTimeout(reportCoachPortalHeight,1000); });
+
 if('ResizeObserver' in window){
   const portalHeightObserver=new ResizeObserver(()=>reportCoachPortalHeight());
   portalHeightObserver.observe(document.body);
 }
+
 window.addEventListener('resize',reportCoachPortalHeight);
