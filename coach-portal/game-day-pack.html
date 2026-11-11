@@ -595,9 +595,9 @@
   <div id="pack-content" style="display:none;">
     <div class="toolbar">
       <!-- =====================================================
-           GAME DAY PACK - DIRECT PRINT BUTTON
+           PRINT GAME DAY PACK BUTTON
            ===================================================== -->
-      <button type="button" id="print-game-day-pack" onclick="window.print()">PRINT GAME DAY PACK</button>
+      <button type="button" id="print-game-day-pack">PRINT GAME DAY PACK</button>
     </div>
     <!-- =====================================================
          PAGE 1
@@ -1300,11 +1300,6 @@
         document.getElementById('pack-content').style.display = 'block';
         document.getElementById('gameday-loading').style.display = 'none';
 
-        // ---------------------------------------------------
-        // OPEN PRINT PREVIEW AUTOMATICALLY
-        // ---------------------------------------------------
-        // Request print preview after the Game Day Pack is populated.
-        //openGameDayPackPrint();
       }
       catch (err) {
         showError(err && err.message ? err.message : String(err));
@@ -1340,13 +1335,14 @@
     document.addEventListener('DOMContentLoaded',loadGameDayPack);
 
     // =====================================================
-    // PRINT GAME DAY PACK - AUTOMATIC / MANUAL
+    // PRINT GAME DAY PACK - MANUAL BUTTON
     // =====================================================
     function openGameDayPackPrint(){
-      const pack=document.getElementById('pack-content');
-      if(!pack||pack.style.display==='none') return;
       window.print();
     }
+    
+    // Attach the button handler once the page is ready.
+    document.getElementById('print-game-day-pack').addEventListener('click',openGameDayPackPrint);
   </script>
 </body>
 </html>
