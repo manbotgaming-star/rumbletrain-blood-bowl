@@ -568,10 +568,12 @@ function renderCoachGameDayPackLink(team,coach,games) {
     link.onclick = null;
     return;
   }
-  // ---------------------------------------------------
-  // GAME DAY PACK - EXISTING GITHUB HOSTING
-  // ---------------------------------------------------
-  const packUrl='https://manbotgaming-star.github.io/rumbletrain-blood-bowl/coach-portal/game-day-pack.html?teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
+  
+  // =====================================================
+  // GAME DAY PACK - GOOGLE APPS SCRIPT (RESTORED)
+  // =====================================================
+  const packUrl=COACH_API_URL+'?view=gameDayPack&teamId='+encodeURIComponent(teamId)+'&seasonId='+encodeURIComponent(seasonId);
+
   link.href=packUrl;
   link.hidden=false;
 
