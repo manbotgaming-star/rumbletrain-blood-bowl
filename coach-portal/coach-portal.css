@@ -2186,3 +2186,10 @@ select.coach-game-submission-stat { width:42px; text-align-last:center; }
   .coach-team-logo { max-width:135px; max-height:135px; }
   .coach-team-title h1 { font-size:28px; }
 }
+
+/* GETTING EVEN - INJURY CONTROLS */
+.coach-submit-hatred { display:grid; gap:6px; min-width:240px; padding:8px; border:1px solid var(--line-dark); border-radius:5px; background:#eef4f6; text-align:left; }
+.coach-submit-hatred[hidden],.coach-submit-hatred [hidden] { display:none !important; }
+.coach-submit-hatred-label { display:grid; gap:3px; font-size:11px; white-space:normal; }
+.coach-submit-hatred select { width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:5px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
+.coach-submit-hatred-note { display:block; font-size:10px; line-height:1.4; white-space:normal; color:var(--ink-muted); }
