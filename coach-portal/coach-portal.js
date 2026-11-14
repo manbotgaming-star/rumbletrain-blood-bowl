@@ -696,7 +696,9 @@ function coachApiSubmitAdvancementRequest(
   type,
   category,
   improvement,
-  expectedAdvancement
+  expectedAdvancement,
+  randomDice,
+  witnessCoach
 ) {
 
   return new Promise(function(resolve, reject) {
@@ -761,6 +763,8 @@ function coachApiSubmitAdvancementRequest(
       '&category=' + encodeURIComponent(category) +
       '&improvement=' + encodeURIComponent(improvement) +
       '&expectedAdvancement=' + encodeURIComponent(expectedAdvancement) +
+      '&randomDice=' + encodeURIComponent(JSON.stringify(randomDice || [])) +
+      '&witnessCoach=' + encodeURIComponent(witnessCoach || '') +
       '&callback=' + encodeURIComponent(callbackName);
 
     document.head.appendChild(script);
@@ -3434,198 +3438,360 @@ function renderCoachAdvancementConfirmation(container, player, option, category,
 // RANDOM PRIMARY CONFIRMATION
 // =====================================================
 
-function renderCoachRandomPrimaryConfirmation(container, player, option, category) {
+function renderCoachRandomPrimaryConfirmation(container, player, option, category){
+  container.innerHTML='';
 
-  container.innerHTML = '';
+  const table=Array.isArray(category.randomTable)?category.randomTable:[];
+  const witnessRequired=category.witnessRequired===true;
 
-  const skills =
-    Array.isArray(category.improvements)
-      ? category.improvements
-      : [];
+  if(table.length!==12||typeof category.witnessRequired!=='boolean'){
+    container.textContent='The manual Random Primary table is unavailable. Refresh the Coach Portal and try again.';
+    return;
+  }
 
-  const remainingSpp =
-    Number(player.availableSpp) -
-    Number(option.cost);
+  const confirmation=document.createElement('div');
+  confirmation.className='coach-advancement-confirmation';
 
-  const confirmation =
-    document.createElement('div');
+  const diceOptions='<option value="">D6</option>'+
+    [1,2,3,4,5,6].map(value=>
+      '<option value="'+value+'">'+value+'</option>'
+    ).join('');
 
-  confirmation.className =
-    'coach-advancement-confirmation';
-
-  confirmation.innerHTML = `
+  confirmation.innerHTML=`
     <div class="coach-advancement-confirmation-title">
-      Random Primary Ready
+      Random Primary — enter your dice rolls
     </div>
 
     <div class="coach-advancement-confirmation-grid">
-
       <div>
         <span>Player</span>
-        <strong>
-          #${escapePortalHtml(player.number)}
-          ${escapePortalHtml(player.playerName)}
-        </strong>
+        <strong>#${escapePortalHtml(player.number)} ${escapePortalHtml(player.playerName)}</strong>
       </div>
-
-      <div>
-        <span>Advancement</span>
-        <strong>Random Primary</strong>
-      </div>
-
       <div>
         <span>Category</span>
-        <strong>
-          ${escapePortalHtml(category.category)}
-        </strong>
+        <strong>${escapePortalHtml(category.category)}</strong>
       </div>
-
       <div>
-        <span>Cost</span>
-        <strong>
-          ${escapePortalHtml(option.cost)} SPP
-        </strong>
+        <span>Cost / SPP after</span>
+        <strong>${escapePortalHtml(option.cost)} / ${escapePortalHtml(Number(player.availableSpp)-Number(option.cost))} SPP</strong>
       </div>
-
-      <div>
-        <span>SPP Remaining</span>
-        <strong>
-          ${escapePortalHtml(remainingSpp)}
-        </strong>
-      </div>
-
     </div>
 
-    <div class="coach-random-skill-pool">
-      <strong>Possible Skills</strong>
-      <span>
-        ${skills.map(function(skill) {
-          return escapePortalHtml(skill);
-        }).join(', ')}
-      </span>
+    <p class="coach-manual-random-help">
+      Roll two D6, one after the other, for each skill option.
+      The first die selects the half of the table; the second selects
+      the skill. Enter all four results below.
+    </p>
+
+    <div class="coach-manual-random-rolls">
+      ${[1,2].map(number=>`
+        <div class="coach-manual-random-card">
+          <strong>Skill option ${number}</strong>
+
+          <div class="coach-manual-random-dice">
+            <label>
+              First D6
+              <select class="coach-manual-random-die"
+                aria-label="Skill option ${number} first D6">
+                ${diceOptions}
+              </select>
+            </label>
+
+            <label>
+              Second D6
+              <select class="coach-manual-random-die"
+                aria-label="Skill option ${number} second D6">
+                ${diceOptions}
+              </select>
+            </label>
+          </div>
+
+          <div class="coach-manual-random-result"
+            aria-live="polite"></div>
+        </div>
+      `).join('')}
     </div>
 
-    <button
-      type="button"
-      class="coach-advancement-confirm-button"
-    >
-      ROLL RANDOM PRIMARY
+    <div class="coach-manual-random-choices"></div>
+
+    <label class="coach-manual-random-witness">
+      Witnessing coach ${witnessRequired?'(required)':'(optional)'}
+      <input type="text"
+        class="coach-manual-random-witness-name"
+        maxlength="80"
+        autocomplete="off"
+        ${witnessRequired?'required':''}>
+    </label>
+
+    <div class="coach-manual-random-review"
+      aria-live="polite"></div>
+
+    <details class="coach-manual-random-table">
+      <summary>
+        View ${escapePortalHtml(category.category)} skill table
+      </summary>
+
+      <table>
+        <thead>
+          <tr>
+            <th>First D6</th>
+            <th>Second D6</th>
+            <th>Skill</th>
+            <th>Availability</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${table.map(row=>`
+            <tr>
+              <td>${escapePortalHtml(row.firstD6)}</td>
+              <td>${escapePortalHtml(row.secondD6)}</td>
+              <td>${escapePortalHtml(row.tableSkill||row.skill)}</td>
+              <td>${escapePortalHtml(row.allowed?'Available':row.reason)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </details>
+
+    <button type="button"
+      class="coach-advancement-confirm-button" disabled>
+      SUBMIT RANDOM PRIMARY
     </button>
 
     <div class="coach-advancement-confirmation-note">
-      The server will randomly select one legal skill from this category.
+      Enter your physical dice results. Nothing is saved until you submit.
     </div>
   `;
 
   container.appendChild(confirmation);
 
-  const button =
-    confirmation.querySelector(
-      '.coach-advancement-confirm-button'
-    );
+  const inputs=Array.from(
+    confirmation.querySelectorAll('.coach-manual-random-die')
+  );
 
-  const note =
-    confirmation.querySelector(
-      '.coach-advancement-confirmation-note'
-    );
+  const outputs=Array.from(
+    confirmation.querySelectorAll('.coach-manual-random-result')
+  );
 
-  if (!button || !note) return;
+  const choices=confirmation.querySelector('.coach-manual-random-choices');
+  const review=confirmation.querySelector('.coach-manual-random-review');
+  const witness=confirmation.querySelector('.coach-manual-random-witness-name');
+  const button=confirmation.querySelector('.coach-advancement-confirm-button');
+  const note=confirmation.querySelector('.coach-advancement-confirmation-note');
 
-  button.addEventListener('click', function() {
+  let selected='',pending=false;
 
-    const accessCode =
-      sessionStorage.getItem(SESSION_KEY) || '';
+  function readResults(){
+    return [0,2].map(offset=>{
+      const first=inputs[offset].value;
+      const second=inputs[offset+1].value;
 
-    if (!accessCode) {
-      note.textContent =
+      if(!/^[1-6]$/.test(first)||!/^[1-6]$/.test(second)){
+        return null;
+      }
+
+      return table[
+        (Number(first)<=3?0:6)+Number(second)-1
+      ];
+    });
+  }
+
+  function updateReview(){
+    button.disabled=
+      pending||
+      !selected||
+      (witnessRequired&&!witness.value.trim());
+
+    review.textContent=selected
+      ?'Selected: '+selected+
+       ' — '+option.cost+' SPP; '+
+       (Number(player.availableSpp)-Number(option.cost))+
+       ' SPP remaining.'+
+       (witness.value.trim()?' Witness: '+witness.value.trim():'')
+      :'';
+
+    reportCoachPortalHeight();
+  }
+
+  function refreshRolls(){
+    selected='';
+    choices.replaceChildren();
+
+    const results=readResults();
+
+    results.forEach((result,index)=>{
+      outputs[index].textContent=!result
+        ?'Enter both dice.'
+        :result.allowed
+          ?(result.tableSkill||result.skill)
+          :((result.tableSkill||result.skill)+' — '+result.reason);
+    });
+
+    if(results.every(result=>result&&result.allowed===true)){
+      const unique=[...new Set(results.map(result=>result.skill))];
+
+      if(unique.length===1){
+        selected=unique[0];
+
+        choices.textContent=
+          'Both options rolled '+selected+
+          '. This is the skill the player receives.';
+      }else{
+        unique.forEach(skill=>{
+          const label=document.createElement('label');
+          label.className='coach-manual-random-pick';
+
+          const input=document.createElement('input');
+          input.type='radio';
+          input.name='manual-random-'+player.playerId;
+          input.value=skill;
+
+          input.addEventListener('change',function(){
+            selected=skill;
+            updateReview();
+          });
+
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(skill));
+          choices.appendChild(label);
+        });
+      }
+
+      note.textContent=unique.length===1
+        ?'Review the result, then submit.'
+        :'Choose one of the two rolled skills, then submit.';
+    }else{
+      note.textContent=
+        'Enter all four results. Reroll any pair that produces an unavailable skill.';
+    }
+
+    updateReview();
+  }
+
+  inputs.forEach(input=>
+    input.addEventListener('change',refreshRolls)
+  );
+
+  witness.addEventListener('input',updateReview);
+
+  function setPending(value){
+    pending=value;
+
+    confirmation.querySelectorAll('select,input').forEach(field=>{
+      field.disabled=value;
+    });
+
+    const selection=confirmation.closest('.coach-advancement-selection');
+
+    if(selection){
+      selection.querySelectorAll('.coach-advancement-category').forEach(field=>{
+        field.disabled=value;
+      });
+    }
+
+    updateReview();
+  }
+
+  button.addEventListener('click',async function(){
+    if(pending) return;
+
+    const results=readResults();
+
+    if(
+      !results.every(result=>result&&result.allowed===true)||
+      !results.some(result=>result.skill===selected)
+    ){
+      note.textContent=
+        'Enter two available skill results and select one of them.';
+      return;
+    }
+
+    const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+
+    if(!accessCode){
+      note.textContent=
         'Your Coach Portal session has expired. Please log in again.';
       return;
     }
 
-    button.disabled = true;
-    button.textContent = 'Rolling...';
-    note.textContent =
-      'Selecting a legal Random Primary skill...';
+    const witnessName=witness.value.replace(/\s+/g,' ').trim();
 
-    coachApiSubmitAdvancementRequest(
-      accessCode,
-      player.playerId,
-      option.type,
-      category.category,
-      '',
-      player.nextAdvancement
-    )
+    if(witnessRequired&&!witnessName){
+      note.textContent='Enter the coach who witnessed the dice rolls.';
+      witness.focus();
+      return;
+    }
 
-      .then(function(result) {
+    if(witnessName.length>80||witnessName.startsWith('=')){
+      note.textContent=
+        'Enter a witnessing coach name of up to 80 characters.';
+      witness.focus();
+      return;
+    }
 
-        if (
-          !result ||
-          result.ok !== true ||
-          result.submitted !== true
-        ) {
-          throw new Error(
-            result && result.error
-              ? result.error
-              : 'The Random Primary advancement could not be submitted.'
-          );
-        }
+    const dice=inputs.map(input=>Number(input.value));
 
-        button.textContent =
-          'Random Primary Submitted';
+    setPending(true);
+    button.textContent='SUBMITTING...';
 
-        note.textContent =
-          'Random skill selected: ' +
-          result.improvement;
+    note.textContent=
+      'Saving '+selected+' with the four recorded dice results...';
 
-        const successMessage =
-          '#' + player.number + ' ' +
-          player.playerName + ' gained ' +
-          result.improvement + ' — ' +
-          (result.advancementId || 'Advancement recorded');
+    try{
+      const result=await coachApiSubmitAdvancementRequest(
+        accessCode,
+        player.playerId,
+        option.type,
+        category.category,
+        selected,
+        player.nextAdvancement,
+        dice,
+        witnessName
+      );
 
-        const refreshedPlayers =
-          Array.isArray(result.players)
-            ? result.players
-            : [];
-        
-        const refreshedAdvancements =
-          result.advancements &&
-          Array.isArray(result.advancements.players)
-            ? result.advancements.players
-            : [];
-        
-        renderCoachAdvancements(refreshedAdvancements);
-        renderCoachRoster(refreshedPlayers);
-        
-        showCoachAdvancementSuccess(successMessage);
+      if(!result||result.ok!==true||result.submitted!==true){
+        throw new Error(
+          result&&result.error||
+          'The Random Primary advancement could not be submitted.'
+        );
+      }
 
-      })
+      renderCoachAdvancements(
+        result.advancements&&Array.isArray(result.advancements.players)
+          ?result.advancements.players
+          :[]
+      );
 
-      .catch(function(error) {
-      
-        const message =
-          error && error.message
-            ? error.message
-            : 'Random Primary advancement failed.';
-      
-        if (message === 'Advancement submission timed out.') {
-      
-          button.disabled = true;
-          button.textContent = 'CHECKING RESULT...';
-      
-          note.textContent =
-            'The server did not respond in time. Refresh the portal before attempting another roll. If the roll was recorded, the result is already locked in.';
-      
-          return;
-        }
-      
-        button.disabled = false;
-        button.textContent = 'ROLL RANDOM PRIMARY';
-        note.textContent = message;
-      
-      });
+      renderCoachRoster(
+        Array.isArray(result.players)?result.players:[]
+      );
 
+      showCoachAdvancementSuccess(
+        '#'+player.number+' '+player.playerName+
+        ' gained '+result.improvement+' — '+
+        (result.advancementId||'Advancement recorded')
+      );
+    }catch(error){
+      const message=error&&error.message
+        ?error.message
+        :'Random Primary advancement failed.';
+
+      if(message==='Advancement submission timed out.'){
+        button.textContent='CHECK SAVED RESULT';
+
+        note.textContent=
+          'The server did not respond in time. Refresh the portal and check whether the advancement was recorded before trying again.';
+
+        return;
+      }
+
+      setPending(false);
+      button.textContent='SUBMIT RANDOM PRIMARY';
+      note.textContent=message;
+    }
   });
+
+  refreshRolls();
 }
 
 // =====================================================
