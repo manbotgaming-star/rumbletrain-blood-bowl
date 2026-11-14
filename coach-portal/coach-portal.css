@@ -2193,3 +2193,23 @@ select.coach-game-submission-stat { width:42px; text-align-last:center; }
 .coach-submit-hatred-label { display:grid; gap:3px; font-size:11px; white-space:normal; }
 .coach-submit-hatred select { width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:5px; border:1px solid var(--line-dark); border-radius:4px; font-family:inherit; }
 .coach-submit-hatred-note { display:block; font-size:10px; line-height:1.4; white-space:normal; color:var(--ink-muted); }
+
+/* MANUAL RANDOM PRIMARY DICE */
+.coach-manual-random-help { font-size:12px; line-height:1.5; }
+.coach-manual-random-rolls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.coach-manual-random-card { min-width:0; padding:10px; border:1px solid var(--line-dark); border-radius:5px; }
+.coach-manual-random-dice { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px; }
+.coach-manual-random-dice label { display:grid; gap:4px; font-size:11px; }
+.coach-manual-random-dice select { width:100%; min-width:0; padding:7px; font:inherit; }
+.coach-manual-random-result { margin-top:8px; font-size:12px; line-height:1.4; }
+.coach-manual-random-choices { display:flex; flex-wrap:wrap; gap:12px; margin:12px 0; }
+.coach-manual-random-pick { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.coach-manual-random-review { margin:8px 0; font-size:12px; font-weight:700; }
+.coach-manual-random-witness { display:grid; gap:5px; margin:10px 0; font-size:12px; }
+.coach-manual-random-witness-name { width:100%; min-width:0; padding:7px; border:1px solid var(--line-dark); border-radius:4px; font:inherit; }
+.coach-manual-random-table { margin:12px 0; overflow:auto; font-size:11px; }
+.coach-manual-random-table summary { cursor:pointer; padding:6px 0; }
+.coach-manual-random-table th,.coach-manual-random-table td { padding:5px; white-space:normal; font-size:11px; }
+@media(max-width:600px){
+  .coach-manual-random-rolls { grid-template-columns:1fr; }
+}
