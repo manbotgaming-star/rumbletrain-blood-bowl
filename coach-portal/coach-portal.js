@@ -3837,6 +3837,175 @@ async function refreshCoachGameSubmissionButton(){
 // POST-GAME SUBMISSION - GAME DAY PACK ENTRY FORM
 // Frontend only. No league write yet.
 // =====================================================
+const COACH_HATRED_DESCRIPTION = 'When blocking a player who has the keyword in brackets, this player can re-roll one Player Down result.';
+
+function coachGettingEvenApplies(injury) {
+  return ['Seriously Hurt','Serious Injury','Lasting Injury'].includes(String(injury || '').trim());
+}
+
+function addCoachGettingEvenControls(cell, injurySelect, sources) {
+  const panel = document.createElement('div');
+  panel.className = 'coach-submit-hatred';
+  panel.hidden = true;
+
+  const heading = document.createElement('strong');
+  heading.textContent = 'Getting Even / Hatred';
+  panel.appendChild(heading);
+
+  function addSelect(labelText, className, placeholder) {
+    const label = document.createElement('label');
+    label.className = 'coach-submit-hatred-label';
+
+    const text = document.createElement('span');
+    text.textContent = labelText;
+
+    const select = document.createElement('select');
+    select.className = className;
+    select.add(new Option(placeholder, ''));
+
+    label.appendChild(text);
+    label.appendChild(select);
+    panel.appendChild(label);
+
+    return {label:label, select:select};
+  }
+
+  const cause = addSelect('Casualty caused by', 'coach-submit-casualty-source', 'Select opposing player');
+
+  (sources || []).forEach(player => {
+    const label = '#' + player.playerNumber + ' ' + player.playerName + ' — ' + player.position + ' [' + player.playerId + ']';
+    cause.select.add(new Option(label, player.playerId));
+  });
+
+  cause.select.add(new Option('No opposing player caused this injury', '__OTHER__'));
+
+  const roll = addSelect('Getting Even D6', 'coach-submit-hatred-roll', 'Select rolled result');
+  for (let value = 1; value <= 6; value++) roll.select.add(new Option(String(value), String(value)));
+  roll.label.hidden = true;
+
+  const keyword = addSelect('Hatred keyword', 'coach-submit-hatred-keyword', 'Select keyword');
+  keyword.label.hidden = true;
+
+  const status = document.createElement('small');
+  status.className = 'coach-submit-hatred-note';
+  status.setAttribute('aria-live', 'polite');
+  panel.appendChild(status);
+
+  const description = document.createElement('small');
+  description.className = 'coach-submit-hatred-note';
+  description.textContent = 'Enter the D6 result already rolled for this injury. On 4+, choose one eligible keyword. ' + COACH_HATRED_DESCRIPTION;
+  panel.appendChild(description);
+
+  function refresh() {
+    const eligible = coachGettingEvenApplies(injurySelect.value);
+    panel.hidden = !eligible;
+
+    if (!eligible) {
+      cause.select.value = '';
+      roll.select.value = '';
+      keyword.select.value = '';
+    }
+
+    const source = (sources || []).find(player => player.playerId === cause.select.value);
+    const showRoll = eligible && !!source;
+    const passed = showRoll && Number(roll.select.value) >= 4;
+
+    roll.label.hidden = !showRoll;
+    keyword.label.hidden = !passed;
+
+    const previousKeyword = keyword.select.value;
+    keyword.select.replaceChildren(new Option('Select keyword', ''));
+
+    if (passed) {
+      (source.keywords || []).forEach(value => keyword.select.add(new Option(value, value)));
+    }
+
+    keyword.select.value = passed && (source.keywords || []).includes(previousKeyword) ? previousKeyword : '';
+
+    if (cause.select.value === '__OTHER__') {
+      status.textContent = 'Injury effects still apply; no Hatred will be recorded.';
+    } else if (!source) {
+      status.textContent = 'Select the opposing player who caused this casualty.';
+    } else if (passed && source.keywordError) {
+      status.textContent = 'Opponent keywords are unavailable. Ask the commissioner to check this player.';
+    } else if (passed) {
+      status.textContent = 'Choose one eligible keyword.';
+    } else if (roll.select.value) {
+      status.textContent = 'Roll failed: no Hatred gained.';
+    } else {
+      status.textContent = 'Enter the Getting Even D6 result.';
+    }
+
+    reportCoachPortalHeight();
+  }
+
+  cause.select.onchange = function() {
+    roll.select.value = '';
+    keyword.select.value = '';
+    refresh();
+  };
+
+  roll.select.onchange = function() {
+    keyword.select.value = '';
+    refresh();
+  };
+
+  injurySelect.addEventListener('change', refresh);
+  cell.appendChild(panel);
+}
+
+function readCoachGettingEven(row, sources) {
+  const injury = row.querySelector('.coach-submit-injury-result');
+  if (!injury || !coachGettingEvenApplies(injury.value)) return {};
+
+  const cause = row.querySelector('.coach-submit-casualty-source');
+  const roll = row.querySelector('.coach-submit-hatred-roll');
+  const keyword = row.querySelector('.coach-submit-hatred-keyword');
+
+  function fail(field, message) {
+    const error = new Error(message);
+    error.field = field;
+    throw error;
+  }
+
+  if (!cause || !cause.value) {
+    fail(cause || injury, 'Select who caused the casualty, or select that no opposing player caused it.');
+  }
+
+  if (cause.value === '__OTHER__') return {};
+
+  const source = (sources || []).find(player => player.playerId === cause.value);
+
+  if (!source) {
+    fail(cause, 'The selected casualty-causing player is unavailable. Refresh the Coach Portal.');
+  }
+
+  if (!roll || !/^[1-6]$/.test(roll.value)) {
+    fail(roll || cause, 'Enter the Getting Even D6 result from 1 to 6.');
+  }
+
+  const result = Number(roll.value);
+  const selectedKeyword = String(keyword && keyword.value || '').trim();
+
+  if (result >= 4) {
+    if (source.keywordError) {
+      fail(cause, 'Opponent keywords are unavailable. Ask the commissioner to check this player.');
+    }
+
+    if (!(source.keywords || []).includes(selectedKeyword)) {
+      fail(keyword || cause, 'Select the Hatred keyword for the successful Getting Even roll.');
+    }
+  } else if (selectedKeyword) {
+    fail(keyword, 'A failed Getting Even roll cannot award Hatred.');
+  }
+
+  return {
+    causedByPlayerId:source.playerId,
+    hatredRoll:result,
+    hatredKeyword:result >= 4 ? selectedKeyword : ''
+  };
+}
+
 async function openCoachGameSubmissionPreview(launchButton){
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const modal=document.getElementById('coach-game-submission-modal');
@@ -3865,6 +4034,7 @@ async function openCoachGameSubmissionPreview(launchButton){
   
     if(!result||result.ok!==true||!result.game) throw new Error(result&&result.error?result.error:'Unable to load the game submission.');
     if(result.canSubmit!==true) throw new Error(result.reason||'This game is not currently available for submission.');
+    if(!Array.isArray(result.hatredSources)) throw new Error('The game options are out of date. Refresh the Coach Portal and try again.');
 
     const game=result.game;
     const team=result.team||{};
@@ -4476,6 +4646,7 @@ async function openCoachGameSubmissionPreview(launchButton){
 
       injury.appendChild(injurySelect);
       injury.appendChild(lastingSelect);
+      addCoachGettingEvenControls(injury, injurySelect, result.hatredSources);
 
       row.appendChild(number);
       row.appendChild(name);
@@ -4536,6 +4707,7 @@ function collectGameSubmissionPayload(){
   
     if(injury&&injury.value) entry.injuryResult=injury.value;
     if(lasting&&lasting.value) entry.lastingInjury=lasting.value;
+    Object.assign(entry, readCoachGettingEven(row, result.hatredSources));
   
     return entry;
   });
@@ -4694,6 +4866,17 @@ function openFinalGameReview(payload){
         );
       }
 
+      if(player.causedByPlayerId){
+        const cause=result.hatredSources.find(source=>source.playerId===player.causedByPlayerId);
+
+        parts.push('Caused by '+(cause?'#'+cause.playerNumber+' '+cause.playerName:player.causedByPlayerId)+' ['+player.causedByPlayerId+']');
+        parts.push('Getting Even D6 '+player.hatredRoll);
+        parts.push(player.hatredKeyword?'Hatred ('+player.hatredKeyword+')':'No Hatred gained');
+      }
+      else if(coachGettingEvenApplies(player.injuryResult)){
+        parts.push('No opposing player; no Hatred recorded');
+      }
+      
       resultCell.textContent=parts.join(' | ');
 
       row.appendChild(number);
@@ -4853,7 +5036,17 @@ reviewButton.onclick=function(){
     return;
   }
 
-  const payload=collectGameSubmissionPayload();
+  let payload;
+
+  try{
+    payload=collectGameSubmissionPayload();
+  }
+  catch(error){
+    message.classList.add('is-error');
+    message.textContent=error.message||'Check the Getting Even entries.';
+    if(error.field) error.field.focus();
+    return;
+  }
 
   message.classList.add('is-success');
   message.textContent='Entries look valid. Opening Final Review...';
@@ -4963,6 +5156,10 @@ function renderCoachRoster(players){
     appendCell(row,player.pa);
     appendCell(row,player.av);
     appendCell(row,player.skills);
+    if(/\bhatred\s*\(/i.test(String(player.skills||''))){
+      row.lastElementChild.title=COACH_HATRED_DESCRIPTION;
+      row.lastElementChild.setAttribute('aria-label',String(player.skills)+'. '+COACH_HATRED_DESCRIPTION);
+    }
     appendCell(row,player.spp);
     appendCell(row,formatGold(player.value));
 
