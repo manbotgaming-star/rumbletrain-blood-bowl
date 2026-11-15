@@ -1289,19 +1289,8 @@ function renderCoachManagement(team, management) {
   setText('coach-rerolls', displayValue(team.rerolls));
   setText('coach-apothecary', displayValue(team.apothecary));
 
-      // ---------------------------------------------------
-      // BUY PLAYER - USE EXISTING MANAGEMENT DATA
-      // ---------------------------------------------------
-      const buyPlayerButton=document.getElementById('coach-management-buy-player');
-      const playerCount=Number(document.getElementById('coach-management-players')?.textContent)||0;
-      const canAttemptPurchase=Number(team.treasury)>0&&playerCount<16;
-    
-      if(buyPlayerButton){
-        buyPlayerButton.disabled=!canAttemptPurchase;
-        buyPlayerButton.title=canAttemptPurchase?'Load current player purchase options.':'No funds available or roster is full.';
-        buyPlayerButton.innerHTML='<span>Buy Player</span><strong>Select</strong>';
-        buyPlayerButton.onclick=canAttemptPurchase?openCoachPlayerPurchase:null;
-      }
+    // Check current legal and affordable player/Journeyman options.
+    refreshCoachBuyPlayerButtonState();
   
     // ---------------------------------------------------
     // RAISE THE DEAD - ONLY CHECK ROSTERS WITH THE RULE
@@ -1861,23 +1850,39 @@ function applyCoachBuyPlayerButtonState(result){
 }
 
 async function refreshCoachBuyPlayerButtonState() {
-  const accessCode = sessionStorage.getItem(SESSION_KEY) || '';
-  const button = document.getElementById('coach-management-buy-player');
+  const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
+  const button=document.getElementById('coach-management-buy-player');
+  if(!button) return;
 
-  if (!button || !accessCode) return;
+  const checkToken={};
+  button.coachBuyPlayerCheck=checkToken;
+  button.disabled=true;
+  button.onclick=null;
+  button.title='Checking affordable player options...';
+  button.innerHTML='<span>Buy Player</span><strong>Checking...</strong>';
+
+  if(!accessCode){
+    button.title='Log in to check player purchase availability.';
+    button.innerHTML='<span>Buy Player</span><strong>Unavailable</strong>';
+    return;
+  }
+
+  const isCurrent=()=>button.coachBuyPlayerCheck===checkToken&&
+    (sessionStorage.getItem(SESSION_KEY)||'')===accessCode;
 
   try {
-    const result = await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+    const result=await coachApiGetPlayerPurchaseOptionsRequest(accessCode);
+    if(!isCurrent()) return;
     applyCoachBuyPlayerButtonState(result);
   }
-  catch (error) {
-    button.disabled = true;
-    button.title = error && error.message ? error.message : 'Unable to check player purchase availability.';
-    button.innerHTML = '<span>Buy Player</span><strong>Unavailable</strong>';
-    button.onclick = null;
+  catch(error){
+    if(!isCurrent()) return;
+    button.disabled=true;
+    button.title=error&&error.message?error.message:'Unable to check player purchase availability.';
+    button.innerHTML='<span>Buy Player</span><strong>Unavailable</strong>';
+    button.onclick=null;
   }
 }
-
 async function openCoachPlayerPurchase() {
   const accessCode=sessionStorage.getItem(SESSION_KEY)||'';
   const launchButton=document.getElementById('coach-management-buy-player');
