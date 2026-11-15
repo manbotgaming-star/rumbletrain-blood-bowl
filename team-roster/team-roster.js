@@ -163,8 +163,15 @@ function renderPlayers(players){
   }
 
   return players.map(function(player){
-    const status=String(player.status||'Active').trim();
-    const statusClass=getStatusClass(status);
+    const baseStatus=String(player.status||'Active').trim();
+    const mng=String(player.mng||'').trim().toLowerCase()==='yes';
+    const niggling=Number(player.niggling)||0;
+    let status=baseStatus;
+    
+    if(mng) status+=' / MNG';
+    if(niggling>0) status+=' / Niggling '+niggling;
+    
+    const statusClass=getStatusClass(mng&&baseStatus.toLowerCase()==='active'?'MNG':baseStatus);
     const skills=player.skills||[player.startingSkills,player.addedSkills].filter(Boolean).join(', ');
 
     return `
