@@ -1196,13 +1196,14 @@ body{display:flex;align-items:center;justify-content:center}
 // =====================================================
 // GAME DAY PACK - BUTTON STATE
 // =====================================================
-function setCoachGameDayPackState(state,gameId){
+function setCoachGameDayPackState(state,gameId,reason){
   const link=document.getElementById('coach-game-day-pack');
   if(!link) return;
 
   link.classList.remove('is-checking','is-pending','is-unavailable');
   delete link.dataset.pendingText;
   delete link.dataset.pendingGameId;
+  link.removeAttribute('title');
 
   if(state==='checking'){
     link.classList.add('is-checking');
@@ -1220,10 +1221,11 @@ function setCoachGameDayPackState(state,gameId){
     return;
   }
 
-  if(state==='pending'){
+  if(state==='pending'||state==='locked'){
     link.classList.add('is-pending');
-    link.dataset.pendingText='PENDING OPPONENT SUBMISSION';
+    link.dataset.pendingText=state==='locked'?'WAITING FOR EARLIER GAMES':'PENDING OPPONENT SUBMISSION';
     link.dataset.pendingGameId=String(gameId||'');
+    if(state==='locked') link.title=reason||'Both teams must complete their earlier games first.';
     link.setAttribute('aria-disabled','true');
     link.setAttribute('tabindex','-1');
     return;
@@ -3937,7 +3939,7 @@ async function refreshCoachGameSubmissionButton(){
     const isReview=validationStatus==='Mismatch';
     
     setCoachPendingGameNotice(!!submission,isReview);
-    setCoachGameDayPackState(submission?(isReview?'review':'pending'):'ready',result.game.gameId);
+    setCoachGameDayPackState(result.fixtureLocked===true?'locked':submission?(isReview?'review':'pending'):'ready',result.game.gameId,result.reason);
     
     // Keep Commissioner Review warning visible until resolved.
     const existingResult=document.querySelector('.coach-game-submission-result');
@@ -3979,6 +3981,14 @@ async function refreshCoachGameSubmissionButton(){
       return;
     }
 
+    if(result.fixtureLocked===true){
+      button.disabled=true;
+      button.textContent='Waiting for Earlier Games';
+      button.title=result.reason||'Both teams must complete their earlier games first.';
+      button.onclick=null;
+      return;
+    }
+    
     // ---------------------------------------------------
     // AVAILABLE TO SUBMIT
     // ---------------------------------------------------
