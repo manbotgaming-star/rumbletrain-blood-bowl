@@ -1,3 +1,7 @@
+// ========================================
+// GitHub reference-data.js
+// ========================================
+
 const BASE_URL = 'https://dahuwcfrwkshtkjxudij.supabase.co';
 const PUBLIC_KEY = 'sb_publishable_xZaw1wxRCmMrQDo5Cojz3Q_FhUuDUFX';
 
