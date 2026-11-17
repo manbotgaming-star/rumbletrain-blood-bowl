@@ -4,7 +4,10 @@ const PUBLIC_KEY = 'sb_publishable_xZaw1wxRCmMrQDo5Cojz3Q_FhUuDUFX';
 const TABLES = {
   roster_rules: ['Roster'],
   base_positions: ['Position Key', 'Roster', 'Position'],
-  skill_lists: ['Category', 'Skill', 'Elite?']
+  skill_lists: ['Category', 'Skill', 'Elite?'],
+  inducement_rules: ['Inducement', 'Cost', 'Max Qty', 'Active'],
+  special_rules: ['Special Rule', 'Description'],
+  star_players: ['Star ID', 'Name', 'Cost', 'Active']
 };
 
 const cache = new Map();
@@ -95,6 +98,9 @@ async function readTable(table) {
 export const getRosterRules = () => readTable('roster_rules');
 export const getBasePositions = () => readTable('base_positions');
 export const getSkillLists = () => readTable('skill_lists');
+export const getInducementRules = () => readTable('inducement_rules');
+export const getSpecialRules = () => readTable('special_rules');
+export const getStarPlayers = () => readTable('star_players');
 
 export async function loadReferenceData() {
   const [rosters, positions, skills] = await Promise.all([
