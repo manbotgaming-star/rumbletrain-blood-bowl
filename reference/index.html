@@ -177,7 +177,7 @@
 </main>
 
 <script type="module">
-import { loadReferenceData } from '../shared/reference-data.js?v=1';
+import { loadReferenceData } from '../shared/reference-data.js?v=2';
 const el = id => document.getElementById(id);
 
 const gp = value =>
@@ -345,5 +345,6 @@ el('retry').addEventListener('click', start);
 
 start();
 </script>
+<script type="module" src="./extra-reference.js?v=1"></script>
 </body>
 </html>
