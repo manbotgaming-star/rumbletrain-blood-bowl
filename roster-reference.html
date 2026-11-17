@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roster Reference | Rumble Train</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #edf2f3;
+    color: #193b47;
+    font: 16px system-ui, sans-serif;
+  }
+
+  main {
+    max-width: 1250px;
+    margin: auto;
+    padding: 32px 20px;
+  }
+
+  h1 { margin-bottom: 8px; }
+  h2 { margin-top: 0; }
+
+  section {
+    background: white;
+    padding: 24px;
+    border-radius: 10px;
+    margin: 22px 0;
+    box-shadow: 0 3px 15px #193b4710;
+  }
+
+  select, button {
+    font: inherit;
+    padding: 10px;
+    border: 1px solid #9aadb5;
+    border-radius: 5px;
+    background: white;
+    color: inherit;
+  }
+
+  select { max-width: 100%; }
+  button { cursor: pointer; }
+
+  label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .scroll {
+    overflow: auto;
+    margin-top: 20px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #dce4e7;
+    vertical-align: top;
+  }
+
+  th {
+    background: #193f4e;
+    color: white;
+    white-space: nowrap;
+  }
+
+  td:nth-child(7) { min-width: 220px; }
+
+  dl {
+    display: grid;
+    grid-template-columns: minmax(130px,210px) 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  dt { font-weight: 700; }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  #status { min-height: 24px; }
+  #status.error { color: #a51e26; }
+  .note { color: #526c78; }
+
+  ul {
+    padding-left: 22px;
+    columns: 3;
+    column-width: 200px;
+  }
+
+  li {
+    padding: 6px;
+    break-inside: avoid;
+  }
+
+  @media (max-width: 600px) {
+    main { padding: 20px 12px; }
+    section { padding: 16px; }
+    dl { grid-template-columns: 1fr; gap: 6px; }
+    dd { margin-bottom: 10px; }
+  }
+</style>
+</head>
+
+<body>
+<main>
+  <h1>Roster reference</h1>
+
+  <p class="note">
+    Rumble Train Blood Bowl · Roster rules, positions and skills
+  </p>
+
+  <p id="status" role="status" aria-live="polite">
+    Loading reference data…
+  </p>
+
+  <button id="retry" hidden>Retry loading</button>
+
+  <div id="content" hidden>
+    <section>
+      <label for="roster">Choose a roster</label>
+      <select id="roster"></select>
+
+      <h2 id="roster-heading" style="margin-top:24px"></h2>
+      <dl id="rules"></dl>
+
+      <div
+        class="scroll"
+        tabindex="0"
+        aria-label="Base positions table, scroll horizontally for more columns"
+      >
+        <table>
+          <caption>Base positions and starting characteristics</caption>
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>MA</th>
+              <th>ST</th>
+              <th>AG</th>
+              <th>PA</th>
+              <th>AV</th>
+              <th>Starting skills</th>
+              <th>Primary</th>
+              <th>Secondary</th>
+              <th>Cost (GP)</th>
+              <th>Max</th>
+              <th>Journeyman</th>
+              <th>Keywords</th>
+            </tr>
+          </thead>
+          <tbody id="positions"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Skill reference</h2>
+
+      <label for="category">Choose a skill category</label>
+      <select id="category"></select>
+
+      <ul id="skills"></ul>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import { loadReferenceData } from './reference-data.js?v=1';
+
+const el = id => document.getElementById(id);
+
+const gp = value =>
+  value == null
+    ? '—'
+    : Number(value).toLocaleString('en-GB');
+
+const display = value =>
+  value == null || value === '' ? '—' : String(value);
+
+let data;
+
+function options(select, values) {
+  select.replaceChildren(...values.map(value => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    return option;
+  }));
+}
+
+function renderRoster() {
+  const roster = data.rosters.find(
+    row => row.Roster === el('roster').value
+  );
+
+  el('roster-heading').textContent = roster.Roster;
+
+  const rows = [
+    ['Re-roll base cost',
+      gp(roster['Re-roll Base Cost']) + ' GP'],
+
+    ['League re-roll cost',
+      gp(roster['League Re-roll Cost']) + ' GP'],
+
+    ['Apothecary',
+      roster['Apothecary Allowed']
+        ? gp(roster['Apothecary Cost']) + ' GP'
+        : 'Not allowed'],
+
+    ['Assistant coaches',
+      roster['Assistant Coach Allowed']
+        ? gp(roster['Assistant Coach Cost']) +
+          ' GP each; maximum ' + roster['Assistant Coach Max']
+        : 'Not allowed'],
+
+    ['Cheerleaders',
+      roster['Cheerleader Allowed']
+        ? gp(roster['Cheerleader Cost']) +
+          ' GP each; maximum ' + roster['Cheerleader Max']
+        : 'Not allowed'],
+
+    ['Special rules', display(roster['Special Rules'])],
+    ['League options', display(roster['League Options'])]
+  ];
+
+  el('rules').replaceChildren(...rows.flatMap(([label, value]) => {
+    const dt = document.createElement('dt');
+    const dd = document.createElement('dd');
+
+    dt.textContent = label;
+    dd.textContent = value;
+
+    return [dt, dd];
+  }));
+
+  const positions = data.positions.filter(
+    row => row.Roster === roster.Roster
+  );
+
+  el('positions').replaceChildren(...positions.map(row => {
+    const tr = document.createElement('tr');
+
+    const values = [
+      row.Position,
+      row.MA,
+      row.ST,
+      row.AG,
+      row.PA,
+      row.AV,
+      row['Starting Skills'],
+      row.Primary,
+      row.Secondary,
+      gp(row.Cost),
+      row.Max,
+      row['Journeyman?'] ? 'Yes' : 'No',
+      row.Keywords
+    ];
+
+    values.forEach(value => {
+      const td = document.createElement('td');
+      td.textContent = display(value);
+      tr.append(td);
+    });
+
+    return tr;
+  }));
+}
+
+function renderSkills() {
+  el('skills').replaceChildren(...data.skills
+    .filter(row => row.Category === el('category').value)
+    .map(row => {
+      const li = document.createElement('li');
+
+      li.textContent =
+        row.Skill + (row['Elite?'] ? ' — Elite' : '');
+
+      return li;
+    }));
+}
+
+async function start() {
+  el('retry').hidden = true;
+  el('content').hidden = true;
+  el('status').className = '';
+  el('status').textContent = 'Loading reference data…';
+
+  try {
+    data = await loadReferenceData();
+
+    if (
+      !data.rosters.length ||
+      !data.positions.length ||
+      !data.skills.length
+    ) {
+      throw new Error('A reference table is empty.');
+    }
+
+    const names = new Set(data.rosters.map(row => row.Roster));
+
+    if (data.positions.some(row => !names.has(row.Roster))) {
+      throw new Error('Some positions have an unrecognised roster.');
+    }
+
+    options(el('roster'), [...names].sort());
+
+    options(
+      el('category'),
+      [...new Set(data.skills.map(row => row.Category))].sort()
+    );
+
+    renderRoster();
+    renderSkills();
+
+    el('content').hidden = false;
+
+    el('status').textContent =
+      `${data.rosters.length} rosters · ` +
+      `${data.positions.length} positions · ` +
+      `${data.skills.length} skills`;
+  } catch (error) {
+    el('status').className = 'error';
+
+    el('status').textContent =
+      'Unable to load reference data. ' + error.message;
+
+    el('retry').hidden = false;
+  }
+}
+
+el('roster').addEventListener('change', renderRoster);
+el('category').addEventListener('change', renderSkills);
+el('retry').addEventListener('click', start);
+
+start();
+</script>
+</body>
+</html>
