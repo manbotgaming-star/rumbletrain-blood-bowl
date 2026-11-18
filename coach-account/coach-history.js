@@ -1,7 +1,7 @@
 // ========================================
 // GitHub: coach-account/coach-history.js
 // ========================================
-import { supabase } from '../shared/supabase-client.js?v=1';
+import { supabase } from '../shared/supabase-client.js?v=2';
 
 const host = document.createElement('div');
 host.id = 'coach-history'; host.hidden = true;
