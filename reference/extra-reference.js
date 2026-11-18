@@ -6,7 +6,7 @@ import {
   getInducementRules,
   getSpecialRules,
   getStarPlayers
-} from '../shared/reference-data.js?v=2';
+} from '../shared/reference-data.js?v=3';
 
 const main = document.querySelector('main');
 
