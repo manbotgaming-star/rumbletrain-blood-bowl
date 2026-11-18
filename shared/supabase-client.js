@@ -1,5 +1,5 @@
 // ========================================
-// GitHub supabase-client.js
+// GitHub shared/supabase-client.js
 // ========================================
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm';
