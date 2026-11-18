@@ -2,7 +2,7 @@
 // GitHub coach-account/coach-account.js
 // ========================================
 
-import './password-recovery.js?v=1';
+import './password-recovery.js?v=2';
 import { supabase } from '../shared/supabase-client.js?v=2';
 import { loadCoachHistory, clearCoachHistory } from './coach-history.js?v=2';
 
