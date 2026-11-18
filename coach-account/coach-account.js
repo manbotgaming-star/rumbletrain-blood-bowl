@@ -1,5 +1,5 @@
 // ========================================
-// GitHub coach-account.js
+// GitHub coach-account/coach-account.js
 // ========================================
 
 import { supabase } from '../shared/supabase-client.js?v=1';
