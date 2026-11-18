@@ -5,7 +5,7 @@ import { supabase } from '../shared/supabase-client.js?v=2';
 
 const button = document.getElementById('forgot-password');
 
-button.addEventListener('click', async () => {
+button?.addEventListener('click', async () => {
   const email = document.getElementById('email');
   if (!email.reportValidity()) return;
 
