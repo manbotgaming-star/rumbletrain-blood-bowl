@@ -4,14 +4,20 @@
 
 const BASE_URL = 'https://dahuwcfrwkshtkjxudij.supabase.co';
 const PUBLIC_KEY = 'sb_publishable_xZaw1wxRCmMrQDo5Cojz3Q_FhUuDUFX';
-
+// ========================================
+// Tables Definitions
+// ========================================
 const TABLES = {
   roster_rules: ['Roster'],
   base_positions: ['Position Key', 'Roster', 'Position'],
   skill_lists: ['Category', 'Skill', 'Elite?'],
   inducement_rules: ['Inducement', 'Cost', 'Max Qty', 'Active'],
   special_rules: ['Special Rule', 'Description'],
-  star_players: ['Star ID', 'Name', 'Cost', 'Active']
+  star_players: ['Star ID', 'Name', 'Cost', 'Active'],
+  spp_awards: ['action_code', 'action_name','standard_spp', 'brawlin_brutes_spp', 'notes'],
+  advancement_costs: ['advancement_number', 'rank', 'random_primary','choose_primary', 'choose_secondary', 'characteristic'],
+  advancement_value_increases: ['value_type', 'value_increase', 'notes'],
+  characteristic_roll_options: ['d8_result', 'characteristics']
 };
 
 const cache = new Map();
@@ -105,7 +111,10 @@ export const getSkillLists = () => readTable('skill_lists');
 export const getInducementRules = () => readTable('inducement_rules');
 export const getSpecialRules = () => readTable('special_rules');
 export const getStarPlayers = () => readTable('star_players');
-
+export const getSppAwards = () => readTable('spp_awards');
+export const getAdvancementCosts = () => readTable('advancement_costs');
+export const getAdvancementValueIncreases = () => readTable('advancement_value_increases');
+export const getCharacteristicRollOptions = () => readTable('characteristic_roll_options');
 export async function loadReferenceData() {
   const [rosters, positions, skills] = await Promise.all([
     getRosterRules(),
