@@ -1,4 +1,6 @@
-
+// ========================================
+// GitHub advancement-reference.js
+// ========================================
 
 import {
   getSppAwards,
