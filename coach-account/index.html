@@ -1,0 +1,85 @@
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Coach Account | Rumble Train</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#edf2f3;color:#193b47;font:16px system-ui,sans-serif}
+main{max-width:1200px;margin:auto;padding:32px 20px}
+section{background:white;padding:24px;border-radius:10px;margin:20px 0}
+h1,h2{margin-top:0}
+label{display:block;margin:14px 0 6px;font-weight:600}
+input,select,button{font:inherit;padding:10px;border:1px solid #a2b3ba;border-radius:5px}
+input{width:100%}select{max-width:100%}
+button{cursor:pointer;background:#193f4e;color:white;margin:12px 8px 0 0}
+button:disabled{opacity:.6;cursor:wait}
+#login{max-width:440px}
+#message{min-height:24px;overflow-wrap:anywhere}
+.scroll{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #dce4e7;vertical-align:top}
+th{background:#193f4e;color:white;white-space:nowrap}
+td:nth-child(9){min-width:220px}
+dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px}
+dt{font-size:14px}dd{font-size:20px;font-weight:700;margin:5px 0}
+.note{color:#526c78}
+@media(max-width:600px){main{padding:20px 12px}section{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Coach account</h1>
+<p class="note">Read-only preview using imported league data. Purchases and match submissions are not enabled.</p>
+<p id="message" role="status" aria-live="polite">Loading sign-in…</p>
+
+<section id="login">
+  <h2>Sign in</h2>
+  <form id="login-form">
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button id="sign-in" type="submit" disabled>Sign in</button>
+  </form>
+</section>
+
+<section id="account" hidden>
+  <p id="identity"></p>
+  <div id="team-picker" hidden>
+    <label for="team-choice">Team and season</label>
+    <select id="team-choice"></select>
+    <button id="refresh" type="button">Refresh team</button>
+  </div>
+  <button id="sign-out" type="button">Sign out</button>
+</section>
+
+<section id="team" hidden>
+  <h2 id="team-name"></h2>
+  <p id="team-meta"></p>
+  <dl id="team-stats"></dl>
+  <p class="note">Base characteristics are shown below. Injury status is listed separately.</p>
+  <div class="scroll" tabindex="0" aria-label="Team roster table">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Player</th><th>Position</th>
+        <th>Base MA</th><th>Base ST</th><th>Base AG</th>
+        <th>Base PA</th><th>Base AV</th><th>Skills</th>
+        <th>Career SPP</th><th>Spent</th><th>Available</th>
+        <th>Value (GP)</th><th>Status</th>
+      </tr></thead>
+      <tbody id="roster"></tbody>
+    </table>
+  </div>
+</section>
+
+<noscript>JavaScript is required to sign in.</noscript>
+</main>
+<script type="module" src="./coach-account.js?v=1"></script>
+</body>
+</html>
