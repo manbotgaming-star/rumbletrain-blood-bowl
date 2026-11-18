@@ -3,6 +3,7 @@
 // ========================================
 
 import { supabase } from '../shared/supabase-client.js?v=1';
+import { loadCoachHistory, clearCoachHistory } from './coach-history.js?v=1';
 
 const el = id => document.getElementById(id);
 const number = value => Number(value).toLocaleString('en-GB');
@@ -15,6 +16,7 @@ function node(tag, value) {
 }
 
 function clearTeam() {
+  clearCoachHistory();
   el('team').hidden = true;
   el('roster').replaceChildren();
   el('team-stats').replaceChildren();
@@ -104,6 +106,7 @@ async function loadTeam() {
     }));
 
     el('team').hidden = false;
+    loadCoachHistory(season_id, team_id, players);
     el('message').textContent = `${players.length} players loaded. Read-only access.`;
   } catch (error) {
     if (id !== revision) return;
