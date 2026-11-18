@@ -1,5 +1,5 @@
 // ========================================
-// GitHub reference-data.js
+// GitHub shared/reference-data.js
 // ========================================
 
 const BASE_URL = 'https://dahuwcfrwkshtkjxudij.supabase.co';
