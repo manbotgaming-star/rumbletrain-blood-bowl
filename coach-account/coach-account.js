@@ -2,8 +2,9 @@
 // GitHub coach-account/coach-account.js
 // ========================================
 
-import { supabase } from '../shared/supabase-client.js?v=1';
-import { loadCoachHistory, clearCoachHistory } from './coach-history.js?v=1';
+import './password-recovery.js?v=1';
+import { supabase } from '../shared/supabase-client.js?v=2';
+import { loadCoachHistory, clearCoachHistory } from './coach-history.js?v=2';
 
 const el = id => document.getElementById(id);
 const number = value => Number(value).toLocaleString('en-GB');
