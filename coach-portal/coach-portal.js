@@ -5516,7 +5516,65 @@ function renderCoachRoster(players,journeymen=[]){
     if(playerStatus==='dead') row.classList.add('coach-player-dead');
     if(playerStatus==='retired') row.classList.add('coach-player-retired');
 
+    
+    // =====================================================
+    // JOURNEYMAN PLAYER NUMBER - INLINE EDITOR
+    // =====================================================
     appendCell(row,player.number);
+    if(player.isJourneyman){
+      const cell=row.lastElementChild;
+      const edit=document.createElement('button');
+      edit.type='button'; edit.textContent='✎'; edit.title='Edit Journeyman number';
+      edit.style.cssText='margin-left:5px;cursor:pointer;padding:1px 4px;font-size:11px;';
+      cell.appendChild(edit);
+
+      edit.onclick=function(){
+        cell.textContent='';
+        const input=document.createElement('input');
+        input.type='number'; input.min='1'; input.max='99'; input.value=String(player.number||20);
+        input.style.cssText='width:48px;padding:3px;font-size:12px;';
+
+        const save=document.createElement('button'),cancel=document.createElement('button');
+        save.type='button'; save.textContent='Save';
+        cancel.type='button'; cancel.textContent='×';
+        save.style.cssText='margin-left:4px;cursor:pointer;';
+        cancel.style.cssText='margin-left:3px;cursor:pointer;';
+        const message=document.createElement('div');
+        message.style.cssText='color:#b3261e;font-size:10px;';
+
+        cell.append(input,save,cancel,message);
+        cancel.onclick=()=>{cell.textContent=''; cell.append(document.createTextNode(String(player.number)),edit);};
+
+        save.onclick=async function(){
+          const number=Number(input.value);
+          if(!Number.isInteger(number)||number<1||number>99){
+            message.textContent='Choose #1–#99.'; return;
+          }
+          const code=sessionStorage.getItem(SESSION_KEY)||'';
+          if(!code){message.textContent='Session expired. Please log in.';return;}
+
+          save.disabled=true; cancel.disabled=true; message.textContent='Saving...';
+          message.style.color='#173d4d';
+
+          try{
+            const result=await coachApiPlayerRequest('coachjourneymannumber',{
+              code:code,journeymanId:player.journeymanId,number:number
+            },'Unable to save Journeyman number.');
+
+            if(!result||result.ok!==true) throw new Error(result?.error||'Number update failed.');
+            const data=await coachApiRequest(code);
+            if(!data||data.ok!==true) throw new Error('Saved, but unable to refresh roster.');
+            renderCoachPortal(data);
+          }
+          catch(error){
+            message.style.color='#b3261e';
+            message.textContent=error.message||'Unable to save.';
+            save.disabled=false; cancel.disabled=false;
+          }
+        };
+      };
+    }
+
     appendCell(row,player.playerName);
     appendCell(row,player.position);
     appendCell(row,player.ma);
