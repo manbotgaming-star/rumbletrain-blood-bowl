@@ -1115,7 +1115,7 @@ function renderCoachPortal(data) {
 
   renderCoachGames(games,team,coach);
   renderCoachAdvancements(advancementPlayers);
-  renderCoachRoster(players);
+  renderCoachRoster(players,data.journeymen||[]);
 }
 
 // =====================================================
@@ -5461,13 +5461,24 @@ function displayTeamForGame(teamId,team,coach){
 // =====================================================
 // ROSTER
 // =====================================================
-function renderCoachRoster(players){
+function renderCoachRoster(players,journeymen=[]){
   const body=document.getElementById('coach-roster-body');
   if(!body) return;
 
+  // =====================================================
+  // INCLUDE ASSIGNED JOURNEYMEN IN THE ROSTER DISPLAY
+  // =====================================================
+  const rosterPlayers=players.concat((journeymen||[]).map(jm=>({
+    ...jm,
+    isJourneyman:true,
+    status:'Journeyman',
+    mng:'No',
+    niggling:0
+  })));
+
   body.innerHTML='';
 
-  if(!players.length){
+  if(!rosterPlayers.length){
     const row=document.createElement('tr');
     const cell=document.createElement('td');
     cell.colSpan=12;
@@ -5481,7 +5492,7 @@ function renderCoachRoster(players){
   // ROSTER DISPLAY ORDER
   // Active → MNG → Retired/Released → Dead
   // ---------------------------------------------------
-  const sortedPlayers=players.slice().sort(function(a,b){
+  const sortedPlayers=rosterPlayers.slice().sort(function(a,b){
     function rosterRank(player){
       const status=String(player.status||'').trim().toLowerCase();
       const mng=String(player.mng||'').trim().toLowerCase()==='yes';
@@ -5547,7 +5558,7 @@ function renderCoachRoster(players){
     statusContent.appendChild(statusText);
     statusCell.appendChild(statusContent);
     
-    if(playerStatus==='active'){
+    if(playerStatus==='active'&&!player.isJourneyman){
       const retireButton=document.createElement('button');
       retireButton.type='button';
       retireButton.className='coach-roster-retire-button';
@@ -6193,34 +6204,14 @@ function showCoachPurchaseConfirmation(itemLabel, cost) {
 // =====================================================
 // HTML ESCAPING
 // =====================================================
-
 function escapePortalHtml(value) {
-
-  return String(
-    value ?? ''
-  )
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-    .replace(
-      /</g,
-      '&lt;'
-    )
-    .replace(
-      />/g,
-      '&gt;'
-    )
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-    .replace(
-      /'/g,
-      '&#039;'
-    );
+  return String(value??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
 }
-
 // ============================================================
 // COACH PORTAL — REPORT DYNAMIC HEIGHT TO EMBEDDED SITE
 // ============================================================
