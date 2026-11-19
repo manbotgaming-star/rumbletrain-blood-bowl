@@ -5522,6 +5522,7 @@ function renderCoachRoster(players,journeymen=[]){
     appendCell(row,player.isJourneyman?'':player.number);
     if(player.isJourneyman){
       const cell=row.lastElementChild;
+      cell.textContent=''; // Remove the unwanted dash
       const edit=document.createElement('button');
       edit.type='button';
       edit.textContent=player.number;
