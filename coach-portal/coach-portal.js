@@ -3941,7 +3941,7 @@ async function refreshCoachGameSubmissionButton(){
     // ---------------------------------------------------
     const submission=result.existingSubmission||null;
     const validationStatus=String(submission&&submission.validationStatus||'').trim();
-    const isReview=validationStatus==='Mismatch';
+    const isReview=validationStatus==='Mismatch'||validationStatus==='Pending Commissioner Review';
     
     setCoachPendingGameNotice(!!submission,isReview);
     setCoachGameDayPackState(result.fixtureLocked===true?'locked':submission?(isReview?'review':'pending'):'ready',result.game.gameId,result.reason);
@@ -3951,7 +3951,7 @@ async function refreshCoachGameSubmissionButton(){
     
     if(isReview){
       showCoachGameSubmissionResult({
-        validationStatus:'Mismatch',
+        validationStatus:validationStatus,
         mismatchFields:Array.isArray(submission.mismatchFields)?submission.mismatchFields:[]
       },true);
     }
@@ -4748,7 +4748,7 @@ async function openCoachGameSubmissionPreview(launchButton){
     updateResults();
 
     // =====================================================
-    // FORFEIT - SCORE PREVIEW (FRONTEND ONLY)
+    // FORFEIT - SCORE PREVIEW / STAGED SUBMISSION
     // =====================================================
     let normalGameValues=null;
     
@@ -4775,11 +4775,11 @@ async function openCoachGameSubmissionPreview(launchButton){
         homeDfRoll.disabled=true;
         awayDfRoll.disabled=true;
     
-        reviewButton.disabled=true;
+        reviewButton.disabled=false;
         message.className='coach-game-submission-message';
         message.textContent=homeLost&&awayLost
-          ?'FORFEIT PREVIEW: Both teams lose (0-0). Forfeit submission will be enabled after backend support is added.'
-          :'FORFEIT PREVIEW: '+(homeLost?game.homeTeam:game.awayTeam)+' forfeits. The opponent wins 2-0. Submission is temporarily disabled.';
+          ?'DOUBLE FORFEIT: Both teams lose 0-0. Select Review Entries to submit for commissioner review.'
+          :'FORFEIT: '+(homeLost?game.homeTeam:game.awayTeam)+' forfeits. Opponent wins 2-0. Select Review Entries to report it.';
         return;
       }
     
@@ -4930,6 +4930,15 @@ apothecaryNote.textContent=ownsApothecary?'Available this game':'No Apothecary r
 // BUILD SUBMISSION PAYLOAD
 // =====================================================
 function collectGameSubmissionPayload(){
+  // ---------------------------------------------------
+  // FORFEIT - NO MATCH STATS OR INDUCEMENTS
+  // ---------------------------------------------------
+  const homeLost=homeForfeit.value==='Yes';
+  const awayLost=awayForfeit.value==='Yes';
+  if(homeLost||awayLost){
+    return {gameId:String(game.gameId||''),homeForfeit:homeForfeit.value,awayForfeit:awayForfeit.value,homeScore:homeLost?0:2,awayScore:awayLost?0:2,coachNotes:String(notes.value||'').trim(),players:[],inducements:[]};
+  }
+
   const home=scoreValue(homeScore);
   const away=scoreValue(awayScore);
 
@@ -4972,6 +4981,7 @@ function collectGameSubmissionPayload(){
 
   return {
     gameId:String(game.gameId||''),
+    homeForfeit:'No',awayForfeit:'No',
 
     higherCtvTreasurySpent:inducementFundingState.higherCtvTreasurySpent,
     inducementTreasuryUsed:inducementFundingState.treasuryUsed,
@@ -5145,10 +5155,26 @@ function openFinalGameReview(payload){
     });
   }
 
+  // ---------------------------------------------------
+  // FORFEIT - OVERRIDE NORMAL MATCH REVIEW DETAILS
+  // ---------------------------------------------------
+  const isForfeit=payload.homeForfeit==='Yes'||payload.awayForfeit==='Yes';
+  if(isForfeit){
+    const type=payload.homeForfeit==='Yes'&&payload.awayForfeit==='Yes'?'Double Forfeit':payload.homeForfeit==='Yes'?'Home Forfeit':'Away Forfeit';
+    reviewDetails.innerHTML='<div class="coach-game-review-detail"><strong>Resolution</strong><span>'+escapePortalHtml(type)+'</span></div>'+
+      '<div class="coach-game-review-detail"><strong>Home forfeits?</strong><span>'+escapePortalHtml(payload.homeForfeit)+'</span></div>'+
+      '<div class="coach-game-review-detail"><strong>Away forfeits?</strong><span>'+escapePortalHtml(payload.awayForfeit)+'</span></div>'+
+      '<div class="coach-game-review-detail"><strong>Result</strong><span>Unplayed fixture — commissioner review required</span></div>';
+    reviewInducements.innerHTML='<tr><td colspan="6">None — match not played.</td></tr>';
+    reviewPlayers.innerHTML='<tr><td colspan="3">No match statistics — match not played.</td></tr>';
+  }
+
   reviewNotes.textContent=payload.coachNotes||'None';
 
   reviewMessage.className='coach-game-review-warning';
-  reviewMessage.textContent='Check the information carefully before submitting. Once submitted, this game will be sent to the commissioner for review.';
+  reviewMessage.textContent=isForfeit
+    ?'Confirm which team forfeited. This will record a report only; no scores, SPP, winnings or league results will be posted until commissioner resolution.'
+    :'Check the information carefully before submitting. Once submitted, this game will be sent to the commissioner for review.';
 
   modal.hidden=true;
   reviewModal.hidden=false;
@@ -5190,8 +5216,8 @@ function openFinalGameReview(payload){
         launchButton.onclick=null;
       }
       
-      setCoachPendingGameNotice(true,false);
-      setCoachGameDayPackState('pending',game.gameId);
+      setCoachPendingGameNotice(true,submitted.validationStatus==='Mismatch'||submitted.validationStatus==='Pending Commissioner Review');
+      setCoachGameDayPackState(submitted.validationStatus==='Pending Commissioner Review'?'review':'pending',game.gameId);
       showCoachGameSubmissionResult(submitted);
       
       // Refresh the full portal in the background.
@@ -5219,6 +5245,16 @@ function openFinalGameReview(payload){
 // =====================================================
 reviewButton.onclick=function(){
   message.className='coach-game-submission-message';
+
+  // ---------------------------------------------------
+  // FORFEIT - SKIP ALL PLAYED-GAME VALIDATION
+  // ---------------------------------------------------
+  if(homeForfeit.value==='Yes'||awayForfeit.value==='Yes'){
+    const coachNotes=String(notes.value||'').trim();
+    if(coachNotes.length>500){ message.classList.add('is-error'); message.textContent='Coach Notes cannot exceed 500 characters.'; return; }
+    openFinalGameReview(collectGameSubmissionPayload());
+    return;
+  }
 
   updateInducementFunding();
 
@@ -5773,7 +5809,11 @@ function showCoachGameSubmissionResult(submitted,persistent=false){
   let title='Game Submitted';
   let message='Your game submission has been recorded. The game will be validated when both coach submissions are available.';
 
-  if(status==='Matched'){
+  if(status==='Pending Commissioner Review'){
+    title='Forfeit Reported';
+    message='Both coaches reported the same forfeit. Commissioner approval is required before the fixture is resolved.';
+  }
+  else if(status==='Matched'){
     title='Match Verified';
     message='Both coach submissions match. The game has been completed automatically.';
   }
