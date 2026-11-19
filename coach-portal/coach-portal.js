@@ -4244,6 +4244,12 @@ async function openCoachGameSubmissionPreview(launchButton){
     const awayScore=document.getElementById('coach-submit-away-score');
     const homeStalled=document.getElementById('coach-submit-home-stalled');
     const awayStalled=document.getElementById('coach-submit-away-stalled');
+    // =====================================================
+    // FORFEIT - HOME / AWAY CONTROLS
+    // =====================================================
+    const homeForfeit=document.getElementById('coach-submit-home-forfeit');
+    const awayForfeit=document.getElementById('coach-submit-away-forfeit');
+    if(!homeForfeit||!awayForfeit) throw new Error('The Forfeit controls could not be loaded.');
 
     const postHomeTeam=document.getElementById('coach-submit-post-home-team');
     const postAwayTeam=document.getElementById('coach-submit-post-away-team');
@@ -4324,6 +4330,19 @@ async function openCoachGameSubmissionPreview(launchButton){
     awayScore.value='';
     homeStalled.value='';
     awayStalled.value='';
+    // =====================================================
+    // FORFEIT - DEFAULT TO GAME PLAYED
+    // =====================================================
+    homeForfeit.value='No';
+    awayForfeit.value='No';
+    homeForfeit.disabled=false;
+    awayForfeit.disabled=false;
+    homeScore.disabled=false;
+    awayScore.disabled=false;
+    homeStalled.disabled=false;
+    awayStalled.disabled=false;
+    reviewButton.disabled=false;
+    
     homeDfRoll.value='';
     awayDfRoll.value='';
     notes.value='';
@@ -4727,6 +4746,64 @@ async function openCoachGameSubmissionPreview(launchButton){
     homeDfRoll.onchange=updateResults;
     awayDfRoll.onchange=updateResults;
     updateResults();
+
+    // =====================================================
+    // FORFEIT - SCORE PREVIEW (FRONTEND ONLY)
+    // =====================================================
+    let normalGameValues=null;
+    
+    function updateForfeitPreview(){
+      const homeLost=homeForfeit.value==='Yes';
+      const awayLost=awayForfeit.value==='Yes';
+      const isForfeit=homeLost||awayLost;
+    
+      if(isForfeit){
+        if(!normalGameValues) normalGameValues={home:homeScore.value,away:awayScore.value,homeStalled:homeStalled.value,awayStalled:awayStalled.value};
+    
+        homeScore.value=homeLost?'0':'2';
+        awayScore.value=awayLost?'0':'2';
+        homeScore.disabled=true;
+        awayScore.disabled=true;
+        homeStalled.value='';
+        awayStalled.value='';
+        homeStalled.disabled=true;
+        awayStalled.disabled=true;
+    
+        updateResults();
+        homeDfRoll.value='';
+        awayDfRoll.value='';
+        homeDfRoll.disabled=true;
+        awayDfRoll.disabled=true;
+    
+        reviewButton.disabled=true;
+        message.className='coach-game-submission-message';
+        message.textContent=homeLost&&awayLost
+          ?'FORFEIT PREVIEW: Both teams lose (0-0). Forfeit submission will be enabled after backend support is added.'
+          :'FORFEIT PREVIEW: '+(homeLost?game.homeTeam:game.awayTeam)+' forfeits. The opponent wins 2-0. Submission is temporarily disabled.';
+        return;
+      }
+    
+      if(normalGameValues){
+        homeScore.value=normalGameValues.home;
+        awayScore.value=normalGameValues.away;
+        homeStalled.value=normalGameValues.homeStalled;
+        awayStalled.value=normalGameValues.awayStalled;
+        normalGameValues=null;
+      }
+    
+      homeScore.disabled=false;
+      awayScore.disabled=false;
+      homeStalled.disabled=false;
+      awayStalled.disabled=false;
+      reviewButton.disabled=false;
+      message.className='coach-game-submission-message';
+      message.textContent='Complete the Game Day Pack entries, then select Review Entries.';
+      updateResults();
+    }
+    
+    homeForfeit.onchange=updateForfeitPreview;
+    awayForfeit.onchange=updateForfeitPreview;
+    updateForfeitPreview();
 
     // =====================================================
     // PLAYER STATS
