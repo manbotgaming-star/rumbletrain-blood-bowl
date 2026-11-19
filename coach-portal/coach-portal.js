@@ -2004,11 +2004,19 @@ function showCoachPlayerPurchaseModal(accessCode,options){
   
     numberSelect.disabled=false;
   
-    if(
-      typeSelect.value==='journeyman' &&
-      available.includes(preferredNumber)
-    ){
-      numberSelect.value=String(preferredNumber);
+    // =====================================================
+    // HIRE JOURNEYMAN - PERMANENT NUMBER SELECTION
+    // =====================================================
+    if(typeSelect.value==='journeyman'){
+      if(available.includes(preferredNumber)){
+        numberSelect.value=String(preferredNumber);
+        message.textContent='';
+      }else if(available.length){
+        numberSelect.value=String(available[0]);
+        message.textContent='Temporary #'+preferredNumber+' cannot be used permanently. Select an available roster number.';
+      }else{
+        message.textContent='No permanent player numbers are available.';
+      }
     }
   }
 
