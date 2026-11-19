@@ -5528,33 +5528,70 @@ function renderCoachRoster(players,journeymen=[]){
       edit.style.cssText='margin-left:5px;cursor:pointer;padding:1px 4px;font-size:11px;';
       cell.appendChild(edit);
 
+
+      // =====================================================
+      // JOURNEYMAN NUMBER - FLOATING EDIT PANEL
+      // =====================================================
       edit.onclick=function(){
-        cell.textContent='';
+        document.querySelectorAll('.jm-number-editor').forEach(el=>el.remove());
+
+        const panel=document.createElement('div');
+        panel.className='jm-number-editor';
+        panel.style.cssText='position:fixed;z-index:99999;width:205px;padding:12px;background:#fff;border:1px solid #8da6b1;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.25);font-family:inherit;color:#173d4d;';
+
+        const title=document.createElement('div');
+        title.textContent='EDIT JOURNEYMAN #';
+        title.style.cssText='font-size:12px;font-weight:bold;margin-bottom:8px;';
+
+        const controls=document.createElement('div');
+        controls.style.cssText='display:flex;align-items:center;gap:6px;';
+
         const input=document.createElement('input');
-        input.type='number'; input.min='1'; input.max='99'; input.value=String(player.number||20);
-        input.style.cssText='width:48px;padding:3px;font-size:12px;';
+        input.type='number'; input.min='1'; input.max='99';
+        input.value=String(player.number||20);
+        input.style.cssText='width:54px;min-width:0;padding:6px;border:1px solid #9aadb5;border-radius:4px;font-size:13px;';
 
-        const save=document.createElement('button'),cancel=document.createElement('button');
-        save.type='button'; save.textContent='Save';
-        cancel.type='button'; cancel.textContent='×';
-        save.style.cssText='margin-left:4px;cursor:pointer;';
-        cancel.style.cssText='margin-left:3px;cursor:pointer;';
+        const save=document.createElement('button');
+        save.type='button'; save.textContent='SAVE';
+        save.style.cssText='padding:7px 10px;background:#17495c;color:white;border:0;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;';
+
+        const cancel=document.createElement('button');
+        cancel.type='button'; cancel.textContent='✕';
+        cancel.style.cssText='padding:7px 9px;background:#edf1f3;border:1px solid #b9c8ce;border-radius:4px;cursor:pointer;';
+
         const message=document.createElement('div');
-        message.style.cssText='color:#b3261e;font-size:10px;';
+        message.style.cssText='margin-top:6px;color:#b3261e;font-size:11px;';
 
-        cell.append(input,save,cancel,message);
-        cancel.onclick=()=>{cell.textContent=''; cell.append(document.createTextNode(String(player.number)),edit);};
+        controls.append(input,save,cancel);
+        panel.append(title,controls,message);
+        document.body.appendChild(panel);
+
+        // Position beside the pencil without changing table dimensions.
+        const rect=edit.getBoundingClientRect();
+        const left=Math.max(8,Math.min(rect.right+8,window.innerWidth-225));
+        const top=Math.max(8,Math.min(rect.top-12,window.innerHeight-135));
+        panel.style.left=left+'px'; panel.style.top=top+'px';
+
+        const close=()=>panel.remove();
+        cancel.onclick=close;
+        input.focus(); input.select();
+
+        input.addEventListener('keydown',e=>{
+          if(e.key==='Enter') save.click();
+          if(e.key==='Escape') close();
+        });
 
         save.onclick=async function(){
           const number=Number(input.value);
-          if(!Number.isInteger(number)||number<1||number>99){
-            message.textContent='Choose #1–#99.'; return;
+          if(!input.value.trim()||!Number.isInteger(number)||number<1||number>99){
+            message.textContent='Choose a number from 1 to 99.'; return;
           }
+
           const code=sessionStorage.getItem(SESSION_KEY)||'';
           if(!code){message.textContent='Session expired. Please log in.';return;}
 
-          save.disabled=true; cancel.disabled=true; message.textContent='Saving...';
-          message.style.color='#173d4d';
+          save.disabled=true; cancel.disabled=true;
+          message.style.color='#173d4d'; message.textContent='Saving...';
 
           try{
             const result=await coachApiPlayerRequest('coachjourneymannumber',{
@@ -5562,8 +5599,11 @@ function renderCoachRoster(players,journeymen=[]){
             },'Unable to save Journeyman number.');
 
             if(!result||result.ok!==true) throw new Error(result?.error||'Number update failed.');
+
             const data=await coachApiRequest(code);
             if(!data||data.ok!==true) throw new Error('Saved, but unable to refresh roster.');
+
+            close();
             renderCoachPortal(data);
           }
           catch(error){
