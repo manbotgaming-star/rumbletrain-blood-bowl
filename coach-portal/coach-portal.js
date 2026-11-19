@@ -5516,18 +5516,18 @@ function renderCoachRoster(players,journeymen=[]){
     if(playerStatus==='dead') row.classList.add('coach-player-dead');
     if(playerStatus==='retired') row.classList.add('coach-player-retired');
 
-    
     // =====================================================
-    // JOURNEYMAN PLAYER NUMBER - INLINE EDITOR
+    // JOURNEYMAN NUMBER - CLICKABLE NUMBER BUTTON
     // =====================================================
-    appendCell(row,player.number);
+    appendCell(row,player.isJourneyman?'':player.number);
     if(player.isJourneyman){
       const cell=row.lastElementChild;
       const edit=document.createElement('button');
-      edit.type='button'; edit.textContent='✎'; edit.title='Edit Journeyman number';
-      edit.style.cssText='margin-left:5px;cursor:pointer;padding:1px 4px;font-size:11px;';
+      edit.type='button';
+      edit.textContent=player.number;
+      edit.title='Edit Journeyman #'+player.number;
+      edit.style.cssText='cursor:pointer;padding:3px 6px;font-size:11px;font-weight:bold;color:#17495c;background:#eef3f5;border:1px solid #8da6b1;border-radius:4px;white-space:nowrap;';
       cell.appendChild(edit);
-
 
       // =====================================================
       // JOURNEYMAN NUMBER - FLOATING EDIT PANEL
