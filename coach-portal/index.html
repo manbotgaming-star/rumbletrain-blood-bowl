@@ -427,11 +427,17 @@ GitHub Coach Portal  index.html
 
       <div class="coach-submit-side">HOME</div>
 
+      <!-- HOME - STALLED / FORFEIT -->
       <div class="coach-submit-stall">
         <span>STALLED?</span>
         <select id="coach-submit-home-stalled">
           <option value="">-</option>
           <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <span class="coach-submit-forfeit-label">FORFEIT?</span>
+        <select id="coach-submit-home-forfeit">
+          <option value="No" selected>No</option>
           <option value="Yes">Yes</option>
         </select>
       </div>
@@ -450,11 +456,17 @@ GitHub Coach Portal  index.html
       
       <div id="coach-submit-away-team" class="coach-submit-team"></div>
 
+      <!-- AWAY - STALLED / FORFEIT -->
       <div class="coach-submit-stall">
         <span>STALLED?</span>
         <select id="coach-submit-away-stalled">
           <option value="">-</option>
           <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+        <span class="coach-submit-forfeit-label">FORFEIT?</span>
+        <select id="coach-submit-away-forfeit">
+          <option value="No" selected>No</option>
           <option value="Yes">Yes</option>
         </select>
       </div>
