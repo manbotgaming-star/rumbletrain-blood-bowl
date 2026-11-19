@@ -2017,6 +2017,13 @@ strong {
 .coach-submit-stall { padding:4px 6px; border:1px solid var(--line-dark); border-radius:6px; text-align:center; }
 .coach-submit-stall span { display:block; font-size:9px; font-weight:800; }
 .coach-submit-stall select { width:72px; border:0; background:transparent; font-family:inherit; text-align:center; text-align-last:center; }
+/* ============================================================
+   SUBMIT GAME - FORFEIT DROPDOWNS
+   ============================================================ */
+.coach-submit-stall .coach-submit-forfeit-label { margin-top:7px; color:var(--accent); }
+.coach-submit-stall select:disabled { opacity:.5; cursor:not-allowed; }
+.coach-submit-score:disabled { background:#eef3f5; color:var(--ink); opacity:1; }
+
 .coach-submit-team-icon { width:32px; height:32px; object-fit:contain; justify-self:center; align-self:center; }
 .coach-submit-team-icon.is-empty { opacity:0; }
 
