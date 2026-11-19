@@ -4751,6 +4751,46 @@ async function openCoachGameSubmissionPreview(launchButton){
     // FORFEIT - SCORE PREVIEW / STAGED SUBMISSION
     // =====================================================
     let normalGameValues=null;
+    let forfeitControlValues=null;
+
+    function refreshForfeitFields(){
+      const homeLost=homeForfeit.value==='Yes',awayLost=awayForfeit.value==='Yes';
+      const active=homeLost||awayLost;
+      const teamWins=active && !(homeLost&&awayLost) && (submittingIsHome?!homeLost:!awayLost);
+      const lockControls=[homeFair,awayFair,inducementHighSpend,inducementTreasury,apothecaryUsed];
+      const inducementControls=Array.from(inducementBody.querySelectorAll('select,input'));
+      const playerRows=Array.from(body.querySelectorAll('tr[data-player-id]'));
+
+      if(active && !forfeitControlValues){
+        forfeitControlValues={homeFair:homeFair.value,awayFair:awayFair.value,apothecary:apothecaryUsed.value,
+          inducements:inducementControls.map(el=>({el:el,value:el.value,disabled:el.disabled})),
+          mvp:playerRows.map(row=>({el:row.querySelector('.coach-submit-mvp'),value:row.querySelector('.coach-submit-mvp')?.value||''}))};
+      }
+      if(!active && forfeitControlValues){
+        homeFair.value=forfeitControlValues.homeFair; awayFair.value=forfeitControlValues.awayFair;
+        apothecaryUsed.value=forfeitControlValues.apothecary;
+        forfeitControlValues.inducements.forEach(x=>{x.el.value=x.value;x.el.disabled=x.disabled;});
+        forfeitControlValues.mvp.forEach(x=>{if(x.el)x.el.value=x.value;});
+        forfeitControlValues=null;
+        updateInducementFunding();
+      }
+      [homeFair,awayFair,apothecaryUsed].forEach(el=>{el.disabled=active||(!active&&el===apothecaryUsed&&!ownsApothecary);});
+      if(active){
+        inducementControls.forEach(el=>{el.disabled=true;});
+        forfeitControlValues.mvp.forEach(x=>{if(x.el)x.el.value='';});
+      }
+      playerRows.forEach(row=>{
+        row.querySelectorAll('input.coach-game-submission-stat,.coach-submit-injury-result,.coach-submit-lasting-injury,.coach-submit-casualty-source,.coach-submit-hatred-roll,.coach-submit-hatred-keyword').forEach(el=>{el.disabled=active;});
+        const mvp=row.querySelector('.coach-submit-mvp');
+        if(mvp) mvp.disabled=active&&!teamWins;
+      });
+      if(active){
+        const allMvp=playerRows.map(row=>row.querySelector('.coach-submit-mvp')).filter(Boolean);
+        allMvp.forEach(sel=>{sel.disabled=!teamWins;});
+      }
+      inducementMessage.textContent=active?'Not applicable: fixture not played.':'';
+    }
+
     
     function updateForfeitPreview(){
       const homeLost=homeForfeit.value==='Yes';
@@ -4776,6 +4816,7 @@ async function openCoachGameSubmissionPreview(launchButton){
         awayDfRoll.disabled=true;
     
         reviewButton.disabled=false;
+        refreshForfeitFields();
         message.className='coach-game-submission-message';
         message.textContent=homeLost&&awayLost
           ?'DOUBLE FORFEIT: Both teams lose 0-0. Select Review Entries to submit for commissioner review.'
@@ -4796,6 +4837,7 @@ async function openCoachGameSubmissionPreview(launchButton){
       homeStalled.disabled=false;
       awayStalled.disabled=false;
       reviewButton.disabled=false;
+      refreshForfeitFields();
       message.className='coach-game-submission-message';
       message.textContent='Complete the Game Day Pack entries, then select Review Entries.';
       updateResults();
@@ -4803,7 +4845,6 @@ async function openCoachGameSubmissionPreview(launchButton){
     
     homeForfeit.onchange=updateForfeitPreview;
     awayForfeit.onchange=updateForfeitPreview;
-    updateForfeitPreview();
 
     // =====================================================
     // PLAYER STATS
@@ -4916,6 +4957,16 @@ async function openCoachGameSubmissionPreview(launchButton){
       body.appendChild(row);
     });
 
+    // -----------------------------------------------------
+    // MVP - NO MORE THAN TWO PLAYERS ON AN UNPLAYED FIXTURE
+    // -----------------------------------------------------
+    body.addEventListener('change',function(event){
+      if(!event.target.matches('.coach-submit-mvp')) return;
+      if(homeForfeit.value!=='Yes'&&awayForfeit.value!=='Yes') return;
+      const selected=Array.from(body.querySelectorAll('.coach-submit-mvp')).filter(el=>el.value==='1');
+      if(selected.length>2){event.target.value='';message.textContent='Only two different players can receive a forfeit MVP.';}
+    });
+
 // =====================================================
 // APOTHECARY
 // =====================================================
@@ -4924,8 +4975,8 @@ const ownsApothecary=Number(team.apothecary||0)>0;
 apothecaryUsed.value='No';
 apothecaryUsed.disabled=!ownsApothecary;
 apothecaryNote.textContent=ownsApothecary?'Available this game':'No Apothecary rostered';
+updateForfeitPreview();
 
-    
 // =====================================================
 // BUILD SUBMISSION PAYLOAD
 // =====================================================
@@ -4936,7 +4987,8 @@ function collectGameSubmissionPayload(){
   const homeLost=homeForfeit.value==='Yes';
   const awayLost=awayForfeit.value==='Yes';
   if(homeLost||awayLost){
-    return {gameId:String(game.gameId||''),homeForfeit:homeForfeit.value,awayForfeit:awayForfeit.value,homeScore:homeLost?0:2,awayScore:awayLost?0:2,coachNotes:String(notes.value||'').trim(),players:[],inducements:[]};
+    const forfeitMvpPlayerIds=Array.from(body.querySelectorAll('tr[data-player-id]')).filter(row=>row.querySelector('.coach-submit-mvp')?.value==='1').map(row=>row.dataset.playerId);
+    return {gameId:String(game.gameId||''),homeForfeit:homeForfeit.value,awayForfeit:awayForfeit.value,homeScore:homeLost?0:2,awayScore:awayLost?0:2,coachNotes:String(notes.value||'').trim(),forfeitMvpPlayerIds:forfeitMvpPlayerIds,players:[],inducements:[]};
   }
 
   const home=scoreValue(homeScore);
@@ -5166,7 +5218,11 @@ function openFinalGameReview(payload){
       '<div class="coach-game-review-detail"><strong>Away forfeits?</strong><span>'+escapePortalHtml(payload.awayForfeit)+'</span></div>'+
       '<div class="coach-game-review-detail"><strong>Result</strong><span>Unplayed fixture — commissioner review required</span></div>';
     reviewInducements.innerHTML='<tr><td colspan="6">None — match not played.</td></tr>';
-    reviewPlayers.innerHTML='<tr><td colspan="3">No match statistics — match not played.</td></tr>';
+    const mvpChoices=(payload.forfeitMvpPlayerIds||[]).map(id=>{
+      const row=Array.from(body.querySelectorAll('tr[data-player-id]')).find(x=>x.dataset.playerId===id);
+      return row?('#'+row.dataset.playerNumber+' '+row.dataset.playerName):id;
+    });
+    reviewPlayers.innerHTML='<tr><td colspan="3">'+(mvpChoices.length?'Forfeit MVP nominations: '+escapePortalHtml(mvpChoices.join(' / ')):'No MVP awards nominated for this team.')+'</td></tr>';
   }
 
   reviewNotes.textContent=payload.coachNotes||'None';
@@ -5250,6 +5306,14 @@ reviewButton.onclick=function(){
   // FORFEIT - SKIP ALL PLAYED-GAME VALIDATION
   // ---------------------------------------------------
   if(homeForfeit.value==='Yes'||awayForfeit.value==='Yes'){
+    const homeLost=homeForfeit.value==='Yes',awayLost=awayForfeit.value==='Yes';
+    const winningCoach=!(homeLost&&awayLost)&&(submittingIsHome?!homeLost:!awayLost);
+    const selected=Array.from(body.querySelectorAll('.coach-submit-mvp')).filter(el=>el.value==='1');
+    if(selected.length!==(winningCoach?2:0)){
+      message.classList.add('is-error');
+      message.textContent=winningCoach?'Select exactly two different players to receive the winner’s MVP awards.':'No MVPs can be awarded to a forfeiting team.';
+      return;
+    }
     const coachNotes=String(notes.value||'').trim();
     if(coachNotes.length>500){ message.classList.add('is-error'); message.textContent='Coach Notes cannot exceed 500 characters.'; return; }
     openFinalGameReview(collectGameSubmissionPayload());
