@@ -224,9 +224,7 @@ function saveTeam(){
     state: stateForSave
   };
 
-  const u =
-    "https://manbotgaming-star.github.io/rumbletrain-blood-bowl/save-team.html?v=4.7#" +
-    encodeURIComponent(JSON.stringify(d));
+  const u="https://manbotgaming-star.github.io/rumbletrain-blood-bowl/team-builder/save-team.html?v=4.7#"+encodeURIComponent(JSON.stringify(d));
 
   const w = window.open(u, "_blank");
 
